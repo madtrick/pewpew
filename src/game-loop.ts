@@ -46,19 +46,62 @@ function registerPlayer (state: GameState, message: IncommingMessage): GameState
   }
 }
 
+interface OutgoingMessage {
+  data: {
+    result: 'Success' | 'Failure'
+    msg?: string
+  },
+  sys: {
+    id: string
+    type: 'Response'
+  }
+}
+
+interface LoopCycleResult {
+  state: GameState
+  responses: OutgoingMessage[]
+}
+
 /*
  * Notes:
  *
  * - Messages are validated in another layer, before being passed to the loop
  */
-export default function gameLoop (state: GameState, messages: IncommingMessage[]): Promise<GameState> {
+export default function gameLoop (state: GameState, messages: IncommingMessage[]): Promise<LoopCycleResult> {
   return new Promise((resolve) => {
     messages.forEach((message) => {
       if (message.sys.type === 'Request') {
         if (message.sys.id === 'RegisterPlayer') {
           const gameStateUpdate = registerPlayer(state, message)
+          let outgoingMessage: OutgoingMessage
+          let loopCycleRunResult: LoopCycleResult = { state: gameStateUpdate.state, responses: [] }
 
-          resolve(gameStateUpdate.state)
+          if (gameStateUpdate.result === GameStateUpdateResult.Success) {
+            outgoingMessage = {
+              data: {
+                result: 'Success'
+              },
+              sys: {
+                type: 'Response',
+                id: 'RegisterPlayer'
+              }
+            }
+          } else {
+            outgoingMessage = {
+              data: {
+                result: 'Failure',
+                msg: gameStateUpdate.reason
+              },
+              sys: {
+                type: 'Response',
+                id: 'RegisterPlayer'
+              }
+            }
+          }
+
+          loopCycleRunResult.responses.push(outgoingMessage)
+
+          resolve(loopCycleRunResult)
         }
       }
     })
