@@ -1,12 +1,15 @@
 import { expect } from 'chai'
-import loop, { IncommingMessage, GameState } from '../../src/game-loop'
-
-
+import { RegisterPlayerMessage } from '../../src/messages'
+import { GameState } from '../../src/game-state'
+import { handlers } from '../../src/message-handlers'
+import createGameLopp from '../../src/game-loop'
 
 describe('Game loop', () => {
+  const loop = createGameLopp(handlers)
+
   it('registers player in game', async () => {
-      const state: GameState = { players: [] }
-      const message: IncommingMessage = {
+      const state: GameState = { players: [], started: false }
+      const message: RegisterPlayerMessage = {
         data: {
           id: 'player-1'
         },
@@ -31,8 +34,8 @@ describe('Game loop', () => {
   })
 
   it('does not register player in game if duplicated id', async () => {
-      const state: GameState = { players: [{ id: 'player-1' }] }
-      const message: IncommingMessage = {
+      const state: GameState = { players: [{ id: 'player-1' }], started: false }
+      const message: RegisterPlayerMessage = {
         data: {
           id: 'player-1'
         },
