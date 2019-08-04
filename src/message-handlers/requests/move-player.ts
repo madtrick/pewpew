@@ -31,6 +31,11 @@ export default function movePlayer (message: MovePlayerMessage, state: GameState
     if (movement.type === 'displacement') {
       player.position = calculateNewPosition(movement.direction, player.position, player.rotation)
     }
+
+    // TODO test for degrees > 360
+    if (movement.type === 'rotation') {
+      player.rotation = movement.degrees
+    }
   })
 
   return {
