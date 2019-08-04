@@ -1,20 +1,28 @@
 import { GameState } from '../../game-state'
 import { HandlerResult } from '../../message-handlers'
 import { RegisterPlayerMessage } from '../../messages'
-import { Player } from '../../game-loop'
+import { Player } from '../../player'
 
 function createPlayer (data: { id: string }): Player {
-  return { id: data.id }
+  // TODO randomize starting position and rotation
+  return {
+    id: data.id,
+    position: {
+      x: 0,
+      y: 0,
+    },
+    rotation: 0
+  }
 }
 
-export default function registerPlayer (message: RegisterPlayerMessage, state: GameState): HandlerResult {
-  const playerExists = state.players.find((player) => player.id === message.data.id)
+export default function registerPlayer (message: RegisterPlayerMessage, state: GameState): HandlerResult<void> {
+  const playerExists = state.players.find((player) => player.id === message.payload.data.id)
   if (playerExists) {
     return {
       response: {
         data: {
           result: 'Failure',
-          msg: `Player already registered with id ${message.data.id}`
+          msg: `Player already registered with id ${message.payload.data.id}`
         },
         sys: {
           type: 'Response',
@@ -25,7 +33,7 @@ export default function registerPlayer (message: RegisterPlayerMessage, state: G
     }
   }
 
-  const player = createPlayer(message.data)
+  const player = createPlayer(message.payload.data)
 
   state.players.push(player)
 

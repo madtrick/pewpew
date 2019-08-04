@@ -3,17 +3,17 @@ import { OutgoingMessage, RegisterPlayerMessage, StartGameMessage } from '../mes
 import StartGameHandler from './commands/start-game'
 import RegisterPlayerHandler from './requests/register-player'
 
-export interface HandlerResult {
-  response: OutgoingMessage
+export interface HandlerResult<T> {
+  response: OutgoingMessage<T>
   state: GameState
 }
 
 export interface IncommingMessageHandlers {
   Request: {
-    RegisterPlayer: (message: RegisterPlayerMessage, state: GameState) => HandlerResult
+    RegisterPlayer: (message: RegisterPlayerMessage, state: GameState) => HandlerResult<void>
   },
   Command: {
-    StartGame: (message: StartGameMessage, state: GameState) => HandlerResult
+    StartGame: (message: StartGameMessage, state: GameState) => HandlerResult<void>
   }
 }
 

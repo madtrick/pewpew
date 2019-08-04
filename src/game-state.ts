@@ -1,4 +1,4 @@
-import { Player } from './game-loop'
+import { Player } from './player'
 
 export interface GameState {
   players: Player[]

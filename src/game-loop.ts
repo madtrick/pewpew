@@ -2,13 +2,9 @@ import { IncommingMessage, RegisterPlayerMessage, StartGameMessage, OutgoingMess
 import { IncommingMessageHandlers } from './message-handlers'
 import { GameState } from './game-state'
 
-export interface Player {
-  id: string
-}
-
 interface GameLoopResult {
   state: GameState
-  responses: OutgoingMessage[]
+  responses: OutgoingMessage<any>[]
 }
 
 /*
@@ -23,14 +19,14 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
 
     return new Promise((resolve) => {
       messages.forEach((message) => {
-        const { sys: { type: messageType, id: messageId } } = message
+        const { payload: { sys: { type: messageType, id: messageId } } } = message
 
         if (messageType === 'Request') {
           if (messageId === 'RegisterPlayer') {
             const result = handlers.Request.RegisterPlayer(message as RegisterPlayerMessage, state)
 
             if (result.response)
-            loopCycleRunResult.responses.push(result.response)
+              loopCycleRunResult.responses.push(result.response)
           }
         }
 
