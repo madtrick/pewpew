@@ -2,6 +2,15 @@ import { MovePlayerMessage } from '../../messages'
 import { GameState } from '../../game-state'
 import { HandlerResult } from '../index'
 
+/*
+ * Round with 5 decimal digits
+ */
+function round (value: number): number {
+  const multiplier = Math.pow(10, 5)
+
+  return Math.round(multiplier * value) / multiplier
+}
+
 type Position = { x: number, y: number }
 function calculateNewPosition (movement: string, position: Position, rotation: number): Position {
   const direction = movement === 'forward' ? 1 : -1
@@ -10,9 +19,8 @@ function calculateNewPosition (movement: string, position: Position, rotation: n
   const radians = (rotation * Math.PI) / 180
   const dX = magnitude * Math.cos(radians)
   const dY = magnitude * Math.sin(radians)
-  // TODO round this values. How many decimal places to keep?
-  const newX = dX + position.x
-  const newY = dY + position.y
+  const newX = round(dX + position.x)
+  const newY = round(dY + position.y)
 
   return { x: newX, y: newY }
 }
