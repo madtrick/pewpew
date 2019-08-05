@@ -7,9 +7,14 @@ describe('Command - Start game', () => {
   it('succeeds', async () => {
       const state: GameState = createGameState()
       const message: StartGameMessage = {
-        sys: {
-          type: 'Command',
-          id: 'StartGame'
+        session: {
+          uuid: 'fake-session'
+        },
+        payload: {
+          sys: {
+            type: 'Command',
+            id: 'StartGame'
+          }
         }
       }
 

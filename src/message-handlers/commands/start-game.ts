@@ -2,7 +2,7 @@ import { StartGameMessage } from '../../messages'
 import { HandlerResult } from '../'
 import { GameState } from '../../game-state'
 
-export default function handler (_message: StartGameMessage, state: GameState): HandlerResult {
+export default function handler (_message: StartGameMessage, state: GameState): HandlerResult<void> {
   if (state.started) {
 
     return {

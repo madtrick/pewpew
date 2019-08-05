@@ -1,25 +1,40 @@
-export interface RegisterPlayerMessage extends IncommingMessage<'Request'> {
-  data: { id: string }
-}
+import { Session } from './session'
 
-export interface StartGameMessage extends IncommingMessage<'Command'> {
-
-}
-
-export interface IncommingMessage<Type> {
-  sys: {
-    type: Type
-    id: string
+export type RegisterPlayerMessage = IncommingMessage<'Request'> & {
+  payload: {
+    data: {
+      id: string
+    }
   }
 }
 
-export interface OutgoingMessage {
+type MovePlayer = { type: 'displacement', direction: 'forward' | 'backward' }
+type RotatePlayer = { type: 'rotation', degrees: number }
+export type MovePlayerMessage = IncommingMessage<'Request'> & {
+  payload: {
+    data: {
+      movements: (MovePlayer | RotatePlayer)[]
+    }
+  }
+}
+
+export interface StartGameMessage extends IncommingMessage<'Command'> {}
+
+type Sys<T> = { type: T, id: string }
+export interface IncommingMessage<Type> {
+  session: Session
+  payload: {
+    sys: Sys<Type>
+  }
+}
+
+
+
+export interface OutgoingMessage<T> {
   data: {
     result: 'Success' | 'Failure'
-    msg?: string
+    msg?: string,
+    details?: T
   },
-  sys: {
-    id: string
-    type: 'Response'
-  }
+  sys: Sys<'Response'>
 }
