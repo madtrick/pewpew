@@ -4,8 +4,29 @@ import { RegisterPlayerMessage } from '../../messages'
 import { createPlayer } from '../../player'
 
 export default function registerPlayer (message: RegisterPlayerMessage, state: GameState): HandlerResult<void> {
-  const playerExists = state.players.find((player) => player.id === message.payload.data.id)
-  if (playerExists) {
+  const player = createPlayer(message.payload.data)
+  // const playerExists = state.players().find((player) => player.id === message.payload.data.id)
+  // if (playerExists) {
+  //   return {
+  //     response: {
+  //       data: {
+  //         result: 'Failure',
+  //         msg: `Player already registered with id ${message.payload.data.id}`
+  //       },
+  //       sys: {
+  //         type: 'Response',
+  //         id: 'RegisterPlayer'
+  //       }
+  //     },
+  //     state
+  //   }
+  // }
+
+  // const player = createPlayer(message.payload.data)
+
+  const result = state.registerPlayer(player)
+
+  if (result.status === 'ko') {
     return {
       response: {
         data: {
@@ -20,10 +41,6 @@ export default function registerPlayer (message: RegisterPlayerMessage, state: G
       state
     }
   }
-
-  const player = createPlayer(message.payload.data)
-
-  state.players.push(player)
 
   return {
     response: {

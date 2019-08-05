@@ -2,13 +2,15 @@ import { expect } from 'chai'
 import { RegisterPlayerMessage } from '../../src/messages'
 import { GameState } from '../../src/game-state'
 import { handlers } from '../../src/message-handlers'
+import { Arena } from '../../src/components/arena'
 import createGameLopp from '../../src/game-loop'
 
 describe('Game loop', () => {
   const loop = createGameLopp(handlers)
+  const arena = new Arena({ width: 100, height: 100 })
 
   it('registers player in game', async () => {
-      const state: GameState = { players: [], started: false }
+      const state: GameState = new GameState({ arena })
       const message: RegisterPlayerMessage = {
         session: {
           uuid: 'fake-session'
@@ -26,7 +28,7 @@ describe('Game loop', () => {
 
       const { responses: [ response ], state: newState } = await loop(state, [message])
 
-      expect(newState.players).to.not.be.empty
+      expect(newState.players()).to.not.be.empty
       expect(response).to.eql({
         data: {
           result: 'Success',
@@ -47,7 +49,8 @@ describe('Game loop', () => {
       },
       rotation: 0
     }
-    const state: GameState = { players: [player], started: false }
+    const state: GameState = new GameState({ arena })
+    state.registerPlayer(player)
     const message: RegisterPlayerMessage = {
       session: {
         uuid: 'fake-session'
@@ -65,7 +68,7 @@ describe('Game loop', () => {
 
     const { responses: [ response ], state: newState } = await loop(state, [message])
 
-    expect(newState.players).to.have.lengthOf(1)
+    expect(newState.players()).to.have.lengthOf(1)
     expect(response).to.eql({
       data: {
         msg: 'Player already registered with id player-1',

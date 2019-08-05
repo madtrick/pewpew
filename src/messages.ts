@@ -8,12 +8,11 @@ export type RegisterPlayerMessage = IncommingMessage<'Request'> & {
   }
 }
 
-type MovePlayer = { type: 'displacement', direction: 'forward' | 'backward' }
-type RotatePlayer = { type: 'rotation', degrees: number }
+export type Movement ={ direction: 'forward' | 'backward' }
 export type MovePlayerMessage = IncommingMessage<'Request'> & {
   payload: {
     data: {
-      movements: (MovePlayer | RotatePlayer)[]
+      movement: Movement
     }
   }
 }
@@ -33,7 +32,7 @@ export interface IncommingMessage<Type> {
 export interface OutgoingMessage<T> {
   data: {
     result: 'Success' | 'Failure'
-    msg?: string,
+    msg?: string, // TODO: move this into details?
     details?: T
   },
   sys: Sys<'Response'>

@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha 'test/**/*.spec.ts'",
+    "test-debug": "mocha --inspect-brk 'test/**/*.spec.ts'",
     "clean": "rimraf built",
     "build": "npm run clean && tsc -p ."
   },
