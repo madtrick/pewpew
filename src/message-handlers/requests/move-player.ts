@@ -9,6 +9,9 @@ type PlayerPosition = {
   }
 }
 
+// TODO validate that the player is registered
+// TODO validate that the movement is valid
+
 export default function movePlayer (message: MovePlayerMessage, state: GameState): HandlerResult<PlayerPosition> {
   const [ player ] = state.players()
   const movement = message.payload.data.movement
