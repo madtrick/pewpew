@@ -122,6 +122,30 @@ describe('Arena', () => {
         expect(y).to.eql(16)
       })
     })
+
+    it('avoids collisions with existing players', () => {
+      const randomStub = sandbox.stub(Math, 'random')
+
+      // This will set the player on x: 50, y: 50
+      randomStub.onCall(0).returns(0.5)
+      randomStub.onCall(1).returns(0.5)
+
+      arena.registerPlayer(player)
+
+      randomStub.reset()
+      randomStub.onCall(0).returns(0.5)
+      randomStub.onCall(1).returns(0.5)
+      // This will set the player on x: 16, y: 16
+      randomStub.onCall(2).returns(0)
+      randomStub.onCall(3).returns(0)
+
+      const newPlayer = createPlayer({ id: 'player-2' })
+      const result = asSuccess(arena.registerPlayer(newPlayer))
+
+      const { x, y } = result.position
+      expect(x).to.eql(16)
+      expect(y).to.eql(16)
+    })
   })
 
   describe('movePlayer', () => {
@@ -176,6 +200,24 @@ describe('Arena', () => {
       initialPosition: { x: 50, y: 50 },
       expectedResponses: [
         makeSuccess({ position: { x: 50.86603, y: 50.5 } }),
+        makeSuccess({ position: { x: 50, y: 50 } })
+      ]
+    }))
+
+    it('moves the player - if it does not collide with others', movementTest({
+      movements: [
+        { type: 'displacement', direction: DisplacementDirection.FORWARD },
+      ],
+      arena: () => {
+        const player = createPlayer({ id: 'player-2' })
+
+        arena.registerPlayer(player)
+        arena.placePlayer({ x: 82, y: 50 }, player)
+
+        return arena
+      },
+      initialPosition: { x: 50, y: 50 },
+      expectedResponses: [
         makeSuccess({ position: { x: 50, y: 50 } })
       ]
     }))

@@ -42,12 +42,35 @@ export class Arena {
       return {
         status: 'ko',
         details: {
-          msg: 'A player with id ${player.id} is already registered'
+          msg: `A player with id ${player.id} is already registered`
         }
       }
     }
 
-    const position = this.generatePlayerPosition()
+    let position: Position
+    // TODO this could be an infinite loop if there is no place in the
+    // arena to position the player without colliding withh other player
+    while (true) {
+      position = this.generatePlayerPosition()
+      const { x, y } = position
+      const collides = this.arenaPlayers.find((arenaPlayer) => {
+       /*
+        * Formula got at http://stackoverflow.com/a/8367547/1078859
+        * (R0-R1)^2 <= (x0-x1)^2+(y0-y1)^2 <= (R0+R1)^2
+        */
+        const { x: ox, y: oy } = arenaPlayer.position
+        const value = Math.pow((x - ox), 2) + Math.pow((y - oy), 2)
+        // TODO the Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) part is useless
+        // but will it keep it here in case we have players with different radius
+
+        return Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) <= value && value <= Math.pow(PLAYER_RADIUS + PLAYER_RADIUS, 2)
+      })
+
+      if (!collides) {
+        break;
+      }
+    }
+
     this.arenaPlayers.push({ player, position })
 
     return { status: 'ok', player, position }
@@ -58,7 +81,26 @@ export class Arena {
     // TODO throw if the player hasn't been found
     const newPosition = this.calculateNewPlayerPosition(movement, player, arenaPlayer!.position)
 
-    if (this.isPlayerPositionWithinBoundaries(newPosition)) {
+    const { x, y } = newPosition
+    const collides = this.arenaPlayers.find((arenaPlayer) => {
+      if (arenaPlayer.player === player) {
+        return false
+      }
+
+      /*
+       * Formula got at http://stackoverflow.com/a/8367547/1078859
+       * (R0-R1)^2 <= (x0-x1)^2+(y0-y1)^2 <= (R0+R1)^2
+       */
+
+      const { x: ox, y: oy } = arenaPlayer.position
+      const value = Math.pow((x - ox), 2) + Math.pow((y - oy), 2)
+      // TODO the Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) part is useless
+      // but will it keep it here in case we have players with different radius
+
+      return Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) <= value && value <= Math.pow(PLAYER_RADIUS + PLAYER_RADIUS, 2)
+    })
+
+    if (this.isPlayerPositionWithinBoundaries(newPosition) && collides === undefined) {
       arenaPlayer!.position = newPosition
 
       return {
