@@ -1,9 +1,5 @@
 import { Player } from './player'
-
-export interface GameState {
-  players: Player[]
-  started: boolean
-}
+import { Arena, Success, Failure, Position } from './components/arena'
 
 export enum GameStateUpdateResult {
   Success,
@@ -16,9 +12,20 @@ export interface GameStateUpdate {
   state: GameState
 }
 
-export function createGameState (): GameState {
-  return {
-    players: [],
-    started: false
+export class GameState {
+  readonly arena: Arena
+  started: boolean
+
+  constructor (options: { arena: Arena }) {
+    this.arena = options.arena
+    this.started = false
+  }
+
+  registerPlayer (player: Player): Success<{ player: Player, position: Position }> | Failure<{ details: { msg: string } }> {
+    return this.arena.registerPlayer(player)
+  }
+
+  players (): Player[] {
+    return this.arena.players()
   }
 }
