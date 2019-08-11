@@ -17,6 +17,8 @@ export type MovePlayerMessage = IncommingMessage<'Request'> & {
   }
 }
 
+export interface ShootMessage extends IncommingMessage<'Request'> {}
+
 export interface StartGameMessage extends IncommingMessage<'Command'> {}
 
 type Sys<T> = { type: T, id: string }
@@ -29,6 +31,9 @@ export interface IncommingMessage<Type> {
 
 
 
+// TODO this interface need doesn't seem to be the best
+// maybe rename it to OutgoingResponse since they are the response
+// to an IncommingMessage
 export interface OutgoingMessage<T> {
   data: {
     result: 'Success' | 'Failure'
@@ -36,4 +41,9 @@ export interface OutgoingMessage<T> {
     details?: T
   },
   sys: Sys<'Response'>
+}
+
+export interface UpdateMessage {
+  data: any
+  sys: Sys<'Update'>
 }

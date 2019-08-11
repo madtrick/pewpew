@@ -1,4 +1,14 @@
+import { ArenaPlayer } from './components/arena'
+import uuid from 'uuid/v4'
+
 export interface Session {
-  uuid: string
+  readonly uuid: string
+  player?: ArenaPlayer
+}
+
+export function createSession (): Session {
+  return {
+    uuid: uuid()
+  }
 }
 

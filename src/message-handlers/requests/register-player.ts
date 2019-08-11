@@ -42,6 +42,8 @@ export default function registerPlayer (message: RegisterPlayerMessage, state: G
     }
   }
 
+  message.session.player = result.player
+
   return {
     response: {
       data: {
