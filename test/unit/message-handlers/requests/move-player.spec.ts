@@ -20,8 +20,7 @@ function movementTest<T>(options: MovementTestOptions<T>): () => Promise<void> {
     const arena = options.arena()
     const state: GameState = new GameState({ arena })
     const player = createPlayer({ id: 'player-1' })
-    state.registerPlayer(player)
-    arena.placePlayer(options.player.position, player)
+    arena.registerPlayer(player, { position: options.player.position })
     player.rotation = options.player.rotation
     // const player: Player = createPlayer({ id: 'player-1' })
     // player.position = options.player.position
