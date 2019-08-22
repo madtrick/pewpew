@@ -15,7 +15,7 @@ interface GameLoopResult {
  */
 
  // TODO validate that only one message is processed per player, per loop tick
-type GameLoop = (state: GameState, messages: IncommingMessage<'Request' | 'Command'>[]) => Promise<GameLoopResult>
+export type GameLoop = (state: GameState, messages: IncommingMessage<'Request' | 'Command'>[]) => Promise<GameLoopResult>
 
 export default function createGameLopp (handlers: IncommingMessageHandlers): GameLoop {
   return function gameLoop (state: GameState, messages: IncommingMessage<'Request' | 'Command'>[]): Promise<GameLoopResult> {
