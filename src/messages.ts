@@ -8,7 +8,7 @@ export type RegisterPlayerMessage = IncommingMessage<'Request'> & {
   }
 }
 
-export type Movement ={ direction: 'forward' | 'backward' }
+export type Movement = { direction: 'forward' | 'backward' }
 export type MovePlayerMessage = IncommingMessage<'Request'> & {
   payload: {
     data: {
@@ -29,7 +29,7 @@ export interface IncommingMessage<Type> {
   }
 }
 
-
+export type IncommingMessages = RegisterPlayerMessage | MovePlayerMessage | ShootMessage
 
 // TODO this interface need doesn't seem to be the best
 // maybe rename it to OutgoingResponse since they are the response
