@@ -30,18 +30,14 @@ describe('Requests - Shoot', () => {
       const player = createPlayer({ id: 'player-1' })
       const session = createSession()
       const initialShots = player.shots
-
       const message: ShootMessage = {
-        session,
-        payload: {
-          sys: {
-            type: 'Request',
-            id: 'Shoot'
-          }
+        sys: {
+          type: 'Request',
+          id: 'Shoot'
         }
       }
 
-      const { response } = handler(message, state)
+      const { response } = handler(session, message, state)
 
       // TODO check that the player still has the initial number of shots
       expect(response).to.eql({
@@ -64,18 +60,15 @@ describe('Requests - Shoot', () => {
       const state: GameState = new GameState(gameStateOptions)
       const session = createSession()
       const message: ShootMessage = {
-        session,
-        payload: {
-          sys: {
-            type: 'Request',
-            id: 'Shoot'
-          }
+        sys: {
+          type: 'Request',
+          id: 'Shoot'
         }
       }
 
       state.started = true
 
-      const { response } = handler(message, state)
+      const { response } = handler(session, message, state)
 
       expect(response).to.eql({
         data: {
@@ -97,12 +90,9 @@ describe('Requests - Shoot', () => {
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
       const session = createSession()
       const message: ShootMessage = {
-        session,
-        payload: {
-          sys: {
-            type: 'Request',
-            id: 'Shoot'
-          }
+        sys: {
+          type: 'Request',
+          id: 'Shoot'
         }
       }
 
@@ -110,7 +100,7 @@ describe('Requests - Shoot', () => {
       session.player = registeredPlayer
       state.started = true
 
-      const { response } = handler(message, state)
+      const { response } = handler(session, message, state)
 
       expect(response).to.eql({
         data: {
@@ -132,19 +122,16 @@ describe('Requests - Shoot', () => {
       const initialShots = registeredPlayer.shots
       const session = createSession()
       const message: ShootMessage = {
-        session,
-        payload: {
-          sys: {
-            type: 'Request',
-            id: 'Shoot'
-          }
+        sys: {
+          type: 'Request',
+          id: 'Shoot'
         }
       }
 
       session.player = registeredPlayer
       state.started = true
 
-      const { response } = handler(message, state)
+      const { response } = handler(session, message, state)
 
       expect(response).to.eql({
         data: {

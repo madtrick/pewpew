@@ -16,19 +16,16 @@ describe('Requests - Register player', () => {
       const state: GameState = new GameState(gameStateOptions)
       const session = createSession()
       const message: RegisterPlayerMessage = {
-        session,
-        payload: {
-          data: {
-            id: 'player-1'
-          },
-          sys: {
-            type: 'Request',
-            id: 'RegisterPlayer'
-          }
+        data: {
+          id: 'player-1'
+        },
+        sys: {
+          type: 'Request',
+          id: 'RegisterPlayer'
         }
       }
 
-      const { response, state: newState } = handler(message, state)
+      const { response, state: newState } = handler(session, message, state)
       const [player] = newState.players()
 
       expect(newState.players()).to.have.lengthOf(1)
@@ -50,19 +47,16 @@ describe('Requests - Register player', () => {
       const session = createSession()
       state.registerPlayer(player)
       const message: RegisterPlayerMessage = {
-        session,
-        payload: {
-          data: {
-            id: 'player-1'
-          },
-          sys: {
-            type: 'Request',
-            id: 'RegisterPlayer'
-          }
+        data: {
+          id: 'player-1'
+        },
+        sys: {
+          type: 'Request',
+          id: 'RegisterPlayer'
         }
       }
 
-      const { response, state: newState } = handler(message, state)
+      const { response, state: newState } = handler(session, message, state)
 
       expect(newState.players()).to.have.lengthOf(1)
       expect(response).to.eql({

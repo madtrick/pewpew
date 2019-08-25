@@ -1,20 +1,22 @@
 import { MovePlayerMessage } from '../../messages'
 import { GameState } from '../../game-state'
+import { Session } from '../../session'
 import { HandlerResult } from '../index'
 
-type PlayerPosition = {
+// TODO unifiy the PlayerPosition (or Position) in just one place
+// instead of having the same structure used in different places
+// with different names
+export type PlayerPosition = {
   position: {
     x: number,
     y: number
   }
 }
 
-// TODO validate that the player is registered
-// TODO validate that the movement is valid
-
-export default function movePlayer (message: MovePlayerMessage, state: GameState): HandlerResult<PlayerPosition> {
+export default function movePlayer (_session: Session, message: MovePlayerMessage, state: GameState): HandlerResult<PlayerPosition> {
+  // TODO fetch the player from the session
   const [ player ] = state.players()
-  const movement = message.payload.data.movement
+  const movement = message.data.movement
   const result = state.arena.movePlayer(movement, player)
 
   return {

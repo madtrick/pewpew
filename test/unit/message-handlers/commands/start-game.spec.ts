@@ -10,17 +10,13 @@ describe('Command - Start game', () => {
   it('succeeds', async () => {
       const state: GameState = new GameState({ arena })
       const message: StartGameMessage = {
-        session: {
-          uuid: 'fake-session'
-        },
-        payload: {
-          sys: {
-            type: 'Command',
-            id: 'StartGame'
-          }
+        sys: {
+          type: 'Command',
+          id: 'StartGame'
         }
       }
 
+      // TODO, update this to also take a session object
       const { response, state: newState } = await handler(message, state)
 
       expect(response).to.eql({

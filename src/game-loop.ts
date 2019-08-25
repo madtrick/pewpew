@@ -1,6 +1,15 @@
-import { IncommingMessage, RegisterPlayerMessage, StartGameMessage, OutgoingMessage, UpdateMessage } from './messages'
+import {
+  IncommingMessage,
+  RegisterPlayerMessage,
+  MovePlayerMessage,
+  ShootMessage,
+  StartGameMessage,
+  OutgoingMessage,
+  UpdateMessage
+} from './messages'
 import { IncommingMessageHandlers } from './message-handlers'
 import { GameState } from './game-state'
+import { Session } from './session'
 
 interface GameLoopResult {
   state: GameState
@@ -15,24 +24,33 @@ interface GameLoopResult {
  */
 
  // TODO validate that only one message is processed per player, per loop tick
-export type GameLoop = (state: GameState, messages: IncommingMessage<'Request' | 'Command'>[]) => Promise<GameLoopResult>
+export type GameLoop = (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[]) => Promise<GameLoopResult>
 
 export default function createGameLopp (handlers: IncommingMessageHandlers): GameLoop {
-  return function gameLoop (state: GameState, messages: IncommingMessage<'Request' | 'Command'>[]): Promise<GameLoopResult> {
+  return function gameLoop (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[]): Promise<GameLoopResult> {
     let loopCycleRunResult: GameLoopResult = { state: state, responses: [], updates: [] }
 
     // TODO instead of creating a promise here, make the wrapping function async
     return new Promise((resolve) => {
-      messages.forEach((message) => {
-        const { payload: { sys: { type: messageType, id: messageId } } } = message
+      inputs.forEach(({ session, message }) => {
+        const { sys: { type: messageType, id: messageId } } = message
 
         if (messageType === 'Request') {
           if (messageId === 'RegisterPlayer') {
-            const result = handlers.Request.RegisterPlayer(message as RegisterPlayerMessage, state)
+            // TODO could I fix the types so I don't have to do the `as ...`
+            const result = handlers.Request.RegisterPlayer(session, message as RegisterPlayerMessage, state)
 
             if (result.response) {
               loopCycleRunResult.responses.push(result.response)
             }
+          }
+
+          if (messageId === 'MovePlayer') {
+            handlers.Request.MovePlayer(session, message as MovePlayerMessage, state)
+          }
+
+          if (messageId === 'Shoot') {
+            handlers.Request.Shoot(session, message as ShootMessage, state)
           }
         }
 

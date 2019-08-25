@@ -1,9 +1,10 @@
 import { GameState } from '../../game-state'
+import { Session } from '../../session'
 import { HandlerResult } from '../../message-handlers'
 import { ShootMessage } from '../../messages'
 import { createShot } from '../../shot'
 
-export default function shoot (message: ShootMessage, state: GameState): HandlerResult<void> {
+export default function shoot (session: Session, _message: ShootMessage, state: GameState): HandlerResult<void> {
   if (!state.started) {
     return {
       response: {
@@ -20,7 +21,7 @@ export default function shoot (message: ShootMessage, state: GameState): Handler
     }
   }
 
-  const { session: { player } } = message
+  const { player } = session
 
   if (!player) {
     return {

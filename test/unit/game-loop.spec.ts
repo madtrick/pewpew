@@ -1,56 +1,32 @@
 import { expect } from 'chai'
-import { RegisterPlayerMessage } from '../../src/messages'
+import sinon from 'sinon'
+import { RegisterPlayerMessage, MovePlayerMessage, ShootMessage } from '../../src/messages'
 import { GameState } from '../../src/game-state'
 import { handlers } from '../../src/message-handlers'
 import { Arena } from '../../src/components/arena'
 import { createPlayer } from '../../src/player'
+import { Session, createSession } from '../../src/session'
 import createGameLopp from '../../src/game-loop'
 
 describe('Game loop', () => {
   const loop = createGameLopp(handlers)
   const arena = new Arena({ width: 100, height: 100 })
 
-  it('registers player in game', async () => {
-      const state: GameState = new GameState({ arena })
-      const message: RegisterPlayerMessage = {
-        session: {
-          uuid: 'fake-session'
-        },
-        payload: {
-          data: {
-            id: 'player-1'
-          },
-          sys: {
-            type: 'Request',
-            id: 'RegisterPlayer'
-          }
-        }
-      }
+  let sandbox: sinon.SinonSandbox
 
-      const { responses: [ response ], state: newState } = await loop(state, [message])
-
-      expect(newState.players()).to.not.be.empty
-      expect(response).to.eql({
-        data: {
-          result: 'Success',
-        },
-        sys: {
-          type: 'Response',
-          id: 'RegisterPlayer'
-        }
-      })
+  beforeEach(() => {
+    sandbox = sinon.createSandbox()
   })
 
-  // TODO maybe remove this test
-  it('does not register player in game if duplicated id', async () => {
-    const player = createPlayer({ id: 'player-1' })
-    const state: GameState = new GameState({ arena })
-    state.registerPlayer(player)
-    const message: RegisterPlayerMessage = {
-      session: {
-        uuid: 'fake-session'
-      },
-      payload: {
+  afterEach(() => {
+    sandbox.restore()
+  })
+
+  describe('RegisterPlayerMessage', () => {
+    it('registers player in game', async () => {
+      const state: GameState = new GameState({ arena })
+      const session: Session = createSession()
+      const message: RegisterPlayerMessage = {
         data: {
           id: 'player-1'
         },
@@ -59,23 +35,86 @@ describe('Game loop', () => {
           id: 'RegisterPlayer'
         }
       }
-    }
+      sandbox.stub(handlers.Request, 'RegisterPlayer').returns({
+        response: {
+          data: {
+            result: 'Success'
+          },
+          sys: {
+            type: 'Response',
+            id: 'RegisterPlayer'
+          }
+        }, state
+      })
 
-    const { responses: [ response ], state: newState } = await loop(state, [message])
+      await loop(state, [{ session, message }])
 
-    expect(newState.players()).to.have.lengthOf(1)
-    expect(response).to.eql({
-      data: {
-        msg: 'Player already registered with id player-1',
-        result: 'Failure'
-      },
-      sys: {
-        type: 'Response',
-        id: 'RegisterPlayer'
-      }
+      expect(handlers.Request.RegisterPlayer).to.have.been.calledOnceWith(session, message, state)
     })
   })
 
+  describe('MovePlayerMessage', () => {
+    it('moves player', async () => {
+      const state: GameState = new GameState({ arena })
+      const session: Session = createSession()
+      const message: MovePlayerMessage = {
+        data: {
+          movement: {
+            direction: 'forward'
+          }
+        },
+        sys: {
+          type: 'Request',
+          id: 'MovePlayer'
+        }
+      }
+      sandbox.stub(handlers.Request, 'MovePlayer').returns({
+        response: {
+          data: {
+            result: 'Success'
+          },
+          sys: {
+            type: 'Response',
+            id: 'MovePlayer'
+          }
+        }, state
+      })
+
+      await loop(state, [{ session, message }])
+
+      expect(handlers.Request.MovePlayer).to.have.been.calledOnceWith(session, message, state)
+    })
+  })
+
+  describe('ShootMessage', () => {
+    it('shoots', async () => {
+      const state: GameState = new GameState({ arena })
+      const session: Session = createSession()
+      const message: ShootMessage = {
+        sys: {
+          type: 'Request',
+          id: 'Shoot' // TODO fix the messages typings. Here I could have RegisterPlayer and the type would not complain
+        }
+      }
+      sandbox.stub(handlers.Request, 'Shoot').returns({
+        response: {
+          data: {
+            result: 'Success'
+          },
+          sys: {
+            type: 'Response',
+            id: 'Shoot'
+          }
+        }, state
+      })
+
+      await loop(state, [{ session, message }])
+
+      expect(handlers.Request.Shoot).to.have.been.calledOnceWith(session, message, state)
+    })
+  })
+
+  // TODO maybe remove this test
   describe('when the game is not started', () => {
     it('does not send update notifications', async () => {
       const state: GameState = new GameState({ arena })
