@@ -1,19 +1,15 @@
-import { Session } from './session'
+import Joi from '@hapi/joi'
 
 export type RegisterPlayerMessage = IncommingMessage<'Request'> & {
-  payload: {
-    data: {
-      id: string
-    }
+  data: {
+    id: string
   }
 }
 
 export type Movement = { direction: 'forward' | 'backward' }
 export type MovePlayerMessage = IncommingMessage<'Request'> & {
-  payload: {
-    data: {
-      movement: Movement
-    }
+  data: {
+    movement: Movement
   }
 }
 
@@ -23,10 +19,7 @@ export interface StartGameMessage extends IncommingMessage<'Command'> {}
 
 type Sys<T> = { type: T, id: string }
 export interface IncommingMessage<Type> {
-  session: Session
-  payload: {
-    sys: Sys<Type>
-  }
+  sys: Sys<Type>
 }
 
 export type IncommingMessages = RegisterPlayerMessage | MovePlayerMessage | ShootMessage
@@ -47,3 +40,36 @@ export interface UpdateMessage {
   data: any
   sys: Sys<'Update'>
 }
+
+const REGISTER_PLAYER_SCHEMA = Joi.object().keys({
+  sys: Joi.object().keys({
+    type: Joi.string().valid('Request'),
+    id: Joi.string().valid('RegisterPlayer')
+  }),
+  data: Joi.object().keys({
+    id: Joi.string()
+  }) //TODO restrict the id more
+})
+
+const MOVE_PLAYER_SCHEMA = Joi.object().keys({
+  sys: Joi.object().keys({
+    type: Joi.string().valid('Request'),
+    id: Joi.string().valid('MovePlayer')
+  }),
+  data: Joi.object().keys({
+    movement: Joi.object().keys({
+      direction: Joi.string().valid(['forward', 'backward'])
+    })
+  }) //TODO restrict the id more
+})
+
+const SHOOT_SCHHEMA = Joi.object().keys({
+  sys: Joi.object().keys({ type: Joi.string().valid('Request'), id: Joi.string().valid('Shoot') }),
+})
+
+const schemas = [REGISTER_PLAYER_SCHEMA, MOVE_PLAYER_SCHEMA, SHOOT_SCHHEMA]
+
+export function validateMessage (message: object): boolean {
+  return !!schemas.find((schema) => schema.validate(message).error === null)
+}
+

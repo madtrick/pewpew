@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { MovePlayerMessage, Movement, OutgoingMessage } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
+import { createSession } from '../../../../src/session'
 import { createPlayer } from '../../../../src/player'
 import { Arena } from '../../../../src/components/arena'
 import handler from '../../../../src/message-handlers/requests/move-player'
@@ -25,22 +26,18 @@ function movementTest<T>(options: MovementTestOptions<T>): () => Promise<void> {
     // const player: Player = createPlayer({ id: 'player-1' })
     // player.position = options.player.position
     // state.players = [player]
+    const session = createSession()
     const message: MovePlayerMessage = {
-      session: {
-        uuid: 'fake-session'
+      data: {
+        movement: options.movement
       },
-      payload: {
-        data: {
-          movement: options.movement
-        },
-        sys: {
-          type: 'Request',
-          id: 'MovePlayer'
-        }
+      sys: {
+        type: 'Request',
+        id: 'MovePlayer'
       }
     }
 
-    const { response } = await handler(message, state)
+    const { response } = await handler(session, message, state)
 
     expect(response).to.eql(options.expectedResponse)
   }

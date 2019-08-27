@@ -2,36 +2,20 @@ import { GameState } from '../../game-state'
 import { HandlerResult } from '../../message-handlers'
 import { RegisterPlayerMessage } from '../../messages'
 import { createPlayer } from '../../player'
+import { Session } from '../../session'
 
-export default function registerPlayer (message: RegisterPlayerMessage, state: GameState): HandlerResult<void> {
-  const player = createPlayer(message.payload.data)
-  // const playerExists = state.players().find((player) => player.id === message.payload.data.id)
-  // if (playerExists) {
-  //   return {
-  //     response: {
-  //       data: {
-  //         result: 'Failure',
-  //         msg: `Player already registered with id ${message.payload.data.id}`
-  //       },
-  //       sys: {
-  //         type: 'Response',
-  //         id: 'RegisterPlayer'
-  //       }
-  //     },
-  //     state
-  //   }
-  // }
-
-  // const player = createPlayer(message.payload.data)
-
+export default function registerPlayer (session: Session, message: RegisterPlayerMessage, state: GameState): HandlerResult<void> {
+  const player = createPlayer(message.data)
+  // TODO, maybe check if session.player is already set and reject
   const result = state.registerPlayer(player)
 
+  // TODO another reason for KO could be too many players in the arena
   if (result.status === 'ko') {
     return {
       response: {
         data: {
           result: 'Failure',
-          msg: `Player already registered with id ${message.payload.data.id}`
+          msg: `Player already registered with id ${message.data.id}`
         },
         sys: {
           type: 'Response',
@@ -42,7 +26,7 @@ export default function registerPlayer (message: RegisterPlayerMessage, state: G
     }
   }
 
-  message.session.player = result.player
+  session.player = result.player
 
   return {
     response: {
