@@ -1,30 +1,87 @@
 import { Session } from '../session'
 import { GameState } from '../game-state'
 import {
-  OutgoingMessage,
   RegisterPlayerMessage,
   MovePlayerMessage,
   ShootMessage,
   StartGameMessage
 } from '../messages'
 import StartGameHandler from './commands/start-game'
-import RegisterPlayerHandler from './requests/register-player'
-import MovePlayerHandler, { PlayerPosition } from './requests/move-player'
-import ShootHandler from './requests/shoot'
+import RegisterPlayerHandler, { RegisterPlayerResultDetails } from './requests/register-player'
+import MovePlayerHandler, { MovePlayerResultDetails } from './requests/move-player'
+import ShootHandler, { ShootPlayerResultDetails } from './requests/shoot'
 
-export interface HandlerResult<T> {
-  response: OutgoingMessage<T>
+
+export enum RequestType {
+  RegisterPlayer = 'RegisterPlayer',
+  MovePlayer = 'MovePlayer',
+  Shoot = 'Shoot'
+}
+
+export enum CommandType {
+  StartGame = 'StartGame'
+}
+
+interface CommandResult {
+  success: boolean
+  command: CommandType
+}
+
+export type SuccessCommandResult = CommandResult & {
+  success: true
+}
+
+export type FailureCommandResult = CommandResult & {
+  success: false,
+  reason: string
+}
+
+interface RequestResult {
+  success: boolean
+  request: RequestType
+}
+
+type SuccessfulRequest = { success: true }
+
+type SuccessfulRegiserPlayerRequest = RequestResult & SuccessfulRequest & {
+  request: RequestType.RegisterPlayer
+  details: RegisterPlayerResultDetails
+}
+
+export type SuccessfulMovePlayerRequest = RequestResult & SuccessfulRequest & {
+  request: RequestType.MovePlayer
+  details: MovePlayerResultDetails
+}
+
+export type SuccessfulShootRequest = RequestResult & SuccessfulRequest & {
+  request: RequestType.Shoot
+  details: ShootPlayerResultDetails
+}
+
+export type SuccessRequestResult = SuccessfulRegiserPlayerRequest | SuccessfulMovePlayerRequest | SuccessfulShootRequest
+export type FailureRequestResult = RequestResult & {
+  success: false,
+  reason: string
+}
+
+export interface CommandHandlerResult {
+  result: SuccessCommandResult | FailureCommandResult
+  state: GameState
+}
+
+export interface HandlerResult {
+  result: SuccessRequestResult | FailureRequestResult
   state: GameState
 }
 
 export interface IncommingMessageHandlers {
   Request: {
-    RegisterPlayer: (session: Session, message: RegisterPlayerMessage, state: GameState) => HandlerResult<void>
-    MovePlayer: (session: Session, message: MovePlayerMessage, state: GameState) => HandlerResult<PlayerPosition>
-    Shoot: (session: Session, message: ShootMessage, state: GameState) => HandlerResult<void>
+    RegisterPlayer: (session: Session, message: RegisterPlayerMessage, state: GameState) => HandlerResult
+    MovePlayer: (session: Session, message: MovePlayerMessage, state: GameState) => HandlerResult
+    Shoot: (session: Session, message: ShootMessage, state: GameState) => HandlerResult
   },
   Command: {
-    StartGame: (message: StartGameMessage, state: GameState) => HandlerResult<void>
+    StartGame: (message: StartGameMessage, state: GameState) => CommandHandlerResult
   }
 }
 

@@ -4,7 +4,8 @@ import { GameState } from '../../../../src/game-state'
 import { createPlayer } from '../../../../src/player'
 import { createSession } from '../../../../src/session'
 import { Arena } from '../../../../src/components/arena'
-import handler from '../../../../src/message-handlers/requests/register-player'
+import { RequestType } from '../../../../src/message-handlers'
+import handler, { RegisterPlayerResultDetails } from '../../../../src/message-handlers/requests/register-player'
 
 describe('Requests - Register player', () => {
   const arena = new Arena({ width: 100, height: 100 })
@@ -25,20 +26,39 @@ describe('Requests - Register player', () => {
         }
       }
 
-      const { response, state: newState } = handler(session, message, state)
+      const { result, state: newState } = handler(session, message, state)
       const [player] = newState.players()
 
       expect(newState.players()).to.have.lengthOf(1)
-      expect(response).to.eql({
-        data: {
-          result: 'Success',
-        },
-        sys: {
-          type: 'Response',
-          id: 'RegisterPlayer'
-        }
+      expect(result).to.deep.include({
+        success: true,
+        request: RequestType.RegisterPlayer
       })
-      expect(session.player).to.eql(player)
+
+      // Can't use a matcher in the expectation above
+      // to verify that the position object is present and
+      // with numeric values for x and y
+      //
+      // So I've to do all this manual property testing here
+      //
+      // We need this https://github.com/chaijs/chai/issues/644
+      if (result.success === true) {
+        // NOTE I've to move this expectation here because
+        // `deep.include` does not support partial matching of
+        // nested objects
+        expect(result.details.id).to.eql('player-1')
+
+        // TODO fix the typing of the handler so
+        // I don't have to do this casting here. The problem is
+        // that the current typings of the handler have an union
+        // type for the `result` property. That union includes the
+        // types of all the return type from all the handlers
+
+        // NOTE can't use .finite from chai as it's not part of the typing definitions
+        expect((result.details as RegisterPlayerResultDetails).position.x).to.be.a('number')
+        expect((result.details as RegisterPlayerResultDetails).position.y).to.be.a('number')
+      }
+      expect(session.playerId).to.eql(player.id)
     })
 
     it('does not register player in game if duplicated id', () => {
@@ -56,20 +76,15 @@ describe('Requests - Register player', () => {
         }
       }
 
-      const { response, state: newState } = handler(session, message, state)
+      const { result, state: newState } = handler(session, message, state)
 
       expect(newState.players()).to.have.lengthOf(1)
-      expect(response).to.eql({
-        data: {
-          msg: 'Player already registered with id player-1',
-          result: 'Failure'
-        },
-        sys: {
-          type: 'Response',
-          id: 'RegisterPlayer'
-        }
+      expect(result).to.eql({
+        success: false,
+        reason: 'Player already registered with id player-1',
+        request: RequestType.RegisterPlayer
       })
-      expect(session.player).to.be.undefined
+      expect(session.playerId).to.be.undefined
     })
   })
 })

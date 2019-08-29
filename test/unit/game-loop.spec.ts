@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import { RegisterPlayerMessage, MovePlayerMessage, ShootMessage } from '../../src/messages'
 import { GameState } from '../../src/game-state'
-import { handlers } from '../../src/message-handlers'
+import { handlers, RequestType } from '../../src/message-handlers'
 import { Arena } from '../../src/components/arena'
 import { createPlayer } from '../../src/player'
 import { Session, createSession } from '../../src/session'
@@ -36,15 +36,18 @@ describe('Game loop', () => {
         }
       }
       sandbox.stub(handlers.Request, 'RegisterPlayer').returns({
-        response: {
-          data: {
-            result: 'Success'
-          },
-          sys: {
-            type: 'Response',
-            id: 'RegisterPlayer'
+        result: {
+          success: true,
+          request: RequestType.RegisterPlayer,
+          details: {
+            id: 'player-1',
+            position: {
+              x: 1,
+              y: 1
+            }
           }
-        }, state
+        },
+        state
       })
 
       await loop(state, [{ session, message }])
@@ -69,13 +72,15 @@ describe('Game loop', () => {
         }
       }
       sandbox.stub(handlers.Request, 'MovePlayer').returns({
-        response: {
-          data: {
-            result: 'Success'
-          },
-          sys: {
-            type: 'Response',
-            id: 'MovePlayer'
+        result: {
+          success: true,
+          request: RequestType.MovePlayer,
+          details: {
+            id: 'player-1',
+            position: {
+              x: 1,
+              y: 1
+            }
           }
         }, state
       })
@@ -97,13 +102,11 @@ describe('Game loop', () => {
         }
       }
       sandbox.stub(handlers.Request, 'Shoot').returns({
-        response: {
-          data: {
-            result: 'Success'
-          },
-          sys: {
-            type: 'Response',
-            id: 'Shoot'
+        result: {
+          success: true,
+          request: RequestType.Shoot,
+          details: {
+            id: 'player-1'
           }
         }, state
       })

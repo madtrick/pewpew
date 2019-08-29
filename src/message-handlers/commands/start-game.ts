@@ -1,20 +1,15 @@
 import { StartGameMessage } from '../../messages'
-import { HandlerResult } from '../'
+import { CommandHandlerResult, CommandType } from '../'
 import { GameState } from '../../game-state'
 
-export default function handler (_message: StartGameMessage, state: GameState): HandlerResult<void> {
+export default function handler (_message: StartGameMessage, state: GameState): CommandHandlerResult {
   if (state.started) {
 
     return {
-      response: {
-        data: {
-          result: 'Failure',
-          msg: 'Game has been already started' 
-        },
-        sys: {
-          type: 'Response',
-          id: 'StartGame'
-        }
+      result: {
+        success: false,
+        reason: 'Game has been already started',
+        command: CommandType.StartGame
       },
       state
     }
@@ -22,14 +17,9 @@ export default function handler (_message: StartGameMessage, state: GameState): 
     state.started = true
 
     return {
-      response: {
-        data: {
-          result: 'Success'
-        },
-        sys: {
-          type: 'Response',
-          id: 'StartGame'
-        }
+      result: {
+        success: true,
+        command: CommandType.StartGame
       },
       state}
   }

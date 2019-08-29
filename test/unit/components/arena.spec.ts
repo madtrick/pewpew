@@ -400,7 +400,8 @@ describe('Arena', () => {
               data: {
                 id: otherPlayer.id,
                 damage: shot1.damage,
-                life: initialOtherPlayerLife - shot1.damage
+                life: initialOtherPlayerLife - shot1.damage,
+                shotId: shot1.id
               }
             }
           },
@@ -412,7 +413,8 @@ describe('Arena', () => {
                 position: {
                   x: 101,
                   y: 20
-                }
+                },
+                shotId: shot2.id
               }
             }
           },
@@ -424,7 +426,8 @@ describe('Arena', () => {
                 position: {
                   x: 58,
                   y: 80
-                }
+                },
+                id: shot3.id
               }
             }
           }

@@ -98,10 +98,10 @@ interface PlayerHitDescriptor {
   }
 }
 
-type Foo = (
-  { type: ComponentType.Player, data: { id: string, damage: number, life: number } } |
-    { type: ComponentType.Wall, data: { position: Position } } |
-    { type: ComponentType.Shot, data: { position: Position } }
+export type Foo = (
+  { type: ComponentType.Player, data: { shotId: string, id: string, damage: number, life: number } } |
+  { type: ComponentType.Wall, data: { shotId: string, position: Position } } |
+  { type: ComponentType.Shot, data: { id: string, position: Position } }
 )
 
 export class Arena {
@@ -232,6 +232,7 @@ export class Arena {
           component: {
             type: ComponentType.Shot,
             data: {
+              id: shot.id,
               position: result.position
             }
           }
@@ -243,7 +244,7 @@ export class Arena {
           type: UpdateType.Hit,
           component: {
             type: ComponentType.Player,
-            data: result.hit.data
+            data: { ...result.hit.data, shotId: shot.id }
           }
         }
       }
@@ -253,10 +254,12 @@ export class Arena {
           type: UpdateType.Hit,
           component: {
             type: ComponentType.Wall,
-            data: result.hit.data
+            data: { ...result.hit.data, shotId: shot.id }
           }
         }
       }
+
+      // TODO missing `Destroy` update for when a shots has to be destroyed
 
       // TODO: use assertNever https://www.typescriptlang.org/docs/handbook/advanced-types.html
       throw new Error('This is not possible')

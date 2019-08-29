@@ -1,8 +1,10 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { EventEmitter } from 'events'
-import { createSession } from '../../src/session'
-import engine, { createSessionManager, SessionManager } from '../../src/engine'
+import { createSession, createControlSession } from '../../src/session'
+import { CommandType } from '../../src/message-handlers'
+import engine, { EngineState } from '../../src/engine'
+import { UpdateType, ComponentType, Arena } from '../../src/components/arena'
 // TODO make messaging hub the default export
 import { MessagingHub } from '../../src/messaging-hub'
 
@@ -11,46 +13,38 @@ describe('Engine', () => {
     const gameStateFactory = sinon.stub().returns('fake-state')
 
     let messagingHub: MessagingHub
-    let sessionManager: SessionManager
     let messagingHubPullStub: sinon.SinonStub
     let messagingHubSendStub: sinon.SinonStub
     let sandbox: sinon.SinonSandbox
+    let engineState: EngineState
+    let loopStub: sinon.SinonStub
 
     beforeEach(() => {
       const wss = new EventEmitter()
-      messagingHub = new MessagingHub(wss)
-      messagingHubPullStub = sinon.stub(messagingHub, 'pull')
-      messagingHubSendStub = sinon.stub(messagingHub, 'send')
-      sessionManager = createSessionManager()
+      const arena = new Arena({ width: 100, height: 100 })
+      const gameState = gameStateFactory(arena)
+      engineState = { arena, gameState, channelSession: new Map(), sessionChannel: new Map() }
       sandbox = sinon.createSandbox()
+      loopStub = sandbox.stub().resolves({ updates: [] })
+      messagingHub = new MessagingHub(wss)
+      messagingHubPullStub = sandbox.stub(messagingHub, 'pull')
+      messagingHubSendStub = sandbox.stub(messagingHub, 'send')
     })
 
     afterEach(() => {
       sandbox.restore()
     })
 
-    it('calls the game loop periodically', async () => {
-      const loop = sinon.stub()
-      const clock = sinon.useFakeTimers()
+    it('calls the game loop', async () => {
       const config = { loopDelayInMs: 100 }
       messagingHubPullStub.returns([])
 
-      engine(loop, messagingHub, gameStateFactory, sessionManager, config)
+      await engine(engineState, loopStub, messagingHub, createSession, config)
 
-      // TODO maybe replace the setInterval in the engine
-      // with a custom abstraction I can pass as a dependency
-      // so I don't have to mock the timer
-      clock.tick(config.loopDelayInMs)
-      clock.tick(config.loopDelayInMs)
-      clock.tick(config.loopDelayInMs)
-
-      expect(loop).to.have.been.calledThrice
-      clock.restore()
+      expect(loopStub).to.have.been.calledOnce
     })
 
     it('calls the game loop with the valid messages along with the session', async () => {
-      const loop = sinon.stub()
-      const clock = sinon.useFakeTimers()
       const config = { loopDelayInMs: 100 }
       const sessionChannel1 = createSession()
       const sessionChannel2 = createSession()
@@ -65,8 +59,8 @@ describe('Engine', () => {
         { channel: { id: 'channel-3' }, data: 'foo' },
       ]
       messagingHubPullStub.returns(messages)
-      sandbox.stub(sessionManager, 'createAndSet').returns(sessionChannel2)
-      sandbox.stub(sessionManager, 'get').callsFake((id: string) => {
+      const fakeCreateSession = () => sessionChannel2
+      sandbox.stub(engineState.channelSession, 'get').callsFake((id: string) => {
         if (id === 'channel-1') {
           return sessionChannel1
         }
@@ -74,14 +68,9 @@ describe('Engine', () => {
         return undefined
       })
 
-      engine(loop, messagingHub, gameStateFactory, sessionManager, config)
+      await engine(engineState, loopStub, messagingHub, fakeCreateSession, config)
 
-      // TODO maybe replace the setInterval in the engine
-      // with a custom abstraction I can pass as a dependency
-      // so I don't have to mock the timer
-      clock.tick(config.loopDelayInMs)
-
-      expect(loop).to.have.been.calledOnceWith('fake-state', [
+      expect(loopStub).to.have.been.calledOnceWith('fake-state', [
         {
           session: sessionChannel1,
           message: shootMessage
@@ -91,33 +80,25 @@ describe('Engine', () => {
           message: movePlayerMessage
         }
       ])
-      clock.restore()
     })
 
-    it('creates a session if one did not exist', () => {
-      const loop = sinon.stub()
-      const clock = sinon.useFakeTimers()
+    it('creates a session if one did not exist', async () => {
       const config = { loopDelayInMs: 100 }
+      const session = createSession()
       const messages = [
         { channel: { id: 'channel-1' }, data: JSON.stringify({ sys: { type: 'Request', id: 'RegisterPlayer' } }) }
       ]
       messagingHubPullStub.returns(messages)
-      sandbox.spy(sessionManager, 'createAndSet')
+      const fakeCreateSession = () => session
 
-      engine(loop, messagingHub, gameStateFactory, sessionManager, config)
+      expect(engineState.channelSession.get('channel-1')).to.be.undefined
 
-      // TODO maybe replace the setInterval in the engine
-      // with a custom abstraction I can pass as a dependency
-      // so I don't have to mock the timer
-      clock.tick(config.loopDelayInMs)
+      engine(engineState, loopStub, messagingHub, fakeCreateSession, config)
 
-      expect(sessionManager.createAndSet).to.have.been.calledOnceWith('channel-1')
-      clock.restore()
+      expect(engineState.channelSession.get('channel-1')).to.have.eql(session)
     })
 
-    it('sends an error on non valid json messages', () => {
-      const loop = sinon.stub()
-      const clock = sinon.useFakeTimers()
+    it('sends an error on non valid json messages', async () => {
       const config = { loopDelayInMs: 100 }
       const messages = [
         { channel: { id: 'channel-1' }, data: 'message-1' }
@@ -125,28 +106,20 @@ describe('Engine', () => {
       messagingHubPullStub.returns(messages)
       messagingHubSendStub.resolves()
 
-      engine(loop, messagingHub, gameStateFactory, sessionManager, config)
-
-      // TODO maybe replace the setInterval in the engine
-      // with a custom abstraction I can pass as a dependency
-      // so I don't have to mock the timer
-      clock.tick(config.loopDelayInMs)
+      await engine(engineState, loopStub, messagingHub, createSession, config)
 
       expect(messagingHub.send).to.have.been.calledOnceWith({
         channel: { id: 'channel-1' },
         data: {
           type: 'Error',
           details: {
-            msg: 'Invalid message payload'
+            msg: 'Invalid message'
           }
         }
       })
-      clock.restore()
     })
 
-    it('sends an error on non-string messages', () => {
-      const loop = sinon.stub()
-      const clock = sinon.useFakeTimers()
+    it('sends an error on non-string messages', async () => {
       const config = { loopDelayInMs: 100 }
       const messages = [
         { channel: { id: 'channel-1' }, data: undefined }
@@ -154,28 +127,20 @@ describe('Engine', () => {
       messagingHubPullStub.returns(messages)
       messagingHubSendStub.resolves()
 
-      engine(loop, messagingHub, gameStateFactory, sessionManager, config)
-
-      // TODO maybe replace the setInterval in the engine
-      // with a custom abstraction I can pass as a dependency
-      // so I don't have to mock the timer
-      clock.tick(config.loopDelayInMs)
+      await engine(engineState, loopStub, messagingHub, createSession, config)
 
       expect(messagingHub.send).to.have.been.calledOnceWith({
         channel: { id: 'channel-1' },
         data: {
           type: 'Error',
           details: {
-            msg: 'Invalid message payload'
+            msg: 'Invalid message'
           }
         }
       })
-      clock.restore()
     })
 
-    it('sends an error on messages that do not follow the schemas', () => {
-      const loop = sinon.stub()
-      const clock = sinon.useFakeTimers()
+    it('sends an error on messages that do not follow the schemas', async () => {
       const config = { loopDelayInMs: 100 }
       const messages = [
         { channel: { id: 'channel-1' }, data: JSON.stringify({foo: 'bar'}) }
@@ -183,23 +148,105 @@ describe('Engine', () => {
       messagingHubPullStub.returns(messages)
       messagingHubSendStub.resolves()
 
-      engine(loop, messagingHub, gameStateFactory, sessionManager, config)
-
-      // TODO maybe replace the setInterval in the engine
-      // with a custom abstraction I can pass as a dependency
-      // so I don't have to mock the timer
-      clock.tick(config.loopDelayInMs)
+      await engine(engineState, loopStub, messagingHub, createSession, config)
 
       expect(messagingHub.send).to.have.been.calledOnceWith({
         channel: { id: 'channel-1' },
         data: {
           type: 'Error',
           details: {
-            msg: 'Invalid message payload'
+            msg: 'Invalid message'
           }
         }
       })
-      clock.restore()
+    })
+
+    it('transform the requests and commands results into notifications and responses and sends those', async () => {
+      const config = { loopDelayInMs: 100 }
+      const controlSession = createControlSession()
+      const playerSession = createSession()
+      messagingHubPullStub.returns([])
+      messagingHubSendStub.resolves()
+      loopStub.resolves({
+        results: [
+          {
+            success: true,
+            command: CommandType.StartGame
+          }
+        ]
+      })
+
+      engineState.channelSession = new Map([
+        ['channel-1', controlSession],
+        ['channel-2', playerSession]
+      ])
+      engineState.sessionChannel = new Map([
+        [controlSession, 'channel-1'],
+        [playerSession, 'channel-2']
+      ])
+
+      await engine(engineState, loopStub, messagingHub, createSession, config)
+
+      expect(messagingHub.send).to.have.been.calledTwice
+      expect(messagingHub.send).to.have.been.calledWith({
+        channel: { id: 'channel-1' },
+        data: {
+          type: 'Response',
+          id: 'StartGame',
+          success: true
+        }
+      })
+      expect(messagingHub.send).to.have.been.calledWith({
+        channel: { id: 'channel-2' },
+        data: {
+          type: 'Notification',
+          id: 'StartGame',
+        }
+      })
+    })
+
+    it('transform the game updates into notifications and sends those', async () => {
+      const config = { loopDelayInMs: 100 }
+      const controlSession = createControlSession()
+      const playerSession = createSession()
+      messagingHubPullStub.returns([])
+      messagingHubSendStub.resolves()
+      loopStub.resolves({
+        updates: [
+          {
+            type: UpdateType.Movement,
+            component: {
+              type: ComponentType.Shot,
+              data: {
+                id: 'shot-1',
+                position: { x: 100, y: 100 }
+              }
+            }
+          }
+        ]
+      })
+
+      engineState.channelSession = new Map([
+        ['channel-1', controlSession],
+        ['channel-2', playerSession]
+      ])
+
+      await engine(engineState, loopStub, messagingHub, createSession, config)
+
+      expect(messagingHub.send).to.have.been.calledOnceWith({
+        channel: { id: 'channel-1' },
+        data: {
+          type: 'Notification',
+          id: 'Movement',
+          component: {
+            type: 'Shot',
+            data: {
+              id: 'shot-1',
+              position: { x: 100, y: 100 }
+            }
+          }
+        }
+      })
     })
   })
 })
