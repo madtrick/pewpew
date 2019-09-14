@@ -5,6 +5,7 @@ import { GameState } from '../../../../src/game-state'
 import { createPlayer } from '../../../../src/player'
 import { createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
+import { RequestType } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/shoot'
 
 describe('Requests - Shoot', () => {
@@ -37,18 +38,13 @@ describe('Requests - Shoot', () => {
         }
       }
 
-      const { response } = handler(session, message, state)
+      const { result } = handler(session, message, state)
 
       // TODO check that the player still has the initial number of shots
-      expect(response).to.eql({
-        data: {
-          result: 'Failure',
-          msg: 'The game has not started'
-        },
-        sys: {
-          type: 'Response',
-          id: 'Shoot'
-        }
+      expect(result).to.eql({
+        success: false,
+        reason: 'The game has not started',
+        request: RequestType.Shoot
       })
       expect(player.shots).to.eql(initialShots)
       expect(arena.registerShot).to.not.have.been.called
@@ -68,17 +64,12 @@ describe('Requests - Shoot', () => {
 
       state.started = true
 
-      const { response } = handler(session, message, state)
+      const { result } = handler(session, message, state)
 
-      expect(response).to.eql({
-        data: {
-          result: 'Failure',
-          msg: 'There is no player registered for this session'
-        },
-        sys: {
-          type: 'Response',
-          id: 'Shoot'
-        }
+      expect(result).to.eql({
+        success: false,
+        reason: 'There is no player registered for this session',
+        request: RequestType.Shoot
       })
     })
   })
@@ -97,20 +88,15 @@ describe('Requests - Shoot', () => {
       }
 
       registeredPlayer.shots = 0
-      session.player = registeredPlayer
+      session.playerId = registeredPlayer.id
       state.started = true
 
-      const { response } = handler(session, message, state)
+      const { result } = handler(session, message, state)
 
-      expect(response).to.eql({
-        data: {
-          result: 'Failure',
-          msg: 'There are no shots left'
-        },
-        sys: {
-          type: 'Response',
-          id: 'Shoot'
-        }
+      expect(result).to.eql({
+        success: false,
+        reason: 'There are no shots left',
+        request: RequestType.Shoot
       })
       expect(arena.registerShot).to.not.have.been.called
     })
@@ -128,18 +114,16 @@ describe('Requests - Shoot', () => {
         }
       }
 
-      session.player = registeredPlayer
+      session.playerId = registeredPlayer.id
       state.started = true
 
-      const { response } = handler(session, message, state)
+      const { result } = handler(session, message, state)
 
-      expect(response).to.eql({
-        data: {
-          result: 'Success',
-        },
-        sys: {
-          type: 'Response',
-          id: 'Shoot'
+      expect(result).to.eql({
+        success: true,
+        request: RequestType.Shoot,
+        details: {
+          id: 'player-1'
         }
       })
       expect(registeredPlayer.shots).to.eql(initialShots - 1)

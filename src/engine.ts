@@ -3,9 +3,11 @@ import { GameLoop } from './game-loop'
 import Config from './config'
 import { Arena } from './components/arena'
 import { GameState } from './game-state'
-import { Session, createSession } from './session'
+import { Session, CreateSessionFn } from './session'
 import { IncommingMessages, validateMessage } from './messages'
 import { isFailure, asSuccess, failure, success, Result } from './success-failure'
+import updateToNotifications from './update-to-notifications'
+import resultToResponseAndNotifications from './result-to-response-notifications'
 
 function parseMessage (message: unknown): Result<IncommingMessages, any> {
   let object: object
@@ -28,63 +30,77 @@ function parseMessage (message: unknown): Result<IncommingMessages, any> {
   }
 }
 
-export interface SessionManager {
-  createAndSet: (id: string) => Session
-  get: (id: string) => Session | undefined
+export interface EngineState {
+  gameState: GameState
+  arena: Arena
+  channelSession: Map<string, Session>
+  sessionChannel: Map<Session, string>
 }
 
-export function createSessionManager (): SessionManager {
-  const sessions: Map<string, Session> = new Map()
+// TODO remove the config object
+export default async function engine (state: EngineState, loop: GameLoop, messagingHub: MessagingHub, createSession: CreateSessionFn, _config: Config ): Promise<void> {
+  const messages = messagingHub.pull()
+  const parsedMessages: { session: Session, message: IncommingMessages }[] = []
+  const errors = []
 
-  return {
-    createAndSet: (id: string) => {
-      const session = createSession()
-      sessions.set(id, session)
+  for (const { channel, data } of messages) {
+    const result = parseMessage(data)
 
-      return session
-    },
-    get: (id: string): Session | undefined => {
-      return sessions.get(id)
+    if (isFailure(result)) {
+      errors.push({
+        channel,
+        data: {
+          type: 'Error',
+          details: {
+            // TODO include the details from the failure
+            msg: 'Invalid message'
+          }
+        }
+      })
+    } else {
+      let session = state.channelSession.get(channel.id)
+
+      if (!session) {
+        // TODO cleanup after a channel is closed
+        session = createSession()
+        state.channelSession.set(channel.id, session)
+        state.sessionChannel.set(session, channel.id)
+      }
+
+      parsedMessages.push({ session, message: asSuccess(result) })
     }
   }
-}
 
-export default function engine (loop: GameLoop, messagingHub: MessagingHub, gameStateFactory: (arena: Arena) => GameState, sessionManager: SessionManager, config: Config ): void {
-  const arena = new Arena({ width: 100, height: 100 })
-  const state = gameStateFactory(arena)
+  // TODO missing await on the call to `send`
+  errors.forEach((e) => messagingHub.send(e))
 
-  setInterval(() => {
-    const messages = messagingHub.pull()
-    const parsedMessages: { session: Session, message: IncommingMessages }[] = []
-    const errors = []
+  const { updates, results } = await loop(state.gameState, parsedMessages)
 
-    for (const { channel, data } of messages) {
-      const result = parseMessage(data)
+  // TODO combine the notifications and responses
+  if (results) {
+    for (const result of results) {
+      const responsesAndNotifications = resultToResponseAndNotifications(result, Array.from(state.channelSession.values()))
+      for (const notification of responsesAndNotifications) {
+        // TODO missing await on the call to `send`
+        const channelId = state.sessionChannel.get(notification.session)
 
-      if (isFailure(result)) {
-        errors.push({
-          channel,
-          data: {
-            type: 'Error',
-            details: {
-              // TODO include the details from the failure
-              msg: 'Invalid message'
-            }
-          }
-        })
-      } else {
-        let session = sessionManager.get(channel.id)
-
-        if (!session) {
-          session = sessionManager.createAndSet(channel.id)
+        if (channelId) {
+          messagingHub.send({ channel: { id: channelId }, data: notification.notification || notification.response })
+        } else {
+          // TODO log
         }
-
-        parsedMessages.push({ session, message: asSuccess(result) })
       }
     }
+  }
 
-    errors.forEach((e) => messagingHub.send(e))
+  if (updates) {
+    for (const update of updates) {
+      const notifications = updateToNotifications(update, Array.from(state.channelSession.values()))
 
-    loop(state, parsedMessages)
-  }, config.loopDelayInMs)
+      for (const notification of notifications) {
+        // TODO missing await on the call to `send`
+        messagingHub.send({ channel: { id: 'channel-1' }, data: notification.notification })
+      }
+    }
+  }
 }

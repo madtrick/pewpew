@@ -1,55 +1,54 @@
 import { GameState } from '../../game-state'
 import { Session } from '../../session'
-import { HandlerResult } from '../../message-handlers'
+import { HandlerResult, RequestType } from '../../message-handlers'
 import { ShootMessage } from '../../messages'
 import { createShot } from '../../shot'
 
-export default function shoot (session: Session, _message: ShootMessage, state: GameState): HandlerResult<void> {
+export interface ShootPlayerResultDetails {
+  id: string
+}
+
+// TODO note that by not havign HandlerResult parameterized with the kind of request result that
+// we are supposed to return from here, we could be returning 
+export default function shoot (session: Session, _message: ShootMessage, state: GameState): HandlerResult {
   if (!state.started) {
     return {
-      response: {
-        data: {
-          result: 'Failure',
-          msg: 'The game has not started'
-        },
-        sys: {
-          type: 'Response',
-          id: 'Shoot'
-        }
+      result: {
+        success: false,
+        request: RequestType.Shoot,
+        reason: 'The game has not started'
       },
       state
     }
   }
 
-  const { player } = session
+  const { playerId } = session
 
-  if (!player) {
+  if (!playerId) {
     return {
-      response: {
-        data: {
-          result: 'Failure',
-          msg: 'There is no player registered for this session'
-        },
-        sys: {
-          type: 'Response',
-          id: 'Shoot'
-        }
+      result: {
+        success: false,
+        request: RequestType.Shoot,
+        reason: 'There is no player registered for this session'
       },
       state
     }
+  }
+
+  const player = state.arena.findPlayer(playerId)
+
+  if (!player) {
+    // TODO can I change with confidence the return type of `findPlayer` so it
+    // doesn't return `undefined` and we can avoid this is
+    throw new Error('This should not be possible')
   }
 
   if (player.shots === 0) {
     return {
-      response: {
-        data: {
-          result: 'Failure',
-          msg: 'There are no shots left'
-        },
-        sys: {
-          type: 'Response',
-          id: 'Shoot'
-        }
+      result: {
+        success: false,
+        request: RequestType.Shoot,
+        reason: 'There are no shots left'
       },
       state
     }
@@ -60,13 +59,11 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
   state.arena.registerShot(shot)
 
   return {
-    response: {
-      data: {
-        result: 'Success'
-      },
-      sys: {
-        type: 'Response',
-        id: 'Shoot'
+    result: {
+      success: true,
+      request: RequestType.Shoot,
+      details: {
+        id: player.id
       }
     },
     state

@@ -3,18 +3,17 @@ import {
   RegisterPlayerMessage,
   MovePlayerMessage,
   ShootMessage,
-  StartGameMessage,
-  OutgoingMessage,
-  UpdateMessage
+  StartGameMessage
 } from './messages'
-import { IncommingMessageHandlers } from './message-handlers'
+import { IncommingMessageHandlers, SuccessCommandResult, SuccessRequestResult, FailureRequestResult } from './message-handlers'
 import { GameState } from './game-state'
 import { Session } from './session'
+import { ComponentUpdate } from './update-to-notifications'
 
 interface GameLoopResult {
   state: GameState
-  responses: OutgoingMessage<any>[]
-  updates: UpdateMessage[]
+  results: (SuccessCommandResult | SuccessRequestResult | FailureRequestResult)[]
+  updates: ComponentUpdate[]
 }
 
 /*
@@ -26,9 +25,10 @@ interface GameLoopResult {
  // TODO validate that only one message is processed per player, per loop tick
 export type GameLoop = (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[]) => Promise<GameLoopResult>
 
+// TODO test the response from the loop function
 export default function createGameLopp (handlers: IncommingMessageHandlers): GameLoop {
   return function gameLoop (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[]): Promise<GameLoopResult> {
-    let loopCycleRunResult: GameLoopResult = { state: state, responses: [], updates: [] }
+    let loopCycleRunResult: GameLoopResult = { state: state, results: [], updates: [] }
 
     // TODO instead of creating a promise here, make the wrapping function async
     return new Promise((resolve) => {
@@ -40,9 +40,7 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
             // TODO could I fix the types so I don't have to do the `as ...`
             const result = handlers.Request.RegisterPlayer(session, message as RegisterPlayerMessage, state)
 
-            if (result.response) {
-              loopCycleRunResult.responses.push(result.response)
-            }
+            loopCycleRunResult.results.push(result.result)
           }
 
           if (messageId === 'MovePlayer') {
@@ -62,6 +60,7 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
       })
 
       const updates = state.update()
+      // TODO the updates should be returned without being transformed
       const transformedUpdates = updates.map((update: any) => {
         if (update.player) {
           return { player: update.player, payload: { data: update.data, sys: 'GameUpdate' } }
