@@ -1,6 +1,5 @@
 import { MessagingHub } from './messaging-hub'
 import { GameLoop } from './game-loop'
-import Config from './config'
 import { Arena } from './components/arena'
 import { GameState } from './game-state'
 import { Session, CreateSessionFn } from './session'
@@ -37,8 +36,18 @@ export interface EngineState {
   sessionChannel: Map<Session, string>
 }
 
+export function createEngineState (arena: Arena, gameState: GameState): EngineState {
+  return {
+    gameState,
+    arena,
+    channelSession: new Map(),
+    sessionChannel: new Map()
+  }
+}
+
+export type Engine = (state: EngineState, loop: GameLoop, messagingHub: MessagingHub, createSession: CreateSessionFn) => Promise<void>
 // TODO remove the config object
-export default async function engine (state: EngineState, loop: GameLoop, messagingHub: MessagingHub, createSession: CreateSessionFn, _config: Config ): Promise<void> {
+export default async function engine (state: EngineState, loop: GameLoop, messagingHub: MessagingHub, createSession: CreateSessionFn): Promise<void> {
   const messages = messagingHub.pull()
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
   const errors = []
