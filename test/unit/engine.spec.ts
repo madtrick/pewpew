@@ -1,34 +1,24 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { EventEmitter } from 'events'
 import { createSession, createControlSession } from '../../src/session'
 import { CommandType } from '../../src/message-handlers'
 import engine, { EngineState } from '../../src/engine'
 import { UpdateType, ComponentType, Arena } from '../../src/components/arena'
-// TODO make messaging hub the default export
-import { MessagingHub } from '../../src/messaging-hub'
 
 describe('Engine', () => {
   describe('on each game tick', () => {
     const gameStateFactory = sinon.stub().returns('fake-state')
 
-    let messagingHub: MessagingHub
-    let messagingHubPullStub: sinon.SinonStub
-    let messagingHubSendStub: sinon.SinonStub
     let sandbox: sinon.SinonSandbox
     let engineState: EngineState
     let loopStub: sinon.SinonStub
 
     beforeEach(() => {
-      const wss = new EventEmitter()
       const arena = new Arena({ width: 100, height: 100 })
       const gameState = gameStateFactory(arena)
       engineState = { arena, gameState, channelSession: new Map(), sessionChannel: new Map() }
       sandbox = sinon.createSandbox()
       loopStub = sandbox.stub().resolves({ updates: [] })
-      messagingHub = new MessagingHub(wss)
-      messagingHubPullStub = sandbox.stub(messagingHub, 'pull')
-      messagingHubSendStub = sandbox.stub(messagingHub, 'send')
     })
 
     afterEach(() => {
@@ -36,16 +26,12 @@ describe('Engine', () => {
     })
 
     it('calls the game loop', async () => {
-      const config = { loopDelayInMs: 100 }
-      messagingHubPullStub.returns([])
-
-      await engine(engineState, loopStub, messagingHub, createSession, config)
+      await engine(engineState, loopStub, [], [], createSession, createControlSession)
 
       expect(loopStub).to.have.been.calledOnce
     })
 
     it('calls the game loop with the valid messages along with the session', async () => {
-      const config = { loopDelayInMs: 100 }
       const sessionChannel1 = createSession()
       const sessionChannel2 = createSession()
       const movePlayerMessage = {
@@ -54,11 +40,9 @@ describe('Engine', () => {
       }
       const shootMessage = { sys: { type: 'Request', id: 'Shoot' } }
       const messages = [
-        { channel: { id: 'channel-1' }, data: JSON.stringify(shootMessage) },
-        { channel: { id: 'channel-2' }, data: JSON.stringify(movePlayerMessage) },
-        { channel: { id: 'channel-3' }, data: 'foo' },
+        { channel: { id: 'channel-1' }, data: shootMessage },
+        { channel: { id: 'channel-2' }, data: movePlayerMessage }
       ]
-      messagingHubPullStub.returns(messages)
       const fakeCreateSession = () => sessionChannel2
       sandbox.stub(engineState.channelSession, 'get').callsFake((id: string) => {
         if (id === 'channel-1') {
@@ -68,7 +52,7 @@ describe('Engine', () => {
         return undefined
       })
 
-      await engine(engineState, loopStub, messagingHub, fakeCreateSession, config)
+      await engine(engineState, loopStub, [], messages, fakeCreateSession, createControlSession)
 
       expect(loopStub).to.have.been.calledOnceWith('fake-state', [
         {
@@ -83,74 +67,39 @@ describe('Engine', () => {
     })
 
     it('creates a session if one did not exist', async () => {
-      const config = { loopDelayInMs: 100 }
       const session = createSession()
       const messages = [
-        { channel: { id: 'channel-1' }, data: JSON.stringify({ sys: { type: 'Request', id: 'RegisterPlayer' } }) }
+        {
+          channel: { id: 'channel-1' },
+          data: {
+            sys: {
+              type: 'Request',
+              id: 'RegisterPlayer'
+            },
+            data: {
+              id: 'potato'
+            }
+          }
+        }
       ]
-      messagingHubPullStub.returns(messages)
       const fakeCreateSession = () => session
 
       expect(engineState.channelSession.get('channel-1')).to.be.undefined
 
-      engine(engineState, loopStub, messagingHub, fakeCreateSession, config)
+      await engine(engineState, loopStub, [], messages, fakeCreateSession, createControlSession)
+      debugger
 
       expect(engineState.channelSession.get('channel-1')).to.have.eql(session)
     })
 
-    it('sends an error on non valid json messages', async () => {
-      const config = { loopDelayInMs: 100 }
-      const messages = [
-        { channel: { id: 'channel-1' }, data: 'message-1' }
-      ]
-      messagingHubPullStub.returns(messages)
-      messagingHubSendStub.resolves()
-
-      await engine(engineState, loopStub, messagingHub, createSession, config)
-
-      expect(messagingHub.send).to.have.been.calledOnceWith({
-        channel: { id: 'channel-1' },
-        data: {
-          type: 'Error',
-          details: {
-            msg: 'Invalid message'
-          }
-        }
-      })
-    })
-
-    it('sends an error on non-string messages', async () => {
-      const config = { loopDelayInMs: 100 }
-      const messages = [
-        { channel: { id: 'channel-1' }, data: undefined }
-      ]
-      messagingHubPullStub.returns(messages)
-      messagingHubSendStub.resolves()
-
-      await engine(engineState, loopStub, messagingHub, createSession, config)
-
-      expect(messagingHub.send).to.have.been.calledOnceWith({
-        channel: { id: 'channel-1' },
-        data: {
-          type: 'Error',
-          details: {
-            msg: 'Invalid message'
-          }
-        }
-      })
-    })
-
     it('sends an error on messages that do not follow the schemas', async () => {
-      const config = { loopDelayInMs: 100 }
       const messages = [
-        { channel: { id: 'channel-1' }, data: JSON.stringify({foo: 'bar'}) }
+        { channel: { id: 'channel-1' }, data: {foo: 'bar'} }
       ]
-      messagingHubPullStub.returns(messages)
-      messagingHubSendStub.resolves()
 
-      await engine(engineState, loopStub, messagingHub, createSession, config)
+      const { messages: outMessages } = await engine(engineState, loopStub, [], messages, createSession, createControlSession)
 
-      expect(messagingHub.send).to.have.been.calledOnceWith({
+      expect(outMessages).to.eql([{
         channel: { id: 'channel-1' },
         data: {
           type: 'Error',
@@ -158,15 +107,12 @@ describe('Engine', () => {
             msg: 'Invalid message'
           }
         }
-      })
+      }])
     })
 
     it('transform the requests and commands results into notifications and responses and sends those', async () => {
-      const config = { loopDelayInMs: 100 }
       const controlSession = createControlSession()
       const playerSession = createSession()
-      messagingHubPullStub.returns([])
-      messagingHubSendStub.resolves()
       loopStub.resolves({
         results: [
           {
@@ -185,32 +131,28 @@ describe('Engine', () => {
         [playerSession, 'channel-2']
       ])
 
-      await engine(engineState, loopStub, messagingHub, createSession, config)
+      const { messages: outMessages } = await engine(engineState, loopStub, [], [], createSession, createControlSession)
 
-      expect(messagingHub.send).to.have.been.calledTwice
-      expect(messagingHub.send).to.have.been.calledWith({
+      expect(outMessages).to.eql([{
         channel: { id: 'channel-1' },
         data: {
           type: 'Response',
           id: 'StartGame',
           success: true
         }
-      })
-      expect(messagingHub.send).to.have.been.calledWith({
+      },
+      {
         channel: { id: 'channel-2' },
         data: {
           type: 'Notification',
           id: 'StartGame',
         }
-      })
+      }])
     })
 
     it('transform the game updates into notifications and sends those', async () => {
-      const config = { loopDelayInMs: 100 }
       const controlSession = createControlSession()
       const playerSession = createSession()
-      messagingHubPullStub.returns([])
-      messagingHubSendStub.resolves()
       loopStub.resolves({
         updates: [
           {
@@ -231,9 +173,9 @@ describe('Engine', () => {
         ['channel-2', playerSession]
       ])
 
-      await engine(engineState, loopStub, messagingHub, createSession, config)
+      const { messages: outMessages } = await engine(engineState, loopStub, [], [], createSession, createControlSession)
 
-      expect(messagingHub.send).to.have.been.calledOnceWith({
+      expect(outMessages).to.eql([{
         channel: { id: 'channel-1' },
         data: {
           type: 'Notification',
@@ -246,7 +188,7 @@ describe('Engine', () => {
             }
           }
         }
-      })
+      }])
     })
   })
 })

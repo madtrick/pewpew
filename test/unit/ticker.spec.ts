@@ -22,7 +22,7 @@ function createDeferred<T> (): Deferred<T> {
   }
 }
 
-describe.only('Ticker', () => {
+describe('Ticker', () => {
   describe('.atLeastEvery', () => {
     it('calls its callback at least every given ms', async () => {
       const ticker = createTicker()

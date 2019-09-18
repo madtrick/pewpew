@@ -9,6 +9,7 @@ import { Engine, createEngineState } from './engine'
 import { createSession } from './session'
 import { createTicker } from './ticker'
 
+// TODO test this
 export function createServer (engine: Engine) {
   const WSServer = new WS.Server({ port: 8888 })
   const messaging = new MessagingHub(WSServer)
@@ -19,6 +20,7 @@ export function createServer (engine: Engine) {
   const ticker = createTicker()
 
   ticker.atLeastEvery(100, () => {
-    return engine(engineState, gameLoop, messaging, createSession)
+    const messages = messaging.pull()
+    return engine(engineState, gameLoop, messages, createSession)
   })
 }

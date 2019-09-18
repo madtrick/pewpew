@@ -5,14 +5,20 @@ import {
   ShootMessage,
   StartGameMessage
 } from './messages'
-import { IncommingMessageHandlers, SuccessCommandResult, SuccessRequestResult, FailureRequestResult } from './message-handlers'
+import {
+  IncommingMessageHandlers,
+  SuccessCommandResult,
+  SuccessRequestResult,
+  FailureRequestResult,
+  FailureCommandResult
+} from './message-handlers'
 import { GameState } from './game-state'
 import { Session } from './session'
 import { ComponentUpdate } from './update-to-notifications'
 
 interface GameLoopResult {
   state: GameState
-  results: (SuccessCommandResult | SuccessRequestResult | FailureRequestResult)[]
+  results: (SuccessCommandResult | SuccessRequestResult | FailureRequestResult | FailureCommandResult)[]
   updates: ComponentUpdate[]
 }
 
@@ -45,32 +51,37 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
           }
 
           if (messageId === 'MovePlayer') {
+            // TODO include the response in the results
             handlers.Request.MovePlayer(session, message as MovePlayerMessage, state)
           }
 
           if (messageId === 'Shoot') {
+            // TODO include the response in the results
             handlers.Request.Shoot(session, message as ShootMessage, state)
           }
         }
 
         if (messageType === 'Command') {
           if (messageId === 'StartGame') {
-            handlers.Command.StartGame(message as StartGameMessage, state)
+            const result = handlers.Command.StartGame(message as StartGameMessage, state)
+
+            // TODO test this
+            loopCycleRunResult.results.push(result.result)
           }
         }
       })
 
       const updates = state.update()
       // TODO the updates should be returned without being transformed
-      const transformedUpdates = updates.map((update: any) => {
-        if (update.player) {
-          return { player: update.player, payload: { data: update.data, sys: 'GameUpdate' } }
-        }
+      // const transformedUpdates = updates.map((update: any) => {
+      //   if (update.player) {
+      //     return { player: update.player, payload: { data: update.data, sys: 'GameUpdate' } }
+      //   }
 
-        return undefined
-      }).filter(Boolean)
+      //   return undefined
+      // }).filter(Boolean)
 
-      loopCycleRunResult.updates = transformedUpdates
+      loopCycleRunResult.updates = updates
 
       resolve(loopCycleRunResult)
     })

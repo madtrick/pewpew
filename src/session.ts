@@ -26,13 +26,13 @@ export function isPlayerSession (session: ControlSession | Session): session is 
   return session.type === SessionType.Player
 }
 
-export type CreateSessionFn = typeof createSession
 export function createSession (): Session {
   return {
     uuid: uuid(),
     type: SessionType.Player
   }
 }
+export type CreateSessionFn = typeof createSession
 
 export function createControlSession (): ControlSession {
   return {
@@ -40,4 +40,5 @@ export function createControlSession (): ControlSession {
     type: SessionType.Control
   }
 }
+export type CreateControlSessionFn = typeof createControlSession
 

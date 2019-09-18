@@ -41,35 +41,48 @@ export interface UpdateMessage {
   sys: Sys<'Update'>
 }
 
+// TODO is there a better way to make all properties required
 const REGISTER_PLAYER_SCHEMA = Joi.object().keys({
   sys: Joi.object().keys({
-    type: Joi.string().valid('Request'),
-    id: Joi.string().valid('RegisterPlayer')
-  }),
+    type: Joi.string().valid('Request').required(),
+    id: Joi.string().valid('RegisterPlayer').required()
+  }).required(),
   data: Joi.object().keys({
-    id: Joi.string()
-  }) //TODO restrict the id more
+    id: Joi.string().required()
+  }).required() //TODO restrict the id more
 })
 
 const MOVE_PLAYER_SCHEMA = Joi.object().keys({
   sys: Joi.object().keys({
-    type: Joi.string().valid('Request'),
-    id: Joi.string().valid('MovePlayer')
-  }),
+    type: Joi.string().valid('Request').required(),
+    id: Joi.string().valid('MovePlayer').required()
+  }).required(),
   data: Joi.object().keys({
     movement: Joi.object().keys({
-      direction: Joi.string().valid(['forward', 'backward'])
-    })
-  }) //TODO restrict the id more
+      direction: Joi.string().valid(['forward', 'backward']).required()
+    }).required()
+  })
 })
 
 const SHOOT_SCHHEMA = Joi.object().keys({
-  sys: Joi.object().keys({ type: Joi.string().valid('Request'), id: Joi.string().valid('Shoot') }),
+  sys: Joi.object().keys({
+    type: Joi.string().valid('Request').required(),
+    id: Joi.string().valid('Shoot').required()
+  }).required()
 })
 
-const schemas = [REGISTER_PLAYER_SCHEMA, MOVE_PLAYER_SCHEMA, SHOOT_SCHHEMA]
+const START_GAME_SCHEMA = Joi.object().keys({
+  sys: Joi.object().keys({
+    type: Joi.string().valid('Command').required(),
+    id: Joi.string().valid('StartGame').required()
+  }).required()
+})
+
+const schemas = [REGISTER_PLAYER_SCHEMA, MOVE_PLAYER_SCHEMA, SHOOT_SCHHEMA, START_GAME_SCHEMA]
 
 export function validateMessage (message: object): boolean {
+  // TODO maybe first check if message.sys.type is present
+  // and then use that to find the schema it should validate
   return !!schemas.find((schema) => schema.validate(message).error === null)
 }
 

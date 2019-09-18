@@ -1,8 +1,8 @@
 import uuid from 'uuid/v4'
 
-interface Message {
+export interface Message {
   channel: { id: ChannelId }
-  data: string
+  data?: string
 }
 
 interface WebSocketServer {

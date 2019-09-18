@@ -31,21 +31,12 @@ export class GameState {
     return this.arena.players()
   }
 
+  // TODO fix this type and use the type from the arena
   update (): any{
     if (!this.started) {
       return []
     }
 
-    // TODO call instead arena.update()
-    const updates = this.players().map((player) => {
-      return {
-        player,
-        data: {
-          life: player.life
-        }
-      }
-    })
-
-    return updates
+    return this.arena.update()
   }
 }

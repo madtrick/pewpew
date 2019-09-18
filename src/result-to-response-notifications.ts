@@ -16,7 +16,7 @@ function isRequestResult (result: SuccessRequestResult | SuccessCommandResult | 
   return 'request' in result
 }
 
-export default function resultToResponseAndNotifications (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult, sessions: Session[]): any[] {
+export default function resultToResponseAndNotifications (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult, sessions: Session[]): any[] {
   const controlSession = sessions.find(isControlSession)
   const playerSessions = sessions.filter(isPlayerSession)
 

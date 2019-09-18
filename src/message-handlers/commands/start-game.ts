@@ -21,6 +21,7 @@ export default function handler (_message: StartGameMessage, state: GameState): 
         success: true,
         command: CommandType.StartGame
       },
-      state}
+      state
+    }
   }
 }

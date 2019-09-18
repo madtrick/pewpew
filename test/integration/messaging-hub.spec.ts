@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import WS from 'ws'
-import { MessagingHub, WebSocket } from '../../src/messaging-hub'
+import { MessagingHub } from '../../src/messaging-hub'
 
-function P (fn: (resolver: (value?: void | PromiseLike<void>) => void) => void): Promise<void> {
+function P (fn: (resolver: (value?: any | PromiseLike<void>) => void) => void): Promise<void> {
   return new Promise((resolve) => fn(resolve))
 }
 
@@ -43,8 +43,8 @@ describe('Messaging Hub - Integration', () => {
   })
 
   it('sends messages', async () => {
-    const messages = []
-    client.on('message', (message) => messages.push(message))
+    const messages: string[] = []
+    client.on('message', (message: string) => messages.push(message))
     await P((resolve) => client.send('some data', resolve))
     await sleep()
 

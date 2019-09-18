@@ -1,8 +1,27 @@
 import { expect } from 'chai'
-import { RegisterPlayerMessage, MovePlayerMessage, ShootMessage, validateMessage } from '../../src/messages'
+import {
+  RegisterPlayerMessage,
+  MovePlayerMessage,
+  ShootMessage,
+  StartGameMessage,
+  validateMessage
+} from '../../src/messages'
 
 describe('Messages', () => {
   describe('validatMessage', () => {
+    it('returns true for valid StartGame messages', () => {
+      const message: StartGameMessage = {
+        sys: {
+          type: 'Command',
+          id: 'StartGame'
+        }
+      }
+
+      const result = validateMessage(message)
+
+      expect(result).to.be.true
+    })
+
     it('returns true for valid RegisterPlayer messages', () => {
       const message: RegisterPlayerMessage = {
         sys: {
@@ -17,6 +36,19 @@ describe('Messages', () => {
       const result = validateMessage(message)
 
       expect(result).to.be.true
+    })
+
+    it('returns false for invalid RegisterPlayer messages', () => {
+      const message = {
+        sys: {
+          type: 'Request',
+          id: 'RegisterPlayer'
+        }
+      }
+
+      const result = validateMessage(message)
+
+      expect(result).to.be.false
     })
 
     it('returns true for valid MovePlayer messages (forward direction)', () => {
