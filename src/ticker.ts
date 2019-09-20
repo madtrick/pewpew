@@ -1,18 +1,16 @@
-interface Ticker {
-  atLeastEvery: (ms: number, fn: () => void) => undefined
+export interface Ticker {
+  atLeastEvery: (ms: number, fn: () => void) => void
   cancel: () => void
 }
 
-type TickerRef = any
 export function createTicker (): Ticker {
   let timeout: NodeJS.Timeout
   let cancel = false
 
   const ticker = {
-    atLeastEvery: (ms: number, fn: () => void): TickerRef => {
+    atLeastEvery: (ms: number, fn: () => void): void => {
       if (cancel) {
         clearTimeout(timeout)
-        return
       }
 
       timeout = setTimeout(async () => {
@@ -20,8 +18,6 @@ export function createTicker (): Ticker {
 
         ticker.atLeastEvery(ms, fn)
       }, ms)
-
-      return timeout
     },
 
     cancel: () => {

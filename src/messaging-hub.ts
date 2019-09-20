@@ -1,11 +1,16 @@
 import uuid from 'uuid/v4'
 
+type ChannelId = string
+
+export interface ChannelRef {
+  id: ChannelId
+}
 export interface Message {
   channel: { id: ChannelId }
   data?: string
 }
 
-interface WebSocketServer {
+export interface WebSocketServer {
   on (event: 'connection', cb: (socket: WebSocket) => void ): void
 }
 
@@ -20,9 +25,12 @@ interface Channel {
   socket: WebSocket
 }
 
-type ChannelId = string
+export interface IMessagingHub {
+  pull (): Message[]
+  send (options: { channel: { id: ChannelId }, data: any }): Promise<void>
+}
 
-export class MessagingHub {
+export class MessagingHub implements IMessagingHub {
   private connection: WebSocketServer
   private channels: Map<string, Channel>
   private messages: [Channel, any][] //TODO replace that any

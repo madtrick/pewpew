@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+
+'use strict';
+
+require('ts-node').register({ transpileOnly: true });
+const { Server } = require('ws');
+
+const { init, start } = require('../src/server');
+
+const run = async () => {
+  const context = init({ WS: Server });
+  const server = await start(context);
+
+  console.log('Server started');
+}
+
+run()

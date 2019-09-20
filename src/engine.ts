@@ -36,7 +36,7 @@ interface OutMessage {
 
 interface InMessage {
   channel: { id: string }
-  data: object
+  data?: object
 }
 
 export interface EngineState {
@@ -60,7 +60,8 @@ export function createEngineState (arena: Arena, gameState: GameState): EngineSt
 }
 
 // TODO create a module that takes messages from the messaging hub and parses and ensures that they are objects
-export type Engine = (state: EngineState, loop: GameLoop, controlMessages: InMessage[], messages: InMessage[], createSession: CreateSessionFn) => Promise<EngineResult>
+// TODO rather than reimplementing the type here use `typeof engine`
+export type Engine = (state: EngineState, loop: GameLoop, controlMessages: InMessage[], messages: InMessage[], createSession: CreateSessionFn, createControlSession: CreateControlSessionFn) => Promise<EngineResult>
 export default async function engine (state: EngineState, loop: GameLoop, controlMessages: InMessage[], messages: InMessage[], createSession: CreateSessionFn, createControlSession: CreateControlSessionFn): Promise<EngineResult> {
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
   const errors = []
@@ -145,10 +146,8 @@ export default async function engine (state: EngineState, loop: GameLoop, contro
   }
 
   if (updates) {
-    console.log(updates)
     for (const update of updates) {
       const notifications = updateToNotifications(update, Array.from(state.channelSession.values()))
-      console.log(notifications)
 
       for (const notification of notifications) {
         resultMessages.push({ channel: { id: 'channel-1' }, data: notification.notification })

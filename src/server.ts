@@ -1,26 +1,92 @@
-import * as WS from 'ws'
 // TODO make MessagingHub, Arena and GameState default exports
-import { MessagingHub } from './messaging-hub'
+import { IMessagingHub, MessagingHub, Message, ChannelRef, WebSocketServer } from './messaging-hub'
 import { Arena } from './components/arena'
 import { GameState } from './game-state'
 import { handlers } from './message-handlers'
-import createGameLopp from './game-loop'
-import { Engine, createEngineState } from './engine'
-import { createSession } from './session'
-import { createTicker } from './ticker'
+import createGameLopp, { GameLoop }  from './game-loop'
+import engine, { Engine, EngineState, createEngineState } from './engine'
+import { createSession, CreateSessionFn, createControlSession, CreateControlSessionFn } from './session'
+import { createTicker, Ticker } from './ticker'
 
-// TODO test this
-export function createServer (engine: Engine) {
-  const WSServer = new WS.Server({ port: 8888 })
-  const messaging = new MessagingHub(WSServer)
-  const arena = new Arena ({ width: 500, height: 500 })
+interface ServerContext {
+  ticker: Ticker
+  engine: Engine
+  loop: GameLoop
+  engineState: EngineState,
+  messaging: {
+    control: IMessagingHub
+    players: IMessagingHub
+  }
+  createSession: CreateSessionFn
+  createControlSession: CreateControlSessionFn
+}
+
+interface Server {
+  ticker: Ticker
+}
+
+// TODO replace the type returned in this function with InMessage or
+// its replacement
+function parse (message: Message): { channel: ChannelRef, data: object } | undefined {
+  if (!message.data) {
+    return
+  }
+
+  try {
+    return { channel: message.channel, data: JSON.parse(message.data) }
+  } catch (_) {
+    return
+  }
+}
+
+export function init ({ WS }: { WS: WebSocketServer }): ServerContext {
+  const arena = new Arena({ width: 500, height: 500 })
   const gameState = new GameState({ arena })
-  const gameLoop = createGameLopp(handlers)
   const engineState = createEngineState(arena, gameState)
   const ticker = createTicker()
+  const loop = createGameLopp(handlers)
+  const messaging = {
+    control: new MessagingHub(new WS({ port: 8888 })),
+    players:  new MessagingHub(new WS({ port: 8889 }))
+  }
 
-  ticker.atLeastEvery(100, () => {
-    const messages = messaging.pull()
-    return engine(engineState, gameLoop, messages, createSession)
-  })
+  return {
+    engineState,
+    ticker,
+    engine,
+    loop,
+    messaging,
+    createSession,
+    createControlSession
+  }
 }
+
+export function start (context: ServerContext): Server {
+  const {
+    ticker,
+    engine,
+    engineState,
+    loop,
+    messaging,
+    createControlSession,
+    createSession
+  } = context
+
+  function isMessage (a: any): a is { channel: ChannelRef, data: object } {
+    return a !== undefined
+  }
+  ticker.atLeastEvery(100, () => {
+    const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
+    const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
+
+    return engine(engineState, loop, controlMessages, playerMessages, createSession, createControlSession)
+  })
+
+  return {
+    ticker
+  }
+}
+
+// function stop (server: Server): void {
+
+// }
