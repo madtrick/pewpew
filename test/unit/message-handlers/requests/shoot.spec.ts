@@ -42,6 +42,7 @@ describe('Requests - Shoot', () => {
 
       // TODO check that the player still has the initial number of shots
       expect(result).to.eql({
+        session,
         success: false,
         reason: 'The game has not started',
         request: RequestType.Shoot
@@ -67,6 +68,7 @@ describe('Requests - Shoot', () => {
       const { result } = handler(session, message, state)
 
       expect(result).to.eql({
+        session,
         success: false,
         reason: 'There is no player registered for this session',
         request: RequestType.Shoot
@@ -94,6 +96,7 @@ describe('Requests - Shoot', () => {
       const { result } = handler(session, message, state)
 
       expect(result).to.eql({
+        session,
         success: false,
         reason: 'There are no shots left',
         request: RequestType.Shoot

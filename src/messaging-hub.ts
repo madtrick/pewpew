@@ -27,7 +27,7 @@ interface Channel {
 
 export interface IMessagingHub {
   pull (): Message[]
-  send (options: { channel: { id: ChannelId }, data: any }): Promise<void>
+  send (options: { channel: { id: ChannelId }, data: string }): Promise<void>
 }
 
 export class MessagingHub implements IMessagingHub {
@@ -69,10 +69,12 @@ export class MessagingHub implements IMessagingHub {
       result.push({ channel: { id: channel.id }, data: message })
     }
 
+    this.messages = []
+
     return result.reverse()
   }
 
-  async send (options: { channel: { id: ChannelId }, data: any }): Promise<void> {
+  async send (options: { channel: { id: ChannelId }, data: string }): Promise<void> {
     return new Promise((resolve) => {
       const channel = this.channels.get(options.channel.id)
 

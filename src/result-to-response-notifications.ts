@@ -5,14 +5,17 @@ import {
   SuccessRequestResult,
   SuccessCommandResult,
   FailureRequestResult,
+  FailureRegisterPlayerRequest,
+  FailureShootRequest,
+  FailureMoveRequest,
   FailureCommandResult
 } from './message-handlers'
 
-function isCommandResult (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult): result is SuccessCommandResult {
+function isCommandResult (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult): result is SuccessCommandResult | FailureCommandResult {
   return 'command' in result
 }
 
-function isRequestResult (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult): result is SuccessRequestResult {
+function isRequestResult (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult): result is SuccessRequestResult | FailureRequestResult | FailureRegisterPlayerRequest {
   return 'request' in result
 }
 
@@ -23,7 +26,23 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
   // TODO missing transformation for failed requests or commands
 
   if (isCommandResult(result)) {
+    if (result.success === false && result.command === CommandType.StartGame) {
+      const { reason } = result as FailureCommandResult
+
+      return [{
+        session: controlSession,
+        response: {
+          type: 'Response',
+          id: CommandType.StartGame,
+          success: false,
+          details: {
+            msg: reason
+          }
+        }
+      }]
+    }
     if (result.success === true && result.command === CommandType.StartGame) {
+      console.dir(playerSessions, { colors: true })
       return [
         {
           session: controlSession,
@@ -45,6 +64,22 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
   }
 
   if (isRequestResult(result)) {
+    if (result.success === false && result.request === RequestType.RegisterPlayer) {
+      const { session, reason } = result as FailureRegisterPlayerRequest
+
+      return [{
+        session,
+        response: {
+          type: 'Response',
+          id: RequestType.RegisterPlayer,
+          success: false,
+          details: {
+            msg: reason
+          }
+        }
+      }]
+    }
+
     if (result.success === true && result.request === RequestType.RegisterPlayer) {
       const { details: { id: playerId, position } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
@@ -81,6 +116,8 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.MovePlayer) {
+      // TODO maybe always include the session in the result so it's easier
+      // to find to which user send the response
       const { details: { id: playerId, position } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
 
@@ -97,6 +134,22 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       }]
     }
 
+    if (result.success === false && result.request === RequestType.MovePlayer) {
+      const { session, reason } = result as FailureMoveRequest
+
+      return [{
+        session,
+        response: {
+          type: 'Response',
+          id: RequestType.MovePlayer,
+          success: false,
+          details: {
+            msg: reason
+          }
+        }
+      }]
+    }
+
     if (result.success === true && result.request === RequestType.Shoot) {
       const { details: { id: playerId } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
@@ -107,6 +160,22 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           type: 'Response',
           id: RequestType.Shoot,
           success: true
+        }
+      }]
+    }
+
+    if (result.success === false && result.request === RequestType.Shoot) {
+      const { session, reason } = result as FailureShootRequest
+
+      return [{
+        session: session,
+        response: {
+          type: 'Response',
+          id: RequestType.Shoot,
+          success: false,
+          details: {
+            msg: reason
+          }
         }
       }]
     }

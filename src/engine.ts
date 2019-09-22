@@ -1,11 +1,12 @@
 import { GameLoop } from './game-loop'
 import { Arena } from './components/arena'
 import { GameState } from './game-state'
-import { Session, CreateSessionFn, CreateControlSessionFn } from './session'
+import { Session, CreateSessionFn, CreateControlSessionFn, isPlayerSession } from './session'
 import { IncommingMessages, validateMessage } from './messages'
 import { isFailure, asSuccess, failure, success, Result } from './success-failure'
 import updateToNotifications from './update-to-notifications'
 import resultToResponseAndNotifications from './result-to-response-notifications'
+import { ILogger } from './types'
 
 function asIncomingMessage (message: object): Result<IncommingMessages, any> {
   // let object: object
@@ -36,7 +37,7 @@ interface OutMessage {
 
 interface InMessage {
   channel: { id: string }
-  data?: object
+  data: object
 }
 
 export interface EngineState {
@@ -47,7 +48,8 @@ export interface EngineState {
 }
 
 interface EngineResult {
-  messages: OutMessage[]
+  playerResultMessages: OutMessage[]
+  controlResultMessages: OutMessage[]
 }
 
 export function createEngineState (arena: Arena, gameState: GameState): EngineState {
@@ -61,16 +63,35 @@ export function createEngineState (arena: Arena, gameState: GameState): EngineSt
 
 // TODO create a module that takes messages from the messaging hub and parses and ensures that they are objects
 // TODO rather than reimplementing the type here use `typeof engine`
-export type Engine = (state: EngineState, loop: GameLoop, controlMessages: InMessage[], messages: InMessage[], createSession: CreateSessionFn, createControlSession: CreateControlSessionFn) => Promise<EngineResult>
-export default async function engine (state: EngineState, loop: GameLoop, controlMessages: InMessage[], messages: InMessage[], createSession: CreateSessionFn, createControlSession: CreateControlSessionFn): Promise<EngineResult> {
+export type Engine = (
+  state: EngineState,
+  loop: GameLoop,
+  controlMessages: InMessage[],
+  messages: InMessage[],
+  createSession: CreateSessionFn,
+  createControlSession: CreateControlSessionFn,
+  context: { logger: ILogger }
+) => Promise<EngineResult>
+export default async function engine (
+  state: EngineState,
+  loop: GameLoop,
+  controlMessages: InMessage[],
+  messages: InMessage[],
+  createSession: CreateSessionFn,
+  createControlSession: CreateControlSessionFn,
+  context: { logger: ILogger }
+): Promise<EngineResult> {
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
-  const errors = []
+  const controlResultMessages: OutMessage[] = []
+  const playerResultMessages: OutMessage[] = []
 
+  // TODO validate that only requests come in these messages
+  // and not commands
   for (const { channel, data } of messages) {
     const result = asIncomingMessage(data)
 
     if (isFailure(result)) {
-      errors.push({
+      playerResultMessages.push({
         channel,
         data: {
           type: 'Error',
@@ -81,7 +102,7 @@ export default async function engine (state: EngineState, loop: GameLoop, contro
         }
       })
     } else {
-      debugger
+      context.logger.info({ msg: result })
       let session = state.channelSession.get(channel.id)
 
       if (!session) {
@@ -99,7 +120,7 @@ export default async function engine (state: EngineState, loop: GameLoop, contro
     const result = asIncomingMessage(data)
 
     if (isFailure(result)) {
-      errors.push({
+      controlResultMessages.push({
         channel,
         data: {
           type: 'Error',
@@ -123,9 +144,6 @@ export default async function engine (state: EngineState, loop: GameLoop, contro
     }
   }
 
-  const resultMessages: OutMessage[] = []
-  errors.forEach((e) => resultMessages.push(e))
-
   const { updates, results } = await loop(state.gameState, parsedMessages)
 
   // TODO combine the notifications and responses
@@ -133,11 +151,14 @@ export default async function engine (state: EngineState, loop: GameLoop, contro
     for (const result of results) {
       const responsesAndNotifications = resultToResponseAndNotifications(result, Array.from(state.channelSession.values()))
       for (const notification of responsesAndNotifications) {
-        // TODO missing await on the call to `send`
         const channelId = state.sessionChannel.get(notification.session)
 
         if (channelId) {
-          resultMessages.push({ channel: { id: channelId }, data: notification.notification || notification.response })
+          if (isPlayerSession(notification.session)) {
+            playerResultMessages.push({ channel: { id: channelId }, data: notification.notification || notification.response })
+          } else {
+            controlResultMessages.push({ channel: { id: channelId }, data: notification.notification || notification.response })
+          }
         } else {
           // TODO log
         }
@@ -150,10 +171,21 @@ export default async function engine (state: EngineState, loop: GameLoop, contro
       const notifications = updateToNotifications(update, Array.from(state.channelSession.values()))
 
       for (const notification of notifications) {
-        resultMessages.push({ channel: { id: 'channel-1' }, data: notification.notification })
+        const channelId = state.sessionChannel.get(notification.session)
+
+        if (channelId) {
+          if (isPlayerSession(notification.session)) {
+            playerResultMessages.push({ channel: { id: channelId }, data: notification.notification })
+          } else {
+            controlResultMessages.push({ channel: { id: channelId }, data: notification.notification })
+          }
+        } else {
+          // TODO log
+        }
       }
     }
   }
 
-  return { messages: resultMessages }
+  // TODO rename this properties
+  return { playerResultMessages, controlResultMessages }
 }

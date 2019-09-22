@@ -16,7 +16,20 @@ export interface MovePlayerResultDetails {
   position: PlayerPosition
 }
 
-export default function movePlayer (_session: Session, message: MovePlayerMessage, state: GameState): HandlerResult {
+export default function movePlayer (session: Session, message: MovePlayerMessage, state: GameState): HandlerResult {
+  debugger
+  if (!state.started) {
+    return {
+      result: {
+        session,
+        success: false,
+        request: RequestType.MovePlayer,
+        reason: 'The game has not started'
+      },
+      state
+    }
+  }
+
   // TODO fetch the player from the session
   const [ player ] = state.players()
   const movement = message.data.movement

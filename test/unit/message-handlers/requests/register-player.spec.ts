@@ -80,6 +80,7 @@ describe('Requests - Register player', () => {
 
       expect(newState.players()).to.have.lengthOf(1)
       expect(result).to.eql({
+        session,
         success: false,
         reason: 'Player already registered with id player-1',
         request: RequestType.RegisterPlayer

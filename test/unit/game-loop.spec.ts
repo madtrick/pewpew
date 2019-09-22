@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { RegisterPlayerMessage, MovePlayerMessage, ShootMessage } from '../../src/messages'
+import { RegisterPlayerMessage, MovePlayerMessage, ShootMessage, StartGameMessage } from '../../src/messages'
 import { GameState } from '../../src/game-state'
-import { handlers, RequestType } from '../../src/message-handlers'
+import { handlers, RequestType, CommandType } from '../../src/message-handlers'
 import { Arena } from '../../src/components/arena'
 import { createPlayer } from '../../src/player'
 import { Session, createSession } from '../../src/session'
@@ -22,6 +22,33 @@ describe('Game loop', () => {
     sandbox.restore()
   })
 
+  describe('StartGameCommand', () => {
+    it('starts the game', async () => {
+      const state: GameState = new GameState({ arena })
+      const session: Session = createSession()
+      const message: StartGameMessage = {
+        sys: {
+          type: 'Command',
+          id: 'StartGame'
+        }
+      }
+      const result = {
+        result: {
+          success: true,
+          command: CommandType.StartGame
+        },
+        state
+      } as const
+      sandbox.stub(handlers.Command, 'StartGame').returns(result)
+
+      const { results } = await loop(state, [{ session, message }])
+
+      expect(handlers.Command.StartGame).to.have.been.calledOnceWith(message, state)
+      expect(results).to.eql([result.result])
+
+    })
+  })
+
   describe('RegisterPlayerMessage', () => {
     it('registers player in game', async () => {
       const state: GameState = new GameState({ arena })
@@ -35,7 +62,7 @@ describe('Game loop', () => {
           id: 'RegisterPlayer'
         }
       }
-      sandbox.stub(handlers.Request, 'RegisterPlayer').returns({
+      const result = {
         result: {
           success: true,
           request: RequestType.RegisterPlayer,
@@ -48,11 +75,13 @@ describe('Game loop', () => {
           }
         },
         state
-      })
+      } as const
+      sandbox.stub(handlers.Request, 'RegisterPlayer').returns(result)
 
-      await loop(state, [{ session, message }])
+      const { results } = await loop(state, [{ session, message }])
 
       expect(handlers.Request.RegisterPlayer).to.have.been.calledOnceWith(session, message, state)
+      expect(results).to.eql([result.result])
     })
   })
 
@@ -71,7 +100,7 @@ describe('Game loop', () => {
           id: 'MovePlayer'
         }
       }
-      sandbox.stub(handlers.Request, 'MovePlayer').returns({
+      const result = {
         result: {
           success: true,
           request: RequestType.MovePlayer,
@@ -83,11 +112,13 @@ describe('Game loop', () => {
             }
           }
         }, state
-      })
+      } as const
+      sandbox.stub(handlers.Request, 'MovePlayer').returns(result)
 
-      await loop(state, [{ session, message }])
+      const { results } = await loop(state, [{ session, message }])
 
       expect(handlers.Request.MovePlayer).to.have.been.calledOnceWith(session, message, state)
+      expect(results).to.eql([result.result])
     })
   })
 
@@ -101,7 +132,7 @@ describe('Game loop', () => {
           id: 'Shoot' // TODO fix the messages typings. Here I could have RegisterPlayer and the type would not complain
         }
       }
-      sandbox.stub(handlers.Request, 'Shoot').returns({
+      const result = {
         result: {
           success: true,
           request: RequestType.Shoot,
@@ -109,11 +140,13 @@ describe('Game loop', () => {
             id: 'player-1'
           }
         }, state
-      })
+      } as const
+      sandbox.stub(handlers.Request, 'Shoot').returns(result)
 
-      await loop(state, [{ session, message }])
+      const { results } = await loop(state, [{ session, message }])
 
       expect(handlers.Request.Shoot).to.have.been.calledOnceWith(session, message, state)
+      expect(results).to.eql([result.result])
     })
   })
 

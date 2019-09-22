@@ -29,6 +29,18 @@ describe('Messaging Hub', () => {
     expect(channels).to.be.empty
   })
 
+  it('clears the in memory messages after each pull', () => {
+    const wss = new EventEmitter()
+    const socket1 = new EventEmitter()
+    const hub = new MessagingHub(wss)
+
+    wss.emit('connection', socket1)
+    socket1.emit('message', 'message-1-1')
+
+    expect(hub.pull()).to.have.lengthOf(1)
+    expect(hub.pull()).to.have.lengthOf(0)
+  })
+
   it('keeps only on message per channel', () => {
     const wss = new EventEmitter()
     const socket1 = new EventEmitter()

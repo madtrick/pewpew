@@ -7,8 +7,10 @@ import createGameLopp, { GameLoop }  from './game-loop'
 import engine, { Engine, EngineState, createEngineState } from './engine'
 import { createSession, CreateSessionFn, createControlSession, CreateControlSessionFn } from './session'
 import { createTicker, Ticker } from './ticker'
+import * as Logger from 'bunyan'
 
 interface ServerContext {
+  logger: Logger
   ticker: Ticker
   engine: Engine
   loop: GameLoop
@@ -45,12 +47,14 @@ export function init ({ WS }: { WS: WebSocketServer }): ServerContext {
   const engineState = createEngineState(arena, gameState)
   const ticker = createTicker()
   const loop = createGameLopp(handlers)
+  const logger = Logger.createLogger({ name: 'pewpew' })
   const messaging = {
     control: new MessagingHub(new WS({ port: 8888 })),
     players:  new MessagingHub(new WS({ port: 8889 }))
   }
 
   return {
+    logger,
     engineState,
     ticker,
     engine,
@@ -69,17 +73,28 @@ export function start (context: ServerContext): Server {
     loop,
     messaging,
     createControlSession,
-    createSession
+    createSession,
+    logger
   } = context
 
   function isMessage (a: any): a is { channel: ChannelRef, data: object } {
     return a !== undefined
   }
-  ticker.atLeastEvery(100, () => {
+  ticker.atLeastEvery(100, async () => {
     const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
     const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
+    logger.info(playerMessages)
 
-    return engine(engineState, loop, controlMessages, playerMessages, createSession, createControlSession)
+    const { playerResultMessages, controlResultMessages } = await engine(engineState, loop, controlMessages, playerMessages, createSession, createControlSession, { logger })
+    debugger
+
+    for (const message of controlResultMessages) {
+      messaging.control.send({ ...message, data: JSON.stringify(message.data) })
+    }
+
+    for (const message of playerResultMessages) {
+      messaging.players.send({ ...message, data: JSON.stringify(message.data) })
+    }
   })
 
   return {

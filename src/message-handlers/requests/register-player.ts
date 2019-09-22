@@ -19,9 +19,10 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
   if (result.status === 'ko') {
     return {
       result: {
+        session,
         success: false,
         request: RequestType.RegisterPlayer,
-        reason: `Player already registered with id ${message.data.id}`
+        reason: `Player already registered with id ${message.data.id}`,
       },
       state
     }

@@ -64,13 +64,26 @@ export type FailureRequestResult = RequestResult & {
   reason: string
 }
 
+// TODO maybe the FailureRequestResult should have the session
+export type FailureRegisterPlayerRequest = FailureRequestResult & {
+  session: Session // we need the session to be able to respond to the request
+}
+
+export type FailureShootRequest = FailureRequestResult & {
+  session: Session // we need the session to be able to respond to the request
+}
+
+export type FailureMoveRequest = FailureRequestResult & {
+  session: Session // we need the session to be able to respond to the request
+}
+
 export interface CommandHandlerResult {
   result: SuccessCommandResult | FailureCommandResult
   state: GameState
 }
 
 export interface HandlerResult {
-  result: SuccessRequestResult | FailureRequestResult
+  result: SuccessRequestResult | FailureRequestResult | FailureRegisterPlayerRequest
   state: GameState
 }
 

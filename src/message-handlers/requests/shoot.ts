@@ -14,6 +14,7 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
   if (!state.started) {
     return {
       result: {
+        session,
         success: false,
         request: RequestType.Shoot,
         reason: 'The game has not started'
@@ -27,6 +28,7 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
   if (!playerId) {
     return {
       result: {
+        session,
         success: false,
         request: RequestType.Shoot,
         reason: 'There is no player registered for this session'
@@ -46,6 +48,7 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
   if (player.shots === 0) {
     return {
       result: {
+        session,
         success: false,
         request: RequestType.Shoot,
         reason: 'There are no shots left'

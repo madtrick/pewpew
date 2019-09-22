@@ -46,26 +46,23 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
           if (messageId === 'RegisterPlayer') {
             // TODO could I fix the types so I don't have to do the `as ...`
             const result = handlers.Request.RegisterPlayer(session, message as RegisterPlayerMessage, state)
-
             loopCycleRunResult.results.push(result.result)
           }
 
           if (messageId === 'MovePlayer') {
-            // TODO include the response in the results
-            handlers.Request.MovePlayer(session, message as MovePlayerMessage, state)
+            const result = handlers.Request.MovePlayer(session, message as MovePlayerMessage, state)
+            loopCycleRunResult.results.push(result.result)
           }
 
           if (messageId === 'Shoot') {
-            // TODO include the response in the results
-            handlers.Request.Shoot(session, message as ShootMessage, state)
+            const result = handlers.Request.Shoot(session, message as ShootMessage, state)
+            loopCycleRunResult.results.push(result.result)
           }
         }
 
         if (messageType === 'Command') {
           if (messageId === 'StartGame') {
             const result = handlers.Command.StartGame(message as StartGameMessage, state)
-
-            // TODO test this
             loopCycleRunResult.results.push(result.result)
           }
         }

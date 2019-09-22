@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import * as sinon from 'sinon'
 import { MovePlayerMessage, Movement } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
 import { createSession } from '../../../../src/session'
@@ -24,6 +25,7 @@ function movementTest(options: MovementTestOptions): () => Promise<void> {
   return async () => {
     const arena = options.arena()
     const state: GameState = new GameState({ arena })
+    state.started = true
     const player = createPlayer({ id: PLAYER_ID })
     arena.registerPlayer(player, { position: options.player.position })
     player.rotation = options.player.rotation
@@ -106,6 +108,36 @@ describe('Requests - Move player', () => {
           }
         }
       }))
+    })
+  })
+
+  describe('when the game has not started', () => {
+    it('rejects the request', () => {
+      const arena = new Arena({ width: 100, height: 100 })
+      const state: GameState = new GameState({ arena })
+      const session = createSession()
+      const message: MovePlayerMessage = {
+        sys: {
+          type: 'Request',
+          id: 'MovePlayer'
+        },
+        data: {
+          movement: {
+            direction: 'forward'
+          }
+        }
+      }
+      sinon.spy(arena, 'movePlayer')
+
+      const { result } = handler(session, message, state)
+
+      expect(result).to.eql({
+        session,
+        success: false,
+        reason: 'The game has not started',
+        request: RequestType.MovePlayer
+      })
+      expect(arena.movePlayer).to.not.have.been.called
     })
   })
 })

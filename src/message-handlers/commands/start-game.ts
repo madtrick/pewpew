@@ -4,7 +4,6 @@ import { GameState } from '../../game-state'
 
 export default function handler (_message: StartGameMessage, state: GameState): CommandHandlerResult {
   if (state.started) {
-
     return {
       result: {
         success: false,
