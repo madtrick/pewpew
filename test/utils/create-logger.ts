@@ -1,5 +1,5 @@
 import * as Bunyan from 'bunyan'
-import { ILogger } from '../../../src/types'
+import { ILogger } from '../../src/types'
 
 export default function createLogger (options?: { enabled: boolean }): ILogger {
   const logger = Bunyan.createLogger({ name: 'pewpew-tests' })
