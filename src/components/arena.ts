@@ -43,12 +43,14 @@ type ArenaShot = Shot & { position: Position }
 export enum ComponentType {
   Player = 'player',
   Shot = 'shot',
-  Wall = 'wall'
+  Wall = 'wall',
+  Radar = 'Radar'
 }
 
 export enum UpdateType {
   Movement = 'movement',
-  Hit = 'hit'
+  Hit = 'hit',
+  Scan = 'scan'
 }
 
 function isPlayerHit(hit: WallHitDescriptor | PlayerHitDescriptor): hit is PlayerHitDescriptor {
@@ -120,7 +122,7 @@ export class Arena {
   // TODO wondering if I could remove the `players` and `shots` methods
   // and instead rely on having a `snapshot` method which returned a representation
   // of the current arena state
-  players (): Player[] {
+  players (): ArenaPlayer[] {
     // TODO remove this mapping
     return this.arenaPlayers.map((arenaPlayer) => arenaPlayer)
   }

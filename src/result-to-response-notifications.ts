@@ -42,7 +42,6 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       }]
     }
     if (result.success === true && result.command === CommandType.StartGame) {
-      console.dir(playerSessions, { colors: true })
       return [
         {
           session: controlSession,
