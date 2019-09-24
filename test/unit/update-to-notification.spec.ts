@@ -3,7 +3,8 @@ import {
   createControlSession,
   createSession
 } from '../../src/session'
-import { UpdateType, ComponentType } from '../../src/components/arena'
+import { UpdateType, ComponentType, ArenaRadarScanResult } from '../../src/components/arena'
+import { ScanResult } from '../../src/components/radar'
 import updateToNotifications, { ComponentUpdate } from '../../src/update-to-notifications'
 
 describe('Update to notification', () => {
@@ -133,6 +134,49 @@ describe('Update to notification', () => {
         }
       })
     })
+  })
+
+  describe('UpdateType.Scan', () => {
+    it('generates a scan notification', () => {
+      // TODO add another player
+      const scannedPlayerPosition = { position: { x: 1, y: 2 } }
+      const scannedUnknownPosition = { position: { x: 2, y: 3 } }
+      const scannedShotPosition = { position: { x: 3, y: 4 } }
+      const update: ArenaRadarScanResult = {
+        type: UpdateType.Scan,
+        component: {
+          type: ComponentType.Radar,
+          data: {
+            playerId: 'player-1',
+            players: [scannedPlayerPosition],
+            unknown: [scannedUnknownPosition],
+            shots: [scannedShotPosition]
+          }
+        }
+      }
+
+      const playerSession = createSession()
+      playerSession.playerId = 'player-1'
+      const controlSession = createControlSession()
+      const sessions = [playerSession, controlSession]
+
+      const result = updateToNotifications(update, sessions)
+
+      expect(result).to.have.lengthOf(1)
+      expect(result[0]).to.eql({
+        session: playerSession,
+        notification: {
+          type: 'Notification',
+          id: 'RadarScan',
+          data: {
+            players: [scannedPlayerPosition],
+            unknown: [scannedUnknownPosition],
+            shots: [scannedShotPosition]
+          }
+        }
+      })
+    })
+
   })
 })
 

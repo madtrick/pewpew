@@ -5,10 +5,11 @@ import { createPlayer } from '../../../../src/player'
 import { createSession } from '../../../../src/session'
 import { Arena } from '../../../../src/components/arena'
 import { RequestType } from '../../../../src/message-handlers'
+import { scan } from '../../../../src/components/radar'
 import handler, { RegisterPlayerResultDetails } from '../../../../src/message-handlers/requests/register-player'
 
 describe('Requests - Register player', () => {
-  const arena = new Arena({ width: 100, height: 100 })
+  const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
   const gameStateOptions = { arena }
 
   // TODO throw if the game has already started

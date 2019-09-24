@@ -5,6 +5,7 @@ import { GameState } from '../../../../src/game-state'
 import { createPlayer } from '../../../../src/player'
 import { createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
+import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/shoot'
 
@@ -14,7 +15,7 @@ describe('Requests - Shoot', () => {
   let sandbox: sinon.SinonSandbox
 
   beforeEach(() => {
-    arena = new Arena({ width: 100, height: 100 })
+    arena = new Arena({ width: 100, height: 100 }, { radar: scan })
 
     sandbox = sinon.createSandbox()
     sandbox.stub(arena, 'registerShot')

@@ -3,17 +3,23 @@ import { createSession, createControlSession } from '../../src/session'
 import engine, { createEngineState } from '../../src/engine'
 import { GameState } from '../../src/game-state'
 import { Arena } from '../../src/components/arena'
+import { scan } from '../../src/components/radar'
 import { handlers } from '../../src/message-handlers'
 import createGameLoop from '../../src/game-loop'
 import createLogger from '../utils/create-logger'
 
 describe('Engine - Integration', () => {
+  let arena: Arena
+  let gameState: GameState
   const logger = createLogger()
+
+  beforeEach(() => {
+    arena = new Arena({ width: 500, height: 500 }, { radar: scan })
+    gameState = new GameState({ arena })
+  })
 
   describe('RegisterPlayer request', () => {
     it('responds as expected', async () => {
-      const arena = new Arena ({ width: 500, height: 500 })
-      const gameState = new GameState({ arena })
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const playerMessages = [
@@ -46,8 +52,6 @@ describe('Engine - Integration', () => {
 
   describe('StartGame command', () => {
     it('responds as expected', async () => {
-      const arena = new Arena ({ width: 500, height: 500 })
-      const gameState = new GameState({ arena })
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const controlMessages = [
@@ -79,8 +83,6 @@ describe('Engine - Integration', () => {
     })
 
     it('notifies players', async () => {
-      const arena = new Arena ({ width: 500, height: 500 })
-      const gameState = new GameState({ arena })
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const playerMessages = [
