@@ -37,6 +37,17 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
   return function gameLoop (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[]): Promise<GameLoopResult> {
     let loopCycleRunResult: GameLoopResult = { state: state, results: [], updates: [] }
 
+    const updates = state.update()
+    // TODO the updates should be returned without being transformed
+    // const transformedUpdates = updates.map((update: any) => {
+    //   if (update.player) {
+    //     return { player: update.player, payload: { data: update.data, sys: 'GameUpdate' } }
+    //   }
+
+    //   return undefined
+    // }).filter(Boolean)
+
+
     // TODO instead of creating a promise here, make the wrapping function async
     return new Promise((resolve) => {
       inputs.forEach(({ session, message }) => {
@@ -67,16 +78,6 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
           }
         }
       })
-
-      const updates = state.update()
-      // TODO the updates should be returned without being transformed
-      // const transformedUpdates = updates.map((update: any) => {
-      //   if (update.player) {
-      //     return { player: update.player, payload: { data: update.data, sys: 'GameUpdate' } }
-      //   }
-
-      //   return undefined
-      // }).filter(Boolean)
 
       loopCycleRunResult.updates = updates
 

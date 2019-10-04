@@ -1,6 +1,7 @@
 import { Player, PLAYER_RADIUS } from '../player'
 import { Shot, SHOT_RADIUS } from '../shot'
 import { Movement } from '../messages'
+import { RadarScan, ScanResult } from './radar'
 
 export type Success<T> = { status: 'ok' } & T
 export type Failure<T> = { status: 'ko' } & T
@@ -100,10 +101,19 @@ interface PlayerHitDescriptor {
   }
 }
 
+type ArenaRadarScanResult = ScanResult & {
+  component: {
+    data: {
+      playerId: string
+    }
+  }
+}
+
 export type Foo = (
   { type: ComponentType.Player, data: { shotId: string, id: string, damage: number, life: number } } |
   { type: ComponentType.Wall, data: { shotId: string, position: Position } } |
-  { type: ComponentType.Shot, data: { id: string, position: Position } }
+  { type: ComponentType.Shot, data: { id: string, position: Position } } |
+  { type: ComponentType.Radar, data: { playerId: string, players: { position: Position }[], unknown: { position: Position }[] } }
 )
 
 export class Arena {
@@ -111,12 +121,14 @@ export class Arena {
   readonly height: number
   private readonly arenaPlayers: ArenaPlayer[]
   private arenaShots: ArenaShot[]
+  private radar: RadarScan
 
-  constructor (options: { width: number, height: number }) {
+  constructor (options: { width: number, height: number }, modules: { radar: RadarScan }) {
     this.width = options.width
     this.height = options.height
     this.arenaPlayers = []
     this.arenaShots = []
+    this.radar = modules.radar
   }
 
   // TODO wondering if I could remove the `players` and `shots` methods
@@ -223,7 +235,7 @@ export class Arena {
     type: UpdateType,
     component: Foo
   }[] {
-    return this.arenaShots.map((shot) => {
+    const shotsUpdates: { type: UpdateType, component: Foo }[] = this.arenaShots.map((shot) => {
       const result = this.moveShot(shot)
 
       // TODO move these transformation to Notifications to another module
@@ -266,6 +278,23 @@ export class Arena {
       // TODO: use assertNever https://www.typescriptlang.org/docs/handbook/advanced-types.html
       throw new Error('This is not possible')
     })
+
+    const radarUpdates: ArenaRadarScanResult[] = this.arenaPlayers.map((player) => {
+      const scanResult = this.radar(player.position, this.arenaPlayers)
+      return {
+        type: scanResult.type,
+        component: {
+          type: scanResult.component.type,
+          data: {
+            playerId: player.id,
+            players: scanResult.component.data.players,
+            unknown: scanResult.component.data.unknown
+          }
+        }
+      }
+    })
+
+    return [...shotsUpdates, ...radarUpdates]
   }
 
   moveShot (arenaShot: ArenaShot):

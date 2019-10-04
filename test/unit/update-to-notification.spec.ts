@@ -3,7 +3,8 @@ import {
   createControlSession,
   createSession
 } from '../../src/session'
-import { UpdateType, ComponentType } from '../../src/components/arena'
+import { UpdateType, ComponentType, ArenaRadarScanResult } from '../../src/components/arena'
+import { ScanResult } from '../../src/components/radar'
 import updateToNotifications, { ComponentUpdate } from '../../src/update-to-notifications'
 
 describe('Update to notification', () => {
@@ -133,6 +134,44 @@ describe('Update to notification', () => {
         }
       })
     })
+  })
+
+  describe('UpdateType.Scan', () => {
+    it('generates a scan notification', () => {
+      // TODO add another player
+      const update: ArenaRadarScanResult = {
+        type: UpdateType.Scan,
+        component: {
+          type: ComponentType.Radar,
+          data: {
+            playerId: 'player-1',
+            players: [],
+            unknown: []
+          }
+        }
+      }
+
+      const playerSession = createSession()
+      playerSession.playerId = 'player-1'
+      const controlSession = createControlSession()
+      const sessions = [playerSession, controlSession]
+
+      const result = updateToNotifications(update, sessions)
+
+      expect(result).to.have.lengthOf(1)
+      expect(result[0]).to.eql({
+        session: playerSession,
+        notification: {
+          type: 'Notification',
+          id: 'RadarScan',
+          data: {
+            players: [],
+            unknown: []
+          }
+        }
+      })
+    })
+
   })
 })
 

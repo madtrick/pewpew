@@ -3,6 +3,7 @@ import * as sinon from 'sinon'
 import { Arena, Success, Result, asSuccess, ComponentType, UpdateType } from '../../../src/components/arena'
 import { Player, createPlayer } from '../../../src/player'
 import { createShot } from '../../../src/shot'
+import { scan, ScanResult as RadarScanResult } from '../../../src/components/radar'
 
 function makeSuccess<T>(data: T): Success<T> {
   return { ...data, status: 'ok' }
@@ -43,9 +44,11 @@ function movementTest<T, F>(options: MovementTestOptions<T, F>): () => Promise<v
 
 describe('Arena', () => {
   let sandbox: sinon.SinonSandbox
+  let arena: Arena
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
+    arena = new Arena({ width: 100, height: 100 }, { radar: scan })
   })
 
   afterEach(() => {
@@ -54,11 +57,9 @@ describe('Arena', () => {
 
   describe('registerPlayer', () => {
     let player: Player
-    let arena: Arena
 
     beforeEach(() => {
       player = createPlayer({ id: 'player-1' })
-      arena = new Arena({ width: 100, height: 100 })
     })
 
     describe('avoids positions on the arena edges', () => {
@@ -167,12 +168,6 @@ describe('Arena', () => {
   })
 
   describe('movePlayer', () => {
-    let arena: Arena
-
-    beforeEach(() => {
-      arena = new Arena({ width: 100, height: 100 })
-    })
-
     it('moves the player - horizontally', movementTest({
       movements: [
         { type: 'displacement', direction: DisplacementDirection.FORWARD },
@@ -261,7 +256,6 @@ describe('Arena', () => {
 
   describe('registerShot', () => {
     it('creates the shot relative to the player position', () => {
-      const arena = new Arena({ width: 100, height: 100 })
       const player = createPlayer({ id: 'player-1' })
       const result = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
       const shot = createShot({ player: result.player })
@@ -276,13 +270,103 @@ describe('Arena', () => {
   })
 
   describe('update', () => {
-    describe('shots', () => {
+    // TODO missing test which tests that update result includes scan and shot movement
+    describe('radar', () => {
       let arena: Arena
+      let scanStub: sinon.SinonStub
 
       beforeEach(() => {
-        arena = new Arena({ width: 100, height: 100 })
+        scanStub = sandbox.stub()
+        arena = new Arena({ width: 500, height: 500 }, { radar: scanStub })
       })
 
+
+      it('calls the radar for each player', () => {
+        const player1 = createPlayer({ id: 'player-1' })
+        const player2 = createPlayer({ id: 'player-2' })
+        const registeredPlayer1 = asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
+        const registeredPlayer2 = asSuccess(arena.registerPlayer(player2, { position: { x: 83, y: 20 } })).player
+        scanStub.returns({
+          type: UpdateType.Scan,
+          component: {
+            type: ComponentType.Radar,
+            data: {
+              players: [],
+              unknown: []
+            }
+          }
+        })
+
+        arena.update()
+
+        expect(scanStub).to.have.been.calledTwice
+        expect(scanStub).to.have.been.calledWith(registeredPlayer1.position, arena.players())
+        expect(scanStub).to.have.been.calledWith(registeredPlayer2.position, arena.players())
+      })
+
+      it('includes the results from the radar scan in the update result', () => {
+        const player1 = createPlayer({ id: 'player-1' })
+        asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
+        const scanResult = {
+          type: UpdateType.Scan,
+          component: {
+            type: ComponentType.Radar,
+            data: {
+              playerId: 'player-1',
+              players: [{
+                position: {
+                  x: 100,
+                  y: 200
+                }
+              }],
+              unknown: []
+            }
+          }
+        }
+        scanStub.returns(scanResult)
+
+        const result = arena.update()
+
+        console.dir(result, { colors: true, depth: null })
+        console.dir(scanResult, { colors: true, depth: null })
+        expect(result).to.deep.include(scanResult)
+      })
+    })
+
+    describe('shots', () => {
+      let arena: Arena
+      let scanStub: sinon.SinonStub
+      let fakeScanResult: RadarScanResult = {
+        type: UpdateType.Scan,
+        component: {
+          type: ComponentType.Radar,
+          data: {
+            players: [],
+            unknown: []
+          }
+        }
+      }
+      const fakeArenaRadarScanResult = (playerId: string) => {
+        return {
+          type: fakeScanResult.type,
+          component: {
+            type: fakeScanResult.component.type,
+            data: {
+              playerId,
+              players: fakeScanResult.component.data.players,
+              unknown: fakeScanResult.component.data.unknown
+            }
+          }
+        }
+      }
+
+      beforeEach(() => {
+        scanStub = sandbox.stub().returns(fakeScanResult)
+        arena = new Arena({ width: 100, height: 100 }, { radar: scanStub })
+      })
+
+      // TODO the shot logic should be moved to a separate module so we can test separately
+      // and also stub that module for easier tests
       it('moves the shots', () => {
         const player = createPlayer({ id: 'player-1' })
         const result = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
@@ -309,7 +393,6 @@ describe('Arena', () => {
 
       describe('when the shot hits a wall', () => {
         it('destroys the shot', () => {
-          // const arena = new Arena({ width: 100, height: 100 })
           const player = createPlayer({ id: 'player-1' })
           const result = asSuccess(arena.registerPlayer(player, { position: { x: 79, y: 50 } }))
           const shot = createShot({ player: result.player })
@@ -365,7 +448,101 @@ describe('Arena', () => {
         })
       })
 
-      it('reflects the updates in the update results', () => {
+      describe('update results', () => {
+        it('reflects the hit on a player', () => {
+          const player1 = createPlayer({ id: 'player-1' })
+          const player2 = createPlayer({ id: 'player-2' })
+          // A shot from this shooter will hit otherPlayer
+          const shooter = asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
+          const otherPlayer = asSuccess(arena.registerPlayer(player2, { position: { x: 59, y: 50 } })).player
+          const initialLifeOtherPlayer = otherPlayer.life
+          shooter.rotation = 0
+          otherPlayer.rotation = 0
+          const shot1 = createShot({ player: shooter })
+          arena.registerShot(shot1)
+
+          const updates = arena.update()
+
+          expect(updates).to.have.lengthOf(3)
+          expect(updates).to.have.deep.members([
+            {
+              type: UpdateType.Hit,
+              component: {
+                type: ComponentType.Player,
+                data: {
+                  id: otherPlayer.id,
+                  damage: shot1.damage,
+                  life: initialLifeOtherPlayer - shot1.damage,
+                  shotId: shot1.id
+                }
+              }
+            },
+            fakeArenaRadarScanResult('player-1'),
+            fakeArenaRadarScanResult('player-2')
+          ])
+        })
+
+        it('reflects the hit on a wall', () => {
+          const player = createPlayer({ id: 'player-1' })
+          // A shot from this shooter will hit the wall
+          const shooter = asSuccess(arena.registerPlayer(player, { position: { x: 83, y: 20 } })).player
+          shooter.rotation = 0
+          const shot = createShot({ player: shooter })
+          arena.registerShot(shot)
+
+          const updates = arena.update()
+
+          expect(updates).to.have.lengthOf(2)
+          expect(updates).to.have.deep.members([
+            {
+              type: UpdateType.Hit,
+              component: {
+                type: ComponentType.Wall,
+                data: {
+                  position: {
+                    x: 101,
+                    y: 20
+                  },
+                  shotId: shot.id
+                }
+              }
+            },
+            fakeArenaRadarScanResult('player-1')
+          ])
+        })
+
+        it('reflects a shot movement', () => {
+          const player1 = createPlayer({ id: 'player-1' })
+          // A shot from this shooter will not hit anything
+          const shooter1 = asSuccess(arena.registerPlayer(player1, { position: { x: 40, y: 80 } })).player
+          shooter1.rotation = 0
+          const shot = createShot({ player: shooter1 })
+          arena.registerShot(shot)
+
+          const updates = arena.update()
+
+
+          expect(updates).to.have.lengthOf(2)
+          expect(updates).to.have.deep.members([
+            {
+              type: UpdateType.Movement,
+              component: {
+                type: ComponentType.Shot,
+                data: {
+                  position: {
+                    x: 58,
+                    y: 80
+                  },
+                  id: shot.id
+                }
+              }
+            },
+            fakeArenaRadarScanResult('player-1')
+          ])
+        })
+      })
+
+      it.skip('reflects the updates in the update results', () => {
         const player1 = createPlayer({ id: 'player-1' })
         const player2 = createPlayer({ id: 'player-2' })
         const player3 = createPlayer({ id: 'player-3' })
@@ -390,6 +567,8 @@ describe('Arena', () => {
         arena.registerShot(shot3)
 
         const updates = arena.update()
+
+        console.dir(updates, { depth: null, colors: true })
 
         expect(updates).to.have.lengthOf(3)
         expect(updates).to.have.deep.members([

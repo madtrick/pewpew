@@ -5,6 +5,7 @@ import { GameState } from '../../../../src/game-state'
 import { createSession } from '../../../../src/session'
 import { createPlayer } from '../../../../src/player'
 import { Arena } from '../../../../src/components/arena'
+import { scan } from '../../../../src/components/radar'
 import { RequestType, SuccessfulMovePlayerRequest, FailureRequestResult } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/move-player'
 
@@ -53,7 +54,7 @@ describe('Requests - Move player', () => {
   let arena: Arena
 
   beforeEach(() => {
-    arena = new Arena({ width: 100, height: 100 })
+    arena = new Arena({ width: 100, height: 100 }, { radar: scan })
   })
   describe('when the game is started', () => {
     describe('when the player is not rotated', () => {
@@ -113,7 +114,6 @@ describe('Requests - Move player', () => {
 
   describe('when the game has not started', () => {
     it('rejects the request', () => {
-      const arena = new Arena({ width: 100, height: 100 })
       const state: GameState = new GameState({ arena })
       const session = createSession()
       const message: MovePlayerMessage = {

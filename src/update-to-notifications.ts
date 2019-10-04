@@ -79,5 +79,26 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
       ]
     }
   }
+
+  if (update.type === UpdateType.Scan) {
+    // This double is required because the type of component is not related to the value
+    // of the update.type (this is :poop:)
+    if (update.component.type === ComponentType.Radar) {
+      const { component: { data: { playerId, players, unknown } } } = update
+      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+
+      return [{
+        session: playerSession,
+        notification: {
+          type: 'Notification',
+          id: 'RadarScan',
+          data: {
+            players,
+            unknown
+          }
+        }
+      }]
+    }
+  }
 }
 
