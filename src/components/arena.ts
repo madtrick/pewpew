@@ -113,7 +113,15 @@ export type Foo = (
   { type: ComponentType.Player, data: { shotId: string, id: string, damage: number, life: number } } |
   { type: ComponentType.Wall, data: { shotId: string, position: Position } } |
   { type: ComponentType.Shot, data: { id: string, position: Position } } |
-  { type: ComponentType.Radar, data: { playerId: string, players: { position: Position }[], unknown: { position: Position }[] } }
+  {
+    type: ComponentType.Radar,
+    data: {
+      playerId: string,
+      players: { position: Position }[],
+      unknown: { position: Position }[],
+      shots: { position: Position }[]
+    }
+  }
 )
 
 export class Arena {
@@ -280,7 +288,7 @@ export class Arena {
     })
 
     const radarUpdates: ArenaRadarScanResult[] = this.arenaPlayers.map((player) => {
-      const scanResult = this.radar(player.position, this.arenaPlayers)
+      const scanResult = this.radar(player.position, [...this.arenaPlayers, ...this.arenaShots])
       return {
         type: scanResult.type,
         component: {
@@ -288,7 +296,8 @@ export class Arena {
           data: {
             playerId: player.id,
             players: scanResult.component.data.players,
-            unknown: scanResult.component.data.unknown
+            unknown: scanResult.component.data.unknown,
+            shots: scanResult.component.data.shots
           }
         }
       }

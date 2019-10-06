@@ -300,8 +300,8 @@ describe('Arena', () => {
         arena.update()
 
         expect(scanStub).to.have.been.calledTwice
-        expect(scanStub).to.have.been.calledWith(registeredPlayer1.position, arena.players())
-        expect(scanStub).to.have.been.calledWith(registeredPlayer2.position, arena.players())
+        expect(scanStub).to.have.been.calledWith(registeredPlayer1.position, [...arena.players(), ...arena.shots()])
+        expect(scanStub).to.have.been.calledWith(registeredPlayer2.position, [...arena.players(), ...arena.shots()])
       })
 
       it('includes the results from the radar scan in the update result', () => {
@@ -319,7 +319,8 @@ describe('Arena', () => {
                   y: 200
                 }
               }],
-              unknown: []
+              unknown: [],
+              shots: []
             }
           }
         }
@@ -342,7 +343,8 @@ describe('Arena', () => {
           type: ComponentType.Radar,
           data: {
             players: [],
-            unknown: []
+            unknown: [],
+            shots: []
           }
         }
       }
@@ -354,7 +356,8 @@ describe('Arena', () => {
             data: {
               playerId,
               players: fakeScanResult.component.data.players,
-              unknown: fakeScanResult.component.data.unknown
+              unknown: fakeScanResult.component.data.unknown,
+              shots: fakeScanResult.component.data.shots
             }
           }
         }
@@ -540,77 +543,6 @@ describe('Arena', () => {
             fakeArenaRadarScanResult('player-1')
           ])
         })
-      })
-
-      it.skip('reflects the updates in the update results', () => {
-        const player1 = createPlayer({ id: 'player-1' })
-        const player2 = createPlayer({ id: 'player-2' })
-        const player3 = createPlayer({ id: 'player-3' })
-        const player4 = createPlayer({ id: 'player-4' })
-        // A shot from this shooter will to initialOtherPlayer
-        const shooter1 = asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
-        // A shot from this shooter will hit the wall
-        const shooter2 = asSuccess(arena.registerPlayer(player2, { position: { x: 83, y: 20 } })).player
-        // A shot from this shooter will not hit anything
-        const shooter3 = asSuccess(arena.registerPlayer(player3, { position: { x: 40, y: 80 } })).player
-        const otherPlayer = asSuccess(arena.registerPlayer(player4, { position: { x: 59, y: 50 } })).player
-        const initialOtherPlayerLife = otherPlayer.life
-        shooter1.rotation = 0
-        shooter2.rotation = 0
-        shooter3.rotation = 0
-        otherPlayer.rotation = 0
-        const shot1 = createShot({ player: shooter1 })
-        const shot2 = createShot({ player: shooter2 })
-        const shot3 = createShot({ player: shooter3 })
-        arena.registerShot(shot1)
-        arena.registerShot(shot2)
-        arena.registerShot(shot3)
-
-        const updates = arena.update()
-
-        console.dir(updates, { depth: null, colors: true })
-
-        expect(updates).to.have.lengthOf(3)
-        expect(updates).to.have.deep.members([
-          {
-            type: UpdateType.Hit,
-            component: {
-              type: ComponentType.Player,
-              data: {
-                id: otherPlayer.id,
-                damage: shot1.damage,
-                life: initialOtherPlayerLife - shot1.damage,
-                shotId: shot1.id
-              }
-            }
-          },
-          {
-            type: UpdateType.Hit,
-            component: {
-              type: ComponentType.Wall,
-              data: {
-                position: {
-                  x: 101,
-                  y: 20
-                },
-                shotId: shot2.id
-              }
-            }
-          },
-          {
-            type: UpdateType.Movement,
-            component: {
-              type: ComponentType.Shot,
-              data: {
-                position: {
-                  x: 58,
-                  y: 80
-                },
-                id: shot3.id
-              }
-            }
-          }
-        ])
       })
     })
   })

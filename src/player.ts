@@ -1,9 +1,13 @@
+import { ComponentType } from './components/arena'
+
 export interface Player {
+  // TODO make some of these properties readonly
   id: string
   rotation: number
   life: number
   // TODO rename this to shot tokens
-  shots: number
+  shots: number,
+  type: ComponentType.Player
 }
 
 export const PLAYER_RADIUS = 16 //px
@@ -22,6 +26,7 @@ export function createPlayer (options: { id: string }): Player {
     id: options.id,
     rotation: 0,
     life: 100,
-    shots: 50
+    shots: 50,
+    type: ComponentType.Player
   }
 }
