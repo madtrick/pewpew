@@ -93,6 +93,8 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
             type: 'Player',
             data: {
               id: 'player-1',
+              // TODO remove this hardcoded value
+              // TODO missing rotation
               position: {
                 x: 100,
                 y: 100
