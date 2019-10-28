@@ -7,10 +7,11 @@ import { Arena } from '../../src/components/arena'
 import { createPlayer } from '../../src/player'
 import { Session, createSession } from '../../src/session'
 import createGameLopp from '../../src/game-loop'
+import { scan } from '../../src/components/radar'
 
 describe('Game loop', () => {
   const loop = createGameLopp(handlers)
-  const arena = new Arena({ width: 100, height: 100 })
+  const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
 
   let sandbox: sinon.SinonSandbox
 

@@ -5,6 +5,7 @@ import { createSession, createControlSession } from '../../src/session'
 import { CommandType } from '../../src/message-handlers'
 import engine, { EngineState } from '../../src/engine'
 import { UpdateType, ComponentType, Arena } from '../../src/components/arena'
+import { scan } from '../../src/components/radar'
 import createLogger from '../utils/create-logger'
 
 describe('Engine', () => {
@@ -17,7 +18,7 @@ describe('Engine', () => {
     let logger: ILogger
 
     beforeEach(() => {
-      const arena = new Arena({ width: 100, height: 100 })
+      const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
       const gameState = gameStateFactory(arena)
       engineState = { arena, gameState, channelSession: new Map(), sessionChannel: new Map() }
       sandbox = sinon.createSandbox()

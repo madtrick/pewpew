@@ -1,6 +1,7 @@
 // TODO make MessagingHub, Arena and GameState default exports
 import { IMessagingHub, MessagingHub, Message, ChannelRef, WebSocketServer } from './messaging-hub'
 import { Arena } from './components/arena'
+import { scan } from './components/radar'
 import { GameState } from './game-state'
 import { handlers } from './message-handlers'
 import createGameLopp, { GameLoop }  from './game-loop'
@@ -42,7 +43,7 @@ function parse (message: Message): { channel: ChannelRef, data: object } | undef
 }
 
 export function init ({ WS }: { WS: WebSocketServer }): ServerContext {
-  const arena = new Arena({ width: 500, height: 500 })
+  const arena = new Arena({ width: 500, height: 500 }, { radar: scan })
   const gameState = new GameState({ arena })
   const engineState = createEngineState(arena, gameState)
   const ticker = createTicker()

@@ -1,3 +1,4 @@
 --require test/setup
 --watch-extensions ts
 --colors
+--inline-diffs
