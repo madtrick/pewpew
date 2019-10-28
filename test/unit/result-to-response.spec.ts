@@ -8,9 +8,11 @@ import {
   RequestType,
   CommandType,
   SuccessRequestResult,
+  SuccessfulRotateRequest,
   FailureRegisterPlayerRequest,
   FailureShootRequest,
   FailureMoveRequest,
+  FailureRotatePlayerRequest,
   SuccessCommandResult,
   FailureCommandResult
 } from '../../src/message-handlers'
@@ -130,6 +132,7 @@ describe('Result to response', () => {
         }])
       })
     })
+
     describe('when the player was successfully moved', () => {
       it('generates a MovePlayer response', () => {
         const result: SuccessRequestResult = {
@@ -198,6 +201,7 @@ describe('Result to response', () => {
         })
       })
     })
+
     describe('when the request was successful', () => {
       it('generates a Shoot response', () => {
         const result: SuccessRequestResult = {
@@ -220,6 +224,66 @@ describe('Result to response', () => {
           response: {
             type: 'Response',
             id: 'Shoot',
+            success: true
+          }
+        })
+      })
+    })
+  })
+
+  describe('RequesType.RotatePlayer', () => {
+    describe('when the request was a failure', () => {
+      it('generates a failure response', () => {
+        const playerSession = createSession()
+        const sessions = [playerSession]
+        const result: FailureRotatePlayerRequest = {
+          session: playerSession,
+          success: false,
+          request: RequestType.RotatePlayer,
+          reason: 'Some reason'
+        }
+
+
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+
+        expect(responsesAndNotifications).to.have.lengthOf(1)
+        expect(responsesAndNotifications[0]).to.eql({
+          session: playerSession,
+          response: {
+            type: 'Response',
+            id: RequestType.RotatePlayer,
+            success: false,
+            details: {
+              msg: 'Some reason'
+            }
+          }
+        })
+      })
+    })
+
+    describe('when the request was successful', () => {
+      it('generates a Rotate response', () => {
+        const result: SuccessfulRotateRequest = {
+          success: true,
+          request: RequestType.RotatePlayer,
+          details: {
+            id: 'player-1',
+            rotation: 300
+          }
+        }
+
+        const playerSession = createSession()
+        playerSession.playerId = 'player-1'
+        const sessions = [playerSession]
+
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+
+        expect(responsesAndNotifications).to.have.lengthOf(1)
+        expect(responsesAndNotifications[0]).to.eql({
+          session: playerSession,
+          response: {
+            type: 'Response',
+            id: RequestType.RotatePlayer,
             success: true
           }
         })

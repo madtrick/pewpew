@@ -3,6 +3,7 @@ import { GameState } from '../game-state'
 import {
   RegisterPlayerMessage,
   MovePlayerMessage,
+  RotatePlayerMessage,
   ShootMessage,
   StartGameMessage
 } from '../messages'
@@ -10,12 +11,14 @@ import StartGameHandler from './commands/start-game'
 import RegisterPlayerHandler, { RegisterPlayerResultDetails } from './requests/register-player'
 import MovePlayerHandler, { MovePlayerResultDetails } from './requests/move-player'
 import ShootHandler, { ShootPlayerResultDetails } from './requests/shoot'
+import RotatePlayerHandler, { RotatePlayerResultDetails } from './requests/rotate-player'
 
 
 export enum RequestType {
   RegisterPlayer = 'RegisterPlayer',
   MovePlayer = 'MovePlayer',
-  Shoot = 'Shoot'
+  Shoot = 'Shoot',
+  RotatePlayer = 'RotatePlayer'
 }
 
 export enum CommandType {
@@ -58,7 +61,12 @@ export type SuccessfulShootRequest = RequestResult & SuccessfulRequest & {
   details: ShootPlayerResultDetails
 }
 
-export type SuccessRequestResult = SuccessfulRegiserPlayerRequest | SuccessfulMovePlayerRequest | SuccessfulShootRequest
+export type SuccessfulRotateRequest = RequestResult & SuccessfulRequest & {
+  request: RequestType.RotatePlayer
+  details: RotatePlayerResultDetails
+}
+
+export type SuccessRequestResult = SuccessfulRegiserPlayerRequest | SuccessfulMovePlayerRequest | SuccessfulShootRequest | SuccessfulRotateRequest
 export type FailureRequestResult = RequestResult & {
   success: false,
   reason: string
@@ -77,6 +85,10 @@ export type FailureMoveRequest = FailureRequestResult & {
   session: Session // we need the session to be able to respond to the request
 }
 
+export type FailureRotatePlayerRequest = FailureRequestResult & {
+  session: Session // we need the session to be able to respond to the request
+}
+
 export interface CommandHandlerResult {
   result: SuccessCommandResult | FailureCommandResult
   state: GameState
@@ -91,6 +103,7 @@ export interface IncommingMessageHandlers {
   Request: {
     RegisterPlayer: (session: Session, message: RegisterPlayerMessage, state: GameState) => HandlerResult
     MovePlayer: (session: Session, message: MovePlayerMessage, state: GameState) => HandlerResult
+    RotatePlayer: (session: Session, message: RotatePlayerMessage, state: GameState) => HandlerResult
     Shoot: (session: Session, message: ShootMessage, state: GameState) => HandlerResult
   },
   Command: {
@@ -106,6 +119,7 @@ export const handlers: IncommingMessageHandlers = {
   Request: {
     RegisterPlayer: RegisterPlayerHandler,
     MovePlayer: MovePlayerHandler,
+    RotatePlayer: RotatePlayerHandler,
     Shoot: ShootHandler
   }
 }

@@ -401,6 +401,12 @@ export class Arena {
     }
   }
 
+  rotatePlayer (rotation: number, player: Player): void {
+    const arenaPlayer = this.arenaPlayers.find((arenaPlayer) => arenaPlayer.id === player.id)
+    // TODO throw if the player is not found
+    arenaPlayer!.rotation = rotation
+  }
+
   private calculateNewPlayerPosition (movement: Movement, player: Player, currentPosition: Position): Position {
     const direction = movement.direction === 'forward' ? 1 : -1
     const speed = 1

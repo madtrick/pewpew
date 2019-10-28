@@ -1,6 +1,12 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { RegisterPlayerMessage, MovePlayerMessage, ShootMessage, StartGameMessage } from '../../src/messages'
+import {
+  RegisterPlayerMessage,
+  MovePlayerMessage,
+  ShootMessage,
+  StartGameMessage,
+  RotatePlayerMessage
+} from '../../src/messages'
 import { GameState } from '../../src/game-state'
 import { handlers, RequestType, CommandType } from '../../src/message-handlers'
 import { Arena } from '../../src/components/arena'
@@ -147,6 +153,38 @@ describe('Game loop', () => {
       const { results } = await loop(state, [{ session, message }])
 
       expect(handlers.Request.Shoot).to.have.been.calledOnceWith(session, message, state)
+      expect(results).to.eql([result.result])
+    })
+  })
+
+  describe('RotatePlayerMessage', () => {
+    it('rotates the player', async () => {
+      const state: GameState = new GameState({ arena })
+      const session: Session = createSession()
+      const message: RotatePlayerMessage = {
+        data: {
+          rotation: 300
+        },
+        sys: {
+          type: 'Request',
+          id: 'RotatePlayer'
+        }
+      }
+      const result = {
+        result: {
+          success: true,
+          request: RequestType.RotatePlayer,
+          details: {
+            id: 'player-1',
+            rotation: 300
+          }
+        }, state
+      } as const
+      sandbox.stub(handlers.Request, 'RotatePlayer').returns(result)
+
+      const { results } = await loop(state, [{ session, message }])
+
+      expect(handlers.Request.RotatePlayer).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
     })
   })
