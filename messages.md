@@ -2,6 +2,10 @@ Messages
 
 ### Notifications
 
+Missing
+
+- Notification for a player movement
+
 ```json
 {
   type: 'Notification',
@@ -66,6 +70,27 @@ Messages
   }
 }
 ```
+
+```json
+{
+	type: 'Notification',
+	id: 'RegisterPlayer',
+  success: true,
+  component: {
+  	type: 'Player',
+    data: {
+      id: <string>,
+      // TODO remove this hardcoded value
+      position: {
+        x: <number>,
+        y: <number>
+      }
+    }
+  }
+}
+```
+
+
 
 ### Commands
 
@@ -184,6 +209,41 @@ Request
 }
 ```
 
+#### RotatePlayerRequest
+
+```json
+{
+  sys: {
+    type: 'Request',
+    id: 'RotatePlayer'
+  },
+  data: {
+    rotation: <number>
+  }
+}
+```
+
+```json
+{
+  type: 'Response',
+  id: 'RotatePlayer',
+  success: false,
+  details: {
+    msg: <tring>
+  }
+}
+```
+
+```json
+{
+  type: 'Response',
+  id: 'RotatePlayer',
+  success: true
+}
+```
+
+
+
 #### RegisterPlayerRequest
 
 ```json
@@ -224,21 +284,6 @@ Request
 ```
 
 ```json
-{
-	type: 'Notification',
-	id: 'RegisterPlayer',
-  success: true,
-  component: {
-  	type: 'Player',
-    data: {
-      id: <string>,
-      // TODO remove this hardcoded value
-      position: {
-        x: <number>,
-        y: <number>
-      }
-    }
-  }
-}
+
 ```
 
