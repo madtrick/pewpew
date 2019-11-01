@@ -180,6 +180,36 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
         }
       }]
     }
+
+    if (result.success === true && result.request === RequestType.RotatePlayer) {
+      const { details: { id: playerId } } = result
+      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+
+      return [{
+        session: playerSession,
+        response: {
+          type: 'Response',
+          id: RequestType.RotatePlayer,
+          success: true
+        }
+      }]
+    }
+
+    if (result.success === false && result.request === RequestType.RotatePlayer) {
+      const { session, reason } = result as FailureShootRequest
+
+      return [{
+        session: session,
+        response: {
+          type: 'Response',
+          id: RequestType.RotatePlayer,
+          success: false,
+          details: {
+            msg: reason
+          }
+        }
+      }]
+    }
   }
 
 }

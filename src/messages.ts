@@ -12,10 +12,16 @@ export type MovePlayerMessage = IncommingMessage<'Request'> & {
     movement: Movement
   }
 }
+export type RotatePlayerMessage = IncommingMessage<'Request'> & {
+  data: {
+    rotation: number
+  }
+}
 
 export interface ShootMessage extends IncommingMessage<'Request'> {}
 
 export interface StartGameMessage extends IncommingMessage<'Command'> {}
+
 
 type Sys<T> = { type: T, id: string }
 export interface IncommingMessage<Type> {
@@ -64,6 +70,16 @@ const MOVE_PLAYER_SCHEMA = Joi.object().keys({
   })
 })
 
+const ROTATE_PLAYER_SCHEMA = Joi.object().keys({
+  sys: Joi.object().keys({
+    type: Joi.string().valid('Request').required(),
+    id: Joi.string().valid('RotatePlayer').required()
+  }).required(),
+  data: Joi.object().keys({
+    rotation: Joi.number().min(0).max(360).required()
+  })
+})
+
 const SHOOT_SCHHEMA = Joi.object().keys({
   sys: Joi.object().keys({
     type: Joi.string().valid('Request').required(),
@@ -78,7 +94,7 @@ const START_GAME_SCHEMA = Joi.object().keys({
   }).required()
 })
 
-const schemas = [REGISTER_PLAYER_SCHEMA, MOVE_PLAYER_SCHEMA, SHOOT_SCHHEMA, START_GAME_SCHEMA]
+const schemas = [REGISTER_PLAYER_SCHEMA, MOVE_PLAYER_SCHEMA, ROTATE_PLAYER_SCHEMA, SHOOT_SCHHEMA, START_GAME_SCHEMA]
 
 export function validateMessage (message: object): boolean {
   // TODO maybe first check if message.sys.type is present

@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import {
   RegisterPlayerMessage,
   MovePlayerMessage,
+  RotatePlayerMessage,
   ShootMessage,
   StartGameMessage,
   validateMessage
@@ -92,6 +93,22 @@ describe('Messages', () => {
         sys: {
           type: 'Request',
           id: 'Shoot'
+        }
+      }
+
+      const result = validateMessage(message)
+
+      expect(result).to.be.true
+    })
+
+    it('returns true for valid RotatePlayer messages', () => {
+      const message: RotatePlayerMessage = {
+        sys: {
+          type: 'Request',
+          id: 'RotatePlayer',
+        },
+        data: {
+          rotation: 120
         }
       }
 

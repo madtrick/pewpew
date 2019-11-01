@@ -1,6 +1,7 @@
 import {
   IncommingMessage,
   RegisterPlayerMessage,
+  RotatePlayerMessage,
   MovePlayerMessage,
   ShootMessage,
   StartGameMessage
@@ -67,6 +68,11 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
 
           if (messageId === 'Shoot') {
             const result = handlers.Request.Shoot(session, message as ShootMessage, state)
+            loopCycleRunResult.results.push(result.result)
+          }
+
+          if (messageId === 'RotatePlayer') {
+            const result = handlers.Request.RotatePlayer(session, message as RotatePlayerMessage, state)
             loopCycleRunResult.results.push(result.result)
           }
         }
