@@ -51,7 +51,8 @@ export enum ComponentType {
 export enum UpdateType {
   Movement = 'movement',
   Hit = 'hit',
-  Scan = 'scan'
+  Scan = 'scan',
+  PlayerDestroyed = 'playerDestroyed'
 }
 
 function isPlayerHit(hit: WallHitDescriptor | PlayerHitDescriptor): hit is PlayerHitDescriptor {
@@ -127,7 +128,7 @@ export type Foo = (
 export class Arena {
   readonly width: number
   readonly height: number
-  private readonly arenaPlayers: ArenaPlayer[]
+  private arenaPlayers: ArenaPlayer[]
   private arenaShots: ArenaShot[]
   private radar: RadarScan
 
@@ -180,6 +181,7 @@ export class Arena {
       }
 
       if (this.playerCollidesWithPlayer(options.position)) {
+        // TODO include the coordinates of the other player
         return {
           status: 'ko',
           details: {
@@ -286,6 +288,26 @@ export class Arena {
       // TODO: use assertNever https://www.typescriptlang.org/docs/handbook/advanced-types.html
       throw new Error('This is not possible')
     })
+
+    const destroyedPlayersUpdates = shotsUpdates.filter((update) => {
+      return update.type === UpdateType.Hit
+        && update.component.type === ComponentType.Player
+        && update.component.data.life <= 0
+    }).map((update) => {
+      return {
+        type: UpdateType.PlayerDestroyed,
+        component: {
+          type: ComponentType.Player,
+          data: {
+            // @ts-ignore fix the types
+            id: update.component.data.id
+          }
+        }
+      }
+    })
+
+    const destroyedPlayerIds = destroyedPlayersUpdates.map((destroyedPlayerUpdate) => destroyedPlayerUpdate.component.data.id)
+    this.arenaPlayers = this.arenaPlayers.filter((arenaPlayer) => !destroyedPlayerIds.includes(arenaPlayer.id))
 
     const radarUpdates: ArenaRadarScanResult[] = this.arenaPlayers.map((player) => {
       const scanResult = this.radar(player.position, [...this.arenaPlayers, ...this.arenaShots])

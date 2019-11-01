@@ -2,6 +2,7 @@ import uuid from 'uuid/v4'
 import { ArenaPlayer, ComponentType } from './components/arena'
 
 export const SHOT_RADIUS = 1
+export const SHOT_DAMAGE = 1
 
 export interface Shot {
   // position: {
@@ -25,7 +26,7 @@ export function createShot (options: { player: ArenaPlayer }): Shot {
     id: uuid(),
     rotation: 0,
     player: options.player,
-    damage: 1,
+    damage: SHOT_DAMAGE,
     type: ComponentType.Shot
   }
 }

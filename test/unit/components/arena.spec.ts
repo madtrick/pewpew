@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { Arena, Success, Result, asSuccess, ComponentType, UpdateType } from '../../../src/components/arena'
-import { Player, createPlayer } from '../../../src/player'
-import { createShot } from '../../../src/shot'
+import { Player, createPlayer, PLAYER_MAX_LIFE } from '../../../src/player'
+import { createShot, SHOT_DAMAGE } from '../../../src/shot'
 import { scan, ScanResult as RadarScanResult } from '../../../src/components/radar'
 
 function makeSuccess<T>(data: T): Success<T> {
@@ -448,6 +448,28 @@ describe('Arena', () => {
           expect(shots).to.be.empty
           const targetPlayer = arena.findPlayer('player-2')
           expect(targetPlayer!.life).to.eql(initialOtherPlayerLife - shot.damage)
+        })
+
+        describe('when the shot hits and destroys a player', () => {
+          it('foo', () => {
+            const player1 = createPlayer({ id: 'player-1' })
+            const player2 = createPlayer({ id: 'player-2' })
+            const shooter = asSuccess(arena.registerPlayer(player1, { position: { x: 31, y: 50 } })).player
+            const otherPlayer = asSuccess(arena.registerPlayer(player2, { position: { x: 65, y: 50 } })).player
+
+            shooter.rotation = 0
+            otherPlayer.rotation = 0
+            otherPlayer.life = PLAYER_MAX_LIFE - (PLAYER_MAX_LIFE - 1)
+            const shot = createShot({ player: shooter })
+            arena.registerShot(shot)
+
+            // After the loop the shot is at x=47. One movement more and the
+            // player will be tangential to the player which is considered a hit
+
+            arena.update()
+            const targetPlayer = arena.findPlayer('player-2')
+            expect(targetPlayer).to.be.undefined
+          })
         })
       })
 

@@ -11,6 +11,7 @@ export interface Player {
 }
 
 export const PLAYER_RADIUS = 16 //px
+export const PLAYER_MAX_LIFE = 100
 
 // TODO Right no the `Player` represents both the human who registerd to play and the bot in the game
 // I think I should split that into a:
@@ -25,7 +26,7 @@ export function createPlayer (options: { id: string }): Player {
   return {
     id: options.id,
     rotation: 0,
-    life: 100,
+    life: PLAYER_MAX_LIFE,
     shots: 50,
     type: ComponentType.Player
   }
