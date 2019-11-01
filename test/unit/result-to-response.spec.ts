@@ -18,6 +18,8 @@ import {
 } from '../../src/message-handlers'
 
 describe('Result to response', () => {
+  const playerOneId = 'player-1'
+
   describe('RequesType.RegisterPlayer', () => {
     describe('when the player was could not be registered', () => {
       it('generates a Error response for the player', () => {
@@ -53,7 +55,7 @@ describe('Result to response', () => {
           success: true,
           request: RequestType.RegisterPlayer,
           details: {
-            id: 'player-1',
+            id: playerOneId,
             position: {
               x: 100,
               y: 100
@@ -62,7 +64,7 @@ describe('Result to response', () => {
         }
 
         const playerSession = createSession()
-        playerSession.playerId = 'player-1'
+        playerSession.playerId = playerOneId
         const controlSession = createControlSession()
         const sessions = [playerSession, controlSession]
 
@@ -78,7 +80,7 @@ describe('Result to response', () => {
             component: {
               type: 'Player',
               data: {
-                id: 'player-1',
+                id: playerOneId,
                 position: {
                   x: 100,
                   y: 100
@@ -139,7 +141,7 @@ describe('Result to response', () => {
           success: true,
           request: RequestType.MovePlayer,
           details: {
-            id: 'player-1',
+            id: playerOneId,
             position: {
               x: 100,
               y: 100
@@ -148,12 +150,13 @@ describe('Result to response', () => {
         }
 
         const playerSession = createSession()
-        playerSession.playerId = 'player-1'
-        const sessions = [playerSession]
+        const controlSession = createControlSession()
+        playerSession.playerId = playerOneId
+        const sessions = [playerSession, controlSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
 
-        expect(responsesAndNotifications).to.have.lengthOf(1)
+        expect(responsesAndNotifications).to.have.lengthOf(2)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
           response: {
@@ -164,6 +167,23 @@ describe('Result to response', () => {
               position: {
                 x: 100,
                 y: 100
+              }
+            }
+          }
+        })
+        expect(responsesAndNotifications[1]).to.eql({
+          session: controlSession,
+          response: {
+            type: 'Notification',
+            id: 'Movement',
+            component: {
+              type: 'Player',
+              data: {
+                id: playerOneId,
+                position: {
+                  x: 100,
+                  y: 100
+                }
               }
             }
           }
@@ -208,12 +228,12 @@ describe('Result to response', () => {
           success: true,
           request: RequestType.Shoot,
           details: {
-            id: 'player-1'
+            id: playerOneId
           }
         }
 
         const playerSession = createSession()
-        playerSession.playerId = 'player-1'
+        playerSession.playerId = playerOneId
         const sessions = [playerSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
@@ -263,28 +283,44 @@ describe('Result to response', () => {
 
     describe('when the request was successful', () => {
       it('generates a Rotate response', () => {
+        const rotation = 300
         const result: SuccessfulRotateRequest = {
           success: true,
           request: RequestType.RotatePlayer,
           details: {
-            id: 'player-1',
-            rotation: 300
+            id: playerOneId,
+            rotation
           }
         }
 
+        const controlSession = createControlSession()
         const playerSession = createSession()
-        playerSession.playerId = 'player-1'
-        const sessions = [playerSession]
+        playerSession.playerId = playerOneId
+        const sessions = [playerSession, controlSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
 
-        expect(responsesAndNotifications).to.have.lengthOf(1)
+        expect(responsesAndNotifications).to.have.lengthOf(2)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
           response: {
             type: 'Response',
             id: RequestType.RotatePlayer,
             success: true
+          }
+        })
+        expect(responsesAndNotifications[1]).to.eql({
+          session: controlSession,
+          response: {
+            type: 'Notification',
+            id: 'ComponentUpdate',
+            component: {
+              type: 'Player',
+              data: {
+                id: playerOneId,
+                rotation
+              }
+            }
           }
         })
       })

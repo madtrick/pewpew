@@ -92,6 +92,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           component: {
             type: 'Player',
             data: {
+              // TODO remove the hardcoded player id
               id: 'player-1',
               // TODO remove this hardcoded value
               // TODO missing rotation
@@ -122,17 +123,33 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       const { details: { id: playerId, position } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
 
-      return [{
-        session: playerSession,
-        response: {
-          type: 'Response',
-          id: RequestType.MovePlayer,
-          success: true,
-          details: {
-            position
+      return [
+        {
+          session: playerSession,
+          response: {
+            type: 'Response',
+            id: RequestType.MovePlayer,
+            success: true,
+            details: {
+              position
+            }
+          }
+        },
+        {
+          session: controlSession,
+          response: {
+            type: 'Notification',
+            id: 'Movement',
+            component: {
+              type: 'Player',
+              data: {
+                id: playerId,
+                position
+              }
+            }
           }
         }
-      }]
+      ]
     }
 
     if (result.success === false && result.request === RequestType.MovePlayer) {
@@ -182,17 +199,34 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.RotatePlayer) {
-      const { details: { id: playerId } } = result
+      const { details: { id: playerId, rotation } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
 
-      return [{
-        session: playerSession,
-        response: {
-          type: 'Response',
-          id: RequestType.RotatePlayer,
-          success: true
+      return [
+        {
+          session: playerSession,
+          response: {
+            type: 'Response',
+            id: RequestType.RotatePlayer,
+            success: true
+          }
+        },
+        {
+          session: controlSession,
+          response: {
+            type: 'Notification',
+            id: 'ComponentUpdate',
+            component: {
+              type: 'Player',
+              data: {
+                id: playerId,
+                rotation
+              }
+            }
+          }
+
         }
-      }]
+      ]
     }
 
     if (result.success === false && result.request === RequestType.RotatePlayer) {
