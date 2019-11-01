@@ -101,5 +101,33 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
       }]
     }
   }
+
+  if (update.type === UpdateType.PlayerDestroyed) {
+    if (update.component.type === ComponentType.DestroyedPlayer) {
+      const { component: { data: { id: playerId } } } = update
+      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+
+      return [{
+        session: playerSession,
+        notification: {
+          type: 'Notification',
+          id: 'Destroyed',
+        }
+      },
+      {
+        session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'PlayerDestroyed',
+          component: {
+            type: 'Player',
+            data: {
+              id: playerId
+            }
+          }
+        }
+      }]
+    }
+  }
 }
 

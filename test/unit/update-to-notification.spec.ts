@@ -175,7 +175,51 @@ describe('Update to notification', () => {
         }
       })
     })
+  })
 
+  describe('UpdateType.PlayerDestroyed', () => {
+    it('generates player destroyed notifications', () => {
+      const update: ComponentUpdate = {
+        type: UpdateType.PlayerDestroyed,
+        component: {
+          type: ComponentType.DestroyedPlayer,
+          data: {
+            id: 'player-1',
+          }
+        }
+      }
+
+      const playerOneSession = createSession()
+      playerOneSession.playerId = 'player-1'
+      const playerTwoSession = createSession()
+      playerTwoSession.playerId = 'player-2'
+      const controlSession = createControlSession()
+      const sessions = [playerOneSession, playerTwoSession, controlSession]
+
+      const result = updateToNotifications(update, sessions)
+
+      expect(result).to.have.lengthOf(2)
+      expect(result[0]).to.eql({
+        session: playerOneSession,
+        notification: {
+          type: 'Notification',
+          id: 'Destroyed',
+        }
+      })
+      expect(result[1]).to.eql({
+        session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'PlayerDestroyed',
+          component: {
+            type: 'Player',
+            data: {
+              id: 'player-1'
+            }
+          }
+        }
+      })
+    })
   })
 })
 

@@ -539,7 +539,7 @@ describe('Arena', () => {
             {
               type: UpdateType.PlayerDestroyed,
               component: {
-                type: ComponentType.Player,
+                type: ComponentType.DestroyedPlayer,
                 data: {
                   id: otherPlayer.id
                 }

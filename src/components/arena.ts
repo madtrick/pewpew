@@ -43,6 +43,7 @@ type ArenaShot = Shot & { position: Position }
 
 export enum ComponentType {
   Player = 'player',
+  DestroyedPlayer = 'destroyedPlayer',
   Shot = 'shot',
   Wall = 'wall',
   Radar = 'Radar'
@@ -122,7 +123,8 @@ export type Foo = (
       unknown: { position: Position }[],
       shots: { position: Position }[]
     }
-  }
+  } |
+  { type: ComponentType.DestroyedPlayer, data: { id: string } }
 )
 
 export class Arena {
@@ -297,7 +299,7 @@ export class Arena {
       return {
         type: UpdateType.PlayerDestroyed,
         component: {
-          type: ComponentType.Player,
+          type: ComponentType.DestroyedPlayer,
           data: {
             // @ts-ignore fix the types
             id: update.component.data.id
@@ -325,6 +327,7 @@ export class Arena {
       }
     })
 
+    // TODO fix the types
     return [...shotsUpdates, ...destroyedPlayersUpdates, ...radarUpdates]
   }
 
