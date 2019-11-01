@@ -325,7 +325,7 @@ export class Arena {
       }
     })
 
-    return [...shotsUpdates, ...radarUpdates]
+    return [...shotsUpdates, ...destroyedPlayersUpdates, ...radarUpdates]
   }
 
   moveShot (arenaShot: ArenaShot):

@@ -507,6 +507,48 @@ describe('Arena', () => {
           ])
         })
 
+        it('reflects the a player destroyed', () => {
+          const player1 = createPlayer({ id: 'player-1' })
+          const player2 = createPlayer({ id: 'player-2' })
+          // A shot from this shooter will hit otherPlayer
+          const shooter = asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
+          const otherPlayer = asSuccess(arena.registerPlayer(player2, { position: { x: 59, y: 50 } })).player
+          shooter.rotation = 0
+          otherPlayer.rotation = 0
+          otherPlayer.life = PLAYER_MAX_LIFE - PLAYER_MAX_LIFE + 1
+
+          const shot1 = createShot({ player: shooter })
+          arena.registerShot(shot1)
+
+          const updates = arena.update()
+
+          expect(updates).to.have.lengthOf(3)
+          expect(updates).to.have.deep.members([
+            {
+              type: UpdateType.Hit,
+              component: {
+                type: ComponentType.Player,
+                data: {
+                  id: otherPlayer.id,
+                  damage: shot1.damage,
+                  life: 0,
+                  shotId: shot1.id
+                }
+              }
+            },
+            {
+              type: UpdateType.PlayerDestroyed,
+              component: {
+                type: ComponentType.Player,
+                data: {
+                  id: otherPlayer.id
+                }
+              }
+            },
+            fakeArenaRadarScanResult('player-1')
+          ])
+        })
+
         it('reflects the hit on a wall', () => {
           const player = createPlayer({ id: 'player-1' })
           // A shot from this shooter will hit the wall
