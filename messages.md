@@ -2,10 +2,6 @@ Messages
 
 ### Notifications
 
-Missing
-
-- Notification for a player movement
-
 ```json
 {
   type: 'Notification',
@@ -85,6 +81,28 @@ Missing
         x: <number>,
         y: <number>
       }
+    }
+  }
+}
+```
+
+```json
+// Notification sent to the player
+{
+	type: 'Notification',
+	id: 'Destroyed'
+}
+```
+
+```json
+// Notification sent to the control channel
+{
+  type: 'Notification',
+  id: 'PlayerDestroyed',
+  component: {
+    type: 'Player',
+    data: {
+      id: <string>
     }
   }
 }
@@ -283,7 +301,5 @@ Request
 }
 ```
 
-```json
 
-```
 
