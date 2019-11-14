@@ -215,6 +215,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           session: controlSession,
           response: {
             type: 'Notification',
+            // TODO: what is this `ComponentUpdate` id? We are using `MovePlayer` when a player was moved
             id: 'ComponentUpdate',
             component: {
               type: 'Player',

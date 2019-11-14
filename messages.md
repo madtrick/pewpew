@@ -2,6 +2,12 @@ Messages
 
 ### Notifications
 
+Missing
+
+- a way for control channels to know about players which registered before the game started
+- Rotation information when a player is registered
+- A notification to signal that a player just shot
+
 ```json
 {
   type: 'Notification',
@@ -227,7 +233,25 @@ Request
 }
 ```
 
-#### RotatePlayerRequest
+```json
+{
+  type: 'Notification',
+  id: 'Movement',
+  component: {
+    type: 'Player',
+    data: {
+      id: <string>,
+      position: {
+      x: <number>,
+      y: <number>
+    }
+  }
+}
+```
+
+
+
+####  RotatePlayerRequest
 
 ```json
 {
@@ -257,6 +281,20 @@ Request
   type: 'Response',
   id: 'RotatePlayer',
   success: true
+}
+```
+
+```json
+{
+  type: 'Notification',
+  id: 'ComponentUpdate', // this has to be fixed
+  component: {
+    type: 'Player',
+    data: {
+      id: playerId,
+      rotation
+    }
+  }
 }
 ```
 
