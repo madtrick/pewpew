@@ -25,6 +25,8 @@ export const PLAYER_MAX_LIFE = 100
 export function createPlayer (options: { id: string }): Player {
   return {
     id: options.id,
+    // TODO randomize the rotation. Also consider the `rotation` of a player part of the ArenaPlayer
+    // type and not the base Player
     rotation: 0,
     life: PLAYER_MAX_LIFE,
     shots: 50,

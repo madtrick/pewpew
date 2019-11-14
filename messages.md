@@ -5,7 +5,6 @@ Messages
 Missing
 
 - a way for control channels to know about players which registered before the game started
-- Rotation information when a player is registered
 - A notification to signal that a player just shot
 
 ```json
@@ -69,25 +68,6 @@ Missing
     players: { position: { x: <number>, y: <number> } }[],
     unknown: { position: { x: <number>, y: <number> } }[],
     shots: { position: { x: <number>, y: <number> } }[]
-  }
-}
-```
-
-```json
-{
-	type: 'Notification',
-	id: 'RegisterPlayer',
-  success: true,
-  component: {
-  	type: 'Player',
-    data: {
-      id: <string>,
-      // TODO remove this hardcoded value
-      position: {
-        x: <number>,
-        y: <number>
-      }
-    }
   }
 }
 ```
@@ -323,7 +303,8 @@ Request
     position: {
       x: <number>,
       y: <number>
-    }
+    },
+    rotation: <number>
   }
 }
 ```
@@ -335,6 +316,26 @@ Request
   success: false,
   details: {
   	msg: <string>
+  }
+}
+```
+
+```json
+{
+	type: 'Notification',
+	id: 'RegisterPlayer',
+  success: true,
+  component: {
+  	type: 'Player',
+    data: {
+      id: <string>,
+      // TODO remove this hardcoded value
+      position: {
+        x: <number>,
+        y: <number>
+      },
+    	rotation: <number>
+    }
   }
 }
 ```

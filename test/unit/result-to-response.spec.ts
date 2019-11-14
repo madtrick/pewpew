@@ -59,7 +59,8 @@ describe('Result to response', () => {
             position: {
               x: 100,
               y: 100
-            }
+            },
+            rotation: 33
           }
         }
 
@@ -84,7 +85,8 @@ describe('Result to response', () => {
                 position: {
                   x: 100,
                   y: 100
-                }
+                },
+                rotation: 33
               }
             }
           }
@@ -99,7 +101,8 @@ describe('Result to response', () => {
               position: {
                 x: 100,
                 y: 100
-              }
+              },
+              rotation: 33
             }
           }
         })

@@ -80,7 +80,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.RegisterPlayer) {
-      const { details: { id: playerId, position } } = result
+      const { details: { id: playerId, position, rotation } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
 
       return [{
@@ -95,11 +95,11 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
               // TODO remove the hardcoded player id
               id: 'player-1',
               // TODO remove this hardcoded value
-              // TODO missing rotation
               position: {
                 x: 100,
                 y: 100
-              }
+              },
+              rotation
             }
           }
         }
@@ -111,7 +111,8 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           id: RequestType.RegisterPlayer,
           success: true,
           details: {
-            position
+            position,
+            rotation
           }
         }
       }]

@@ -8,6 +8,7 @@ import { Position } from '../../components/arena'
 export interface RegisterPlayerResultDetails {
   id: string
   position: Position
+  rotation: number
 }
 
 export default function registerPlayer (session: Session, message: RegisterPlayerMessage, state: GameState): HandlerResult {
@@ -36,7 +37,8 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
       request: RequestType.RegisterPlayer,
       details: {
         id: result.player.id,
-        position: result.player.position
+        position: result.player.position,
+        rotation: result.player.rotation
       }
     },
     state
