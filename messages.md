@@ -6,6 +6,13 @@ Missing
 
 - a way for control channels to know about players which registered before the game started
 - A notification to signal that a player just shot
+- Add version to the reply from RegisterPlayer
+- Replace `details` with `data` in responses and notifications
+  - `RegisterPlayer `  failure and success
+  - `MovePlayer` failure and success
+  - `StartGame` failure
+  - `Shoot` failure
+  - `RotatePlayer` failure
 
 ```json
 {
@@ -102,10 +109,8 @@ Missing
 
 ```json
 {
-  sys: {
-    type: 'Command',
-    id: 'StartGame'
-  }
+  type: 'Command',
+  id: 'StartGame'
 }
 ```
 
@@ -146,10 +151,8 @@ Request
 
 ```json
 {
-  sys: {
-    type: 'Request',
-    id: 'Shoot'
-  }
+  type: 'Request',
+  id: 'Shoot'
 }
 ```
 
@@ -176,10 +179,8 @@ Request
 
 ```json
 {
-  sys: {
-    type: 'Request',
-    id: 'MovePlayer',
-  },
+  type: 'Request',
+  id: 'MovePlayer',
   data: {
     movement: {
       direction: <'forward'|'backward'>
@@ -222,9 +223,9 @@ Request
     data: {
       id: <string>,
       position: {
-      x: <number>,
-      y: <number>
-    }
+     		x: <number>,
+      	y: <number>
+    	}
   }
 }
 ```
@@ -235,10 +236,8 @@ Request
 
 ```json
 {
-  sys: {
-    type: 'Request',
-    id: 'RotatePlayer'
-  },
+  type: 'Request',
+  id: 'RotatePlayer',
   data: {
     rotation: <number>
   }
@@ -284,10 +283,8 @@ Request
 
 ```json
 {
-  sys: {
-    type: 'Request',
-    id: 'RegisterPlayer'
-  },
+  type: 'Request',
+  id: 'RegisterPlayer',
   data: {
     id: <string>
   }

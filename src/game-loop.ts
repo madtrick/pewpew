@@ -52,7 +52,7 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
     // TODO instead of creating a promise here, make the wrapping function async
     return new Promise((resolve) => {
       inputs.forEach(({ session, message }) => {
-        const { sys: { type: messageType, id: messageId } } = message
+        const { type: messageType, id: messageId } = message
 
         if (messageType === 'Request') {
           if (messageId === 'RegisterPlayer') {

@@ -40,10 +40,10 @@ describe('Engine', () => {
       const sessionChannel1 = createSession()
       const sessionChannel2 = createSession()
       const movePlayerMessage = {
-        sys: { type: 'Request', id: 'MovePlayer' },
+        type: 'Request', id: 'MovePlayer',
         data: { movement: { direction: 'forward' } }
       }
-      const shootMessage = { sys: { type: 'Request', id: 'Shoot' } }
+      const shootMessage = { type: 'Request', id: 'Shoot' }
       const messages = [
         { channel: { id: 'channel-1' }, data: shootMessage },
         { channel: { id: 'channel-2' }, data: movePlayerMessage }
@@ -77,10 +77,8 @@ describe('Engine', () => {
         {
           channel: { id: 'channel-1' },
           data: {
-            sys: {
-              type: 'Request',
-              id: 'RegisterPlayer'
-            },
+            type: 'Request',
+            id: 'RegisterPlayer',
             data: {
               id: 'potato'
             }

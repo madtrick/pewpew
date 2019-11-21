@@ -23,9 +23,9 @@ export interface ShootMessage extends IncommingMessage<'Request'> {}
 export interface StartGameMessage extends IncommingMessage<'Command'> {}
 
 
-type Sys<T> = { type: T, id: string }
 export interface IncommingMessage<Type> {
-  sys: Sys<Type>
+  type: Type
+  id: string
 }
 
 export type IncommingMessages = RegisterPlayerMessage | MovePlayerMessage | ShootMessage
@@ -39,30 +39,28 @@ export interface OutgoingMessage<T> {
     msg?: string, // TODO: move this into details?
     details?: T
   },
-  sys: Sys<'Response'>
+  type: 'Response'
+  id: string
 }
 
 export interface UpdateMessage {
   data: any
-  sys: Sys<'Update'>
+  type: 'Update'
+  id: string
 }
 
 // TODO is there a better way to make all properties required
 const REGISTER_PLAYER_SCHEMA = Joi.object().keys({
-  sys: Joi.object().keys({
-    type: Joi.string().valid('Request').required(),
-    id: Joi.string().valid('RegisterPlayer').required()
-  }).required(),
+  type: Joi.string().valid('Request').required(),
+  id: Joi.string().valid('RegisterPlayer').required(),
   data: Joi.object().keys({
     id: Joi.string().required()
   }).required() //TODO restrict the id more
 })
 
 const MOVE_PLAYER_SCHEMA = Joi.object().keys({
-  sys: Joi.object().keys({
-    type: Joi.string().valid('Request').required(),
-    id: Joi.string().valid('MovePlayer').required()
-  }).required(),
+  type: Joi.string().valid('Request').required(),
+  id: Joi.string().valid('MovePlayer').required(),
   data: Joi.object().keys({
     movement: Joi.object().keys({
       direction: Joi.string().valid(['forward', 'backward']).required()
@@ -71,33 +69,27 @@ const MOVE_PLAYER_SCHEMA = Joi.object().keys({
 })
 
 const ROTATE_PLAYER_SCHEMA = Joi.object().keys({
-  sys: Joi.object().keys({
-    type: Joi.string().valid('Request').required(),
-    id: Joi.string().valid('RotatePlayer').required()
-  }).required(),
+  type: Joi.string().valid('Request').required(),
+  id: Joi.string().valid('RotatePlayer').required(),
   data: Joi.object().keys({
     rotation: Joi.number().min(0).max(360).required()
   })
 })
 
 const SHOOT_SCHHEMA = Joi.object().keys({
-  sys: Joi.object().keys({
-    type: Joi.string().valid('Request').required(),
-    id: Joi.string().valid('Shoot').required()
-  }).required()
+  type: Joi.string().valid('Request').required(),
+  id: Joi.string().valid('Shoot').required()
 })
 
 const START_GAME_SCHEMA = Joi.object().keys({
-  sys: Joi.object().keys({
-    type: Joi.string().valid('Command').required(),
-    id: Joi.string().valid('StartGame').required()
-  }).required()
+  type: Joi.string().valid('Command').required(),
+  id: Joi.string().valid('StartGame').required()
 })
 
 const schemas = [REGISTER_PLAYER_SCHEMA, MOVE_PLAYER_SCHEMA, ROTATE_PLAYER_SCHEMA, SHOOT_SCHHEMA, START_GAME_SCHEMA]
 
 export function validateMessage (message: object): boolean {
-  // TODO maybe first check if message.sys.type is present
+  // TODO maybe first check if message.type is present
   // and then use that to find the schema it should validate
   return !!schemas.find((schema) => schema.validate(message).error === null)
 }

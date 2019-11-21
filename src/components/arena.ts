@@ -57,11 +57,11 @@ export enum UpdateType {
 }
 
 function isPlayerHit(hit: WallHitDescriptor | PlayerHitDescriptor): hit is PlayerHitDescriptor {
-  return hit.sys.type === ComponentType.Player
+  return hit.type === ComponentType.Player
 }
 
 function isWallHit(hit: WallHitDescriptor | PlayerHitDescriptor): hit is WallHitDescriptor {
-  return hit.sys.type === ComponentType.Wall
+  return hit.type === ComponentType.Wall
 }
 
 // interface ComponentUpdate {
@@ -84,18 +84,14 @@ function isWallHit(hit: WallHitDescriptor | PlayerHitDescriptor): hit is WallHit
 // }
 
 interface WallHitDescriptor {
-  sys: {
-    type: ComponentType.Wall
-  }
+  type: ComponentType.Wall
   data: {
     position: Position
   }
 }
 
 interface PlayerHitDescriptor {
-  sys: {
-    type: ComponentType.Player
-  }
+  type: ComponentType.Player
   data: {
     id: string
     life: number
@@ -356,9 +352,7 @@ export class Arena {
     let hit: any
     if (hitsWall) {
       hit = {
-        sys: {
-          type: ComponentType.Wall,
-        },
+        type: ComponentType.Wall,
         data: {
           position: newPosition
         }
@@ -370,11 +364,9 @@ export class Arena {
       // TODO: remove player if it's life has reached 0. Maybe do a `updatePlayers` method
       // and handle that there :shrug:
       hit = {
-        sys: {
-          type: ComponentType.Player,
-        },
+        type: ComponentType.Player,
         // TODO: fix the typings here. Since I set it to `any` I didn't catch that I was
-        // puting the `data` object inside `sys`
+        // puting the `data` object inside `sys` (when we still had a `sys` wrapper)
         data: {
           id: hittedPlayer.id,
           life: hittedPlayer.life,

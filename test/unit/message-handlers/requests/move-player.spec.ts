@@ -38,10 +38,8 @@ function movementTest(options: MovementTestOptions): () => Promise<void> {
       data: {
         movement: options.movement
       },
-      sys: {
-        type: 'Request',
-        id: 'MovePlayer'
-      }
+      type: 'Request',
+      id: 'MovePlayer'
     }
 
     const { result } = await handler(session, message, state)
@@ -62,7 +60,7 @@ describe('Requests - Move player', () => {
         player: { position: { x: 50, y: 17 }, rotation: 0 },
         movement: { direction: 'forward' },
         arena: () => arena,
-        expectedResult: {
+          expectedResult: {
           request: RequestType.MovePlayer,
           success: true,
           details: {
@@ -79,7 +77,7 @@ describe('Requests - Move player', () => {
         player: { position: { x: 84, y: 17 }, rotation: 0 },
         movement: { direction: 'backward' },
         arena: () => arena,
-        expectedResult: {
+          expectedResult: {
           request: RequestType.MovePlayer,
           success: true,
           details: {
@@ -97,7 +95,7 @@ describe('Requests - Move player', () => {
         player: { position: { x: 84, y: 17 }, rotation: 0 },
         movement: { direction: 'forward' },
         arena: () => arena,
-        expectedResult: {
+          expectedResult: {
           request: RequestType.MovePlayer,
           success: true,
           details: {
@@ -117,10 +115,8 @@ describe('Requests - Move player', () => {
       const state: GameState = new GameState({ arena })
       const session = createSession()
       const message: MovePlayerMessage = {
-        sys: {
-          type: 'Request',
-          id: 'MovePlayer'
-        },
+        type: 'Request',
+        id: 'MovePlayer',
         data: {
           movement: {
             direction: 'forward'

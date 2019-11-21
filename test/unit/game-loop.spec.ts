@@ -34,10 +34,8 @@ describe('Game loop', () => {
       const state: GameState = new GameState({ arena })
       const session: Session = createSession()
       const message: StartGameMessage = {
-        sys: {
-          type: 'Command',
-          id: 'StartGame'
-        }
+        type: 'Command',
+        id: 'StartGame'
       }
       const result = {
         result: {
@@ -64,10 +62,8 @@ describe('Game loop', () => {
         data: {
           id: 'player-1'
         },
-        sys: {
-          type: 'Request',
-          id: 'RegisterPlayer'
-        }
+        type: 'Request',
+        id: 'RegisterPlayer'
       }
       const result = {
         result: {
@@ -78,7 +74,8 @@ describe('Game loop', () => {
             position: {
               x: 1,
               y: 1
-            }
+            },
+            rotation: 0
           }
         },
         state
@@ -102,10 +99,8 @@ describe('Game loop', () => {
             direction: 'forward'
           }
         },
-        sys: {
-          type: 'Request',
-          id: 'MovePlayer'
-        }
+        type: 'Request',
+        id: 'MovePlayer'
       }
       const result = {
         result: {
@@ -134,10 +129,8 @@ describe('Game loop', () => {
       const state: GameState = new GameState({ arena })
       const session: Session = createSession()
       const message: ShootMessage = {
-        sys: {
-          type: 'Request',
-          id: 'Shoot' // TODO fix the messages typings. Here I could have RegisterPlayer and the type would not complain
-        }
+        type: 'Request',
+        id: 'Shoot' // TODO fix the messages typings. Here I could have RegisterPlayer and the type would not complain
       }
       const result = {
         result: {
@@ -165,10 +158,8 @@ describe('Game loop', () => {
         data: {
           rotation: 300
         },
-        sys: {
-          type: 'Request',
-          id: 'RotatePlayer'
-        }
+        type: 'Request',
+        id: 'RotatePlayer'
       }
       const result = {
         result: {

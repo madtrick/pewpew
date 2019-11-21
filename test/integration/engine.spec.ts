@@ -26,10 +26,8 @@ describe('Engine - Integration', () => {
         {
           channel: { id: 'channel-2' },
           data: {
-            sys: {
-              type: 'Request',
-              id: 'RegisterPlayer'
-            },
+            type: 'Request',
+            id: 'RegisterPlayer',
             data: {
               id: 'jake'
             }
@@ -58,10 +56,8 @@ describe('Engine - Integration', () => {
         {
           channel: { id: 'channel-1' },
           data: {
-            sys: {
-              type: 'Command',
-              id: 'StartGame'
-            }
+            type: 'Command',
+            id: 'StartGame'
           }
         }
       ]
@@ -89,10 +85,8 @@ describe('Engine - Integration', () => {
         {
           channel: { id: 'channel-2' },
           data: {
-            sys: {
-              type: 'Request',
-              id: 'RegisterPlayer'
-            },
+            type: 'Request',
+            id: 'RegisterPlayer',
             data: {
               id: 'jake'
             }
@@ -101,10 +95,8 @@ describe('Engine - Integration', () => {
         {
           channel: { id: 'channel-3' },
           data: {
-            sys: {
-              type: 'Request',
-              id: 'RegisterPlayer'
-            },
+            type: 'Request',
+            id: 'RegisterPlayer',
             data: {
               id: 'mike'
             }
@@ -118,10 +110,8 @@ describe('Engine - Integration', () => {
         {
           channel: { id: 'channel-1' },
           data: {
-            sys: {
-              type: 'Command',
-              id: 'StartGame'
-            }
+            type: 'Command',
+            id: 'StartGame'
           }
         }
       ]

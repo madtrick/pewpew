@@ -12,10 +12,8 @@ describe('Command - Start game', () => {
   it('succeeds', async () => {
       const state: GameState = new GameState({ arena })
       const message: StartGameMessage = {
-        sys: {
-          type: 'Command',
-          id: 'StartGame'
-        }
+        type: 'Command',
+        id: 'StartGame'
       }
 
       // TODO, update this to also take a session object

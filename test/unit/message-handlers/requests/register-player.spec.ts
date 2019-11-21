@@ -21,10 +21,8 @@ describe('Requests - Register player', () => {
         data: {
           id: 'player-1'
         },
-        sys: {
-          type: 'Request',
-          id: 'RegisterPlayer'
-        }
+        type: 'Request',
+        id: 'RegisterPlayer'
       }
 
       const { result, state: newState } = handler(session, message, state)
@@ -71,10 +69,8 @@ describe('Requests - Register player', () => {
         data: {
           id: 'player-1'
         },
-        sys: {
-          type: 'Request',
-          id: 'RegisterPlayer'
-        }
+        type: 'Request',
+        id: 'RegisterPlayer'
       }
 
       const { result, state: newState } = handler(session, message, state)

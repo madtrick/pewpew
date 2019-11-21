@@ -33,10 +33,8 @@ describe('Requests - Shoot', () => {
       const session = createSession()
       const initialShots = player.shots
       const message: ShootMessage = {
-        sys: {
-          type: 'Request',
-          id: 'Shoot'
-        }
+        type: 'Request',
+        id: 'Shoot'
       }
 
       const { result } = handler(session, message, state)
@@ -58,10 +56,8 @@ describe('Requests - Shoot', () => {
       const state: GameState = new GameState(gameStateOptions)
       const session = createSession()
       const message: ShootMessage = {
-        sys: {
-          type: 'Request',
-          id: 'Shoot'
-        }
+        type: 'Request',
+        id: 'Shoot'
       }
 
       state.started = true
@@ -84,10 +80,8 @@ describe('Requests - Shoot', () => {
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
       const session = createSession()
       const message: ShootMessage = {
-        sys: {
-          type: 'Request',
-          id: 'Shoot'
-        }
+        type: 'Request',
+        id: 'Shoot'
       }
 
       registeredPlayer.shots = 0
@@ -112,10 +106,8 @@ describe('Requests - Shoot', () => {
       const initialShots = registeredPlayer.shots
       const session = createSession()
       const message: ShootMessage = {
-        sys: {
-          type: 'Request',
-          id: 'Shoot'
-        }
+        type: 'Request',
+        id: 'Shoot'
       }
 
       session.playerId = registeredPlayer.id

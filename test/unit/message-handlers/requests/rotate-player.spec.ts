@@ -28,10 +28,8 @@ describe('Requests - Rotate player', () => {
         const state: GameState = new GameState({ arena })
         const session = createSession()
         const message: RotatePlayerMessage = {
-          sys: {
-            type: 'Request',
-            id: 'RotatePlayer'
-          },
+          type: 'Request',
+          id: 'RotatePlayer',
           data: {
             rotation: 300
           }
@@ -60,10 +58,8 @@ describe('Requests - Rotate player', () => {
         const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
         const rotation = 300
         const message: RotatePlayerMessage = {
-          sys: {
-            type: 'Request',
-            id: 'RotatePlayer'
-          },
+          type: 'Request',
+          id: 'RotatePlayer',
           data: {
             rotation
           }
@@ -94,10 +90,8 @@ describe('Requests - Rotate player', () => {
       const state: GameState = new GameState({ arena })
       const session = createSession()
       const message: RotatePlayerMessage = {
-        sys: {
-          type: 'Request',
-          id: 'RotatePlayer'
-        },
+        type: 'Request',
+        id: 'RotatePlayer',
         data: {
           rotation: 300
         }
