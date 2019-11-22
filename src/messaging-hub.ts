@@ -61,6 +61,10 @@ export class MessagingHub implements IMessagingHub {
     for (let i = this.messages.length - 1; i >= 0; i--) {
       const [channel, message] = this.messages[i]
 
+      // NOTE this does not belong here. Deciding if the users can send
+      // only one or more messages before the previous ones are consumed
+      // is a decision of the domain logic and not of this wrapper around
+      // the websocket server
       if (seen.has(channel)) {
         continue
       }
