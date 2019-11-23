@@ -20,7 +20,11 @@ describe('Engine - Integration', () => {
 
   describe('RegisterPlayer request', () => {
     it('responds as expected', async () => {
-      const session = createSession()
+      const session = createSession({ id: 'channel-2' })
+      // TODO I've to create this session here because the code expects a control
+      // session to be present. Does that make sense in all cases? For example
+      // a player can register before a control session is created
+      const controlSession = createControlSession({ id: 'channel-1' })
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const playerMessages = [
@@ -37,7 +41,7 @@ describe('Engine - Integration', () => {
       ]
 
       engineState.channelSession.set('channel-2', session)
-      engineState.sessionChannel.set(session, 'channel-2')
+      engineState.channelSession.set('channel-1', controlSession)
 
       const { playerResultMessages } = await engine(engineState, gameLoop, [], playerMessages, { logger })
 
@@ -54,7 +58,7 @@ describe('Engine - Integration', () => {
 
   describe('StartGame command', () => {
     it('responds as expected', async () => {
-      const controlSession = createControlSession()
+      const controlSession = createControlSession({ id: 'channel-1' })
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const controlMessages = [
@@ -68,7 +72,6 @@ describe('Engine - Integration', () => {
       ]
 
       engineState.channelSession.set('channel-1', controlSession)
-      engineState.sessionChannel.set(controlSession, 'channel-1')
 
       const { controlResultMessages  } = await engine(engineState, gameLoop, controlMessages, [], { logger })
 
@@ -87,8 +90,9 @@ describe('Engine - Integration', () => {
     })
 
     it('notifies players', async () => {
-      const session1 = createSession()
-      const session2 = createSession()
+      const controlSession = createControlSession({ id: 'channel-1' })
+      const session1 = createSession({ id: 'channel-2' })
+      const session2 = createSession({ id: 'channel-3' })
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const playerMessages = [
@@ -114,14 +118,12 @@ describe('Engine - Integration', () => {
         }
       ]
 
+      engineState.channelSession.set('channel-1', controlSession)
       engineState.channelSession.set('channel-2', session1)
-      engineState.sessionChannel.set(session1, 'channel-2')
       engineState.channelSession.set('channel-3', session2)
-      engineState.sessionChannel.set(session2, 'channel-3')
 
       await engine(engineState, gameLoop, [], playerMessages, { logger })
 
-      const controlSession = createControlSession()
       const controlMessages = [
         {
           channel: { id: 'channel-1' },
@@ -131,9 +133,6 @@ describe('Engine - Integration', () => {
           }
         }
       ]
-
-      engineState.channelSession.set('channel-1', controlSession)
-      engineState.sessionChannel.set(controlSession, 'channel-1')
 
       const { playerResultMessages, controlResultMessages } = await engine(engineState, gameLoop, controlMessages, [], { logger })
       expect(controlResultMessages).to.have.lengthOf(1)

@@ -81,6 +81,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
     if (result.success === true && result.request === RequestType.RegisterPlayer) {
       const { details: { id: playerId, position, rotation } } = result
+      // TODO isn't the session alredy part of the result? why I'm finding it again here?
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
 
       return [{

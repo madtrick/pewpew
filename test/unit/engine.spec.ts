@@ -37,8 +37,8 @@ describe('Engine', () => {
     })
 
     it('calls the game loop with the valid messages along with the session', async () => {
-      const sessionChannel1 = createSession()
-      const sessionChannel2 = createSession()
+      const sessionChannel1 = createSession({ id: 'channel-1' })
+      const sessionChannel2 = createSession({ id: 'channel-2' })
       const movePlayerMessage = {
         type: 'Request', id: 'MovePlayer',
         data: { movement: { direction: 'forward' } }
@@ -66,7 +66,7 @@ describe('Engine', () => {
     })
 
     it('creates a session if one did not exist', async () => {
-      const session = createSession()
+      const session = createSession({ id: 'channel-1' })
       const messages = [
         {
           channel: { id: 'channel-1' },
@@ -106,8 +106,8 @@ describe('Engine', () => {
     })
 
     it('transform the requests and commands results into notifications and responses and sends those', async () => {
-      const controlSession = createControlSession()
-      const playerSession = createSession()
+      const controlSession = createControlSession({ id: 'channel-1' })
+      const playerSession = createSession({ id: 'channel-2' })
       loopStub.resolves({
         results: [
           {
@@ -146,8 +146,8 @@ describe('Engine', () => {
     })
 
     it('transform the game updates into notifications and sends those', async () => {
-      const controlSession = createControlSession()
-      const playerSession = createSession()
+      const controlSession = createControlSession({ id: 'channel-1' })
+      const playerSession = createSession({ id: 'channel-2' })
       loopStub.resolves({
         updates: [
           {

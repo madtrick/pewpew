@@ -125,6 +125,8 @@ export default async function engine (
         }
       })
     } else {
+      // TODO sessions shouldn't be a part of the engine state. Instead they should be
+      // passed as a separate argument
       const session = state.channelSession.get(channel.id)
 
       if (session) {
@@ -143,16 +145,14 @@ export default async function engine (
     for (const result of results) {
       const responsesAndNotifications = resultToResponseAndNotifications(result, Array.from(state.channelSession.values()))
       for (const notification of responsesAndNotifications) {
-        const channelId = state.sessionChannel.get(notification.session)
+        const channel = notification.session.channel
 
-        if (channelId) {
-          if (isPlayerSession(notification.session)) {
-            playerResultMessages.push({ channel: { id: channelId }, data: notification.notification || notification.response })
-          } else {
-            controlResultMessages.push({ channel: { id: channelId }, data: notification.notification || notification.response })
-          }
+        if (isPlayerSession(notification.session)) {
+          // TODO we shoult pass the session here and not the channel. The channel is an implementation
+          // detail of how we communicate with players
+          playerResultMessages.push({ channel, data: notification.notification || notification.response })
         } else {
-          // TODO log
+          controlResultMessages.push({ channel, data: notification.notification || notification.response })
         }
       }
     }
@@ -163,16 +163,12 @@ export default async function engine (
       const notifications = updateToNotifications(update, Array.from(state.channelSession.values()))
 
       for (const notification of notifications) {
-        const channelId = state.sessionChannel.get(notification.session)
+        const channel = notification.session.channel
 
-        if (channelId) {
-          if (isPlayerSession(notification.session)) {
-            playerResultMessages.push({ channel: { id: channelId }, data: notification.notification })
-          } else {
-            controlResultMessages.push({ channel: { id: channelId }, data: notification.notification })
-          }
+        if (isPlayerSession(notification.session)) {
+          playerResultMessages.push({ channel, data: notification.notification })
         } else {
-          // TODO log
+          controlResultMessages.push({ channel, data: notification.notification })
         }
       }
     }

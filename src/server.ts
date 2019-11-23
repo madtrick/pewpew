@@ -83,15 +83,13 @@ export function start (context: ServerContext): Server {
   }
 
   messaging.control.on('channelOpen', (channel: ChannelRef) => {
-    const session = createControlSession()
+    const session = createControlSession(channel)
     engineState.channelSession.set(channel.id, session)
-    engineState.sessionChannel.set(session, channel.id)
   })
 
   messaging.players.on('channelOpen', (channel: ChannelRef) => {
-    const session = createSession()
+    const session = createSession(channel)
     engineState.channelSession.set(channel.id, session)
-    engineState.sessionChannel.set(session, channel.id)
   })
 
   ticker.atLeastEvery(100, async () => {
