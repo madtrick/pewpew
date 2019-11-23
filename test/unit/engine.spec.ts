@@ -31,7 +31,7 @@ describe('Engine', () => {
     })
 
     it('calls the game loop', async () => {
-      await engine(engineState, loopStub, [], [], createSession, createControlSession, { logger })
+      await engine(engineState, loopStub, [], [], { logger })
 
       expect(loopStub).to.have.been.calledOnce
     })
@@ -48,16 +48,10 @@ describe('Engine', () => {
         { channel: { id: 'channel-1' }, data: shootMessage },
         { channel: { id: 'channel-2' }, data: movePlayerMessage }
       ]
-      const fakeCreateSession = () => sessionChannel2
-      sandbox.stub(engineState.channelSession, 'get').callsFake((id: string) => {
-        if (id === 'channel-1') {
-          return sessionChannel1
-        }
+      engineState.channelSession.set('channel-1', sessionChannel1)
+      engineState.channelSession.set('channel-2', sessionChannel2)
 
-        return undefined
-      })
-
-      await engine(engineState, loopStub, [], messages, fakeCreateSession, createControlSession, { logger })
+      await engine(engineState, loopStub, [], messages, { logger })
 
       expect(loopStub).to.have.been.calledOnceWith('fake-state', [
         {
@@ -85,11 +79,9 @@ describe('Engine', () => {
           }
         }
       ]
-      const fakeCreateSession = () => session
+      engineState.channelSession.set('channel-1', session)
 
-      expect(engineState.channelSession.get('channel-1')).to.be.undefined
-
-      await engine(engineState, loopStub, [], messages, fakeCreateSession, createControlSession, { logger })
+      await engine(engineState, loopStub, [], messages, { logger })
 
       expect(engineState.channelSession.get('channel-1')).to.have.eql(session)
     })
@@ -99,7 +91,7 @@ describe('Engine', () => {
         { channel: { id: 'channel-1' }, data: {foo: 'bar'} }
       ]
 
-      const { playerResultMessages, controlResultMessages } = await engine(engineState, loopStub, [], messages, createSession, createControlSession, { logger })
+      const { playerResultMessages, controlResultMessages } = await engine(engineState, loopStub, [], messages, { logger })
 
       expect(controlResultMessages).to.be.empty
       expect(playerResultMessages).to.eql([{
@@ -134,7 +126,7 @@ describe('Engine', () => {
         [playerSession, 'channel-2']
       ])
 
-      const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], createSession, createControlSession, { logger })
+      const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], { logger })
 
       expect(playerResultMessages).to.eql([{
         channel: { id: 'channel-2' },
@@ -180,7 +172,7 @@ describe('Engine', () => {
         [playerSession, 'channel-2']
       ])
 
-      const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], createSession, createControlSession, { logger })
+      const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], { logger })
 
       expect(playerResultMessages).to.be.empty
       expect(controlResultMessages).to.eql([{

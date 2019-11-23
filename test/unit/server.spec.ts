@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { EventEmitter } from 'events'
+import { ChannelRef } from '../../src/messaging-hub'
 import { start as startServer, init } from '../../src/server'
 
 describe('Server', () => {
@@ -19,12 +20,27 @@ describe('Server', () => {
     const controlMessages = [{ channel: { id: 'ch-1' }, data: JSON.stringify({}) }]
     const playerMessages = [{ channel: { id: 'ch-2' }, data: JSON.stringify({}) }]
 
+    let onOpenControlChannel: (ch: ChannelRef) => void
+    let onOpenPlayerChannel: (ch: ChannelRef) => void
+
     context.messaging = {
-      control: { pull: sinon.stub().returns(controlMessages), send: sinon.stub() },
-      players: { pull: sinon.stub().returns(playerMessages), send: sinon.stub() }
+      control: {
+        pull: sinon.stub().returns(controlMessages),
+        send: sinon.stub(),
+        on: ((_: string, listener: any) => onOpenControlChannel = listener)
+      },
+      players: {
+        pull: sinon.stub().returns(playerMessages),
+        send: sinon.stub(),
+        on: ((_: string, listener: any) => onOpenPlayerChannel = listener)
+      }
     }
 
     startServer(context)
+
+    onOpenControlChannel!({ id: 'ch-1' })
+    onOpenPlayerChannel!({ id: 'ch-2' })
+
     await callback!()
 
     expect(context.engine).to.have.been.calledWith(
@@ -32,10 +48,7 @@ describe('Server', () => {
       context.loop,
       [{ channel: { id: 'ch-1' }, data: {} }],
       [{ channel: { id: 'ch-2' }, data: {} }],
-      context.createSession,
-      context.createControlSession
     )
-    debugger
     expect(context.messaging.control.send).to.have.been.calledWith({
       channel: { id: 'ch-1' },
       data: JSON.stringify(responseToControl)

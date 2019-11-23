@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { EventEmitter } from 'events'
-import { MessagingHub, WebSocket } from '../../src/messaging-hub'
+import { MessagingHub, WebSocket, ChannelRef } from '../../src/messaging-hub'
 
 describe('Messaging Hub', () => {
   it('creates a channel when a new WebSocket connection is openened', () => {
@@ -84,6 +84,19 @@ describe('Messaging Hub', () => {
 
     expect(socket1.send).to.have.been.calledWith(data)
     expect(socket2.send).to.not.have.been.called
+  })
+
+  it('calls the listener when a new channel is created', () => {
+    const wss = new EventEmitter()
+    const socket = new EventEmitter()
+    const hub = new MessagingHub(wss)
+    let channel: ChannelRef | undefined
+
+    hub.on('channelOpen', (ch: ChannelRef) => channel = ch)
+    wss.emit('connection', socket)
+    const { channels } = hub.status()
+
+    expect(channels[0]).to.eql(channel)
   })
 
   //TODO don't send messages to a socket that just closed

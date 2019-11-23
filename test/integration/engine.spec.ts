@@ -1,11 +1,11 @@
 import { expect } from 'chai'
-import { createSession, createControlSession } from '../../src/session'
 import engine, { createEngineState } from '../../src/engine'
 import { GameState } from '../../src/game-state'
 import { Arena } from '../../src/components/arena'
 import { scan } from '../../src/components/radar'
 import { handlers } from '../../src/message-handlers'
 import createGameLoop from '../../src/game-loop'
+import { createSession, createControlSession } from '../../src/session'
 import createLogger from '../utils/create-logger'
 
 describe('Engine - Integration', () => {
@@ -20,6 +20,7 @@ describe('Engine - Integration', () => {
 
   describe('RegisterPlayer request', () => {
     it('responds as expected', async () => {
+      const session = createSession()
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const playerMessages = [
@@ -35,7 +36,10 @@ describe('Engine - Integration', () => {
         }
       ]
 
-      const { playerResultMessages } = await engine(engineState, gameLoop, [], playerMessages, createSession, createControlSession, { logger })
+      engineState.channelSession.set('channel-2', session)
+      engineState.sessionChannel.set(session, 'channel-2')
+
+      const { playerResultMessages } = await engine(engineState, gameLoop, [], playerMessages, { logger })
 
       expect(playerResultMessages).to.have.lengthOf(1)
       expect(playerResultMessages[0].data).to.include({
@@ -50,6 +54,7 @@ describe('Engine - Integration', () => {
 
   describe('StartGame command', () => {
     it('responds as expected', async () => {
+      const controlSession = createControlSession()
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const controlMessages = [
@@ -62,7 +67,10 @@ describe('Engine - Integration', () => {
         }
       ]
 
-      const { controlResultMessages  } = await engine(engineState, gameLoop, controlMessages, [], createSession, createControlSession, { logger })
+      engineState.channelSession.set('channel-1', controlSession)
+      engineState.sessionChannel.set(controlSession, 'channel-1')
+
+      const { controlResultMessages  } = await engine(engineState, gameLoop, controlMessages, [], { logger })
 
       // TODO once chaijs is bumped to version 5 we might be able to write
       // loose matchers and then be able to combine these two expectations in one
@@ -79,6 +87,8 @@ describe('Engine - Integration', () => {
     })
 
     it('notifies players', async () => {
+      const session1 = createSession()
+      const session2 = createSession()
       const engineState = createEngineState(arena, gameState)
       const gameLoop = createGameLoop(handlers)
       const playerMessages = [
@@ -104,8 +114,14 @@ describe('Engine - Integration', () => {
         }
       ]
 
-      await engine(engineState, gameLoop, [], playerMessages, createSession, createControlSession, { logger })
+      engineState.channelSession.set('channel-2', session1)
+      engineState.sessionChannel.set(session1, 'channel-2')
+      engineState.channelSession.set('channel-3', session2)
+      engineState.sessionChannel.set(session2, 'channel-3')
 
+      await engine(engineState, gameLoop, [], playerMessages, { logger })
+
+      const controlSession = createControlSession()
       const controlMessages = [
         {
           channel: { id: 'channel-1' },
@@ -116,7 +132,10 @@ describe('Engine - Integration', () => {
         }
       ]
 
-      const { playerResultMessages, controlResultMessages } = await engine(engineState, gameLoop, controlMessages, [], createSession, createControlSession, { logger })
+      engineState.channelSession.set('channel-1', controlSession)
+      engineState.sessionChannel.set(controlSession, 'channel-1')
+
+      const { playerResultMessages, controlResultMessages } = await engine(engineState, gameLoop, controlMessages, [], { logger })
       expect(controlResultMessages).to.have.lengthOf(1)
       expect(controlResultMessages[0].data).to.eql({
         type: 'Response',

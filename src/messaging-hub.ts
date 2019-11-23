@@ -1,4 +1,5 @@
 import uuid from 'uuid/v4'
+import { EventEmitter } from 'events'
 
 type ChannelId = string
 
@@ -28,14 +29,16 @@ interface Channel {
 export interface IMessagingHub {
   pull (): Message[]
   send (options: { channel: { id: ChannelId }, data: string }): Promise<void>
+  on (event: 'channelOpen', listener: (ch: ChannelRef) => void): void
 }
 
-export class MessagingHub implements IMessagingHub {
+export class MessagingHub extends EventEmitter implements IMessagingHub {
   private connection: WebSocketServer
   private channels: Map<string, Channel>
   private messages: [Channel, any][] //TODO replace that any
 
   constructor (wss: WebSocketServer) {
+    super()
     this.connection = wss
     this.connection.on('connection', this.createChannel.bind(this))
     this.channels = new Map()
@@ -102,6 +105,7 @@ export class MessagingHub implements IMessagingHub {
     })
     // TODO handle closed channels. How to communicate that to the engine
     this.channels.set(id, channel)
+    this.emit('channelOpen', { id: channel.id })
   }
 }
 

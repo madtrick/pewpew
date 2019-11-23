@@ -1,7 +1,7 @@
 import { GameLoop } from './game-loop'
 import { Arena } from './components/arena'
 import { GameState } from './game-state'
-import { Session, CreateSessionFn, CreateControlSessionFn, isPlayerSession } from './session'
+import { Session, isPlayerSession } from './session'
 import { IncommingMessages, validateMessage } from './messages'
 import { isFailure, asSuccess, failure, success, Result } from './success-failure'
 import updateToNotifications from './update-to-notifications'
@@ -68,8 +68,6 @@ export type Engine = (
   loop: GameLoop,
   controlMessages: InMessage[],
   messages: InMessage[],
-  createSession: CreateSessionFn,
-  createControlSession: CreateControlSessionFn,
   context: { logger: ILogger }
 ) => Promise<EngineResult>
 export default async function engine (
@@ -77,8 +75,6 @@ export default async function engine (
   loop: GameLoop,
   controlMessages: InMessage[],
   messages: InMessage[],
-  createSession: CreateSessionFn,
-  createControlSession: CreateControlSessionFn,
   context: { logger: ILogger }
 ): Promise<EngineResult> {
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
@@ -103,16 +99,14 @@ export default async function engine (
       })
     } else {
       context.logger.info({ msg: result })
-      let session = state.channelSession.get(channel.id)
+      const session = state.channelSession.get(channel.id)
 
-      if (!session) {
-        // TODO cleanup after a channel is closed
-        session = createSession()
-        state.channelSession.set(channel.id, session)
-        state.sessionChannel.set(session, channel.id)
+      if (session) {
+        parsedMessages.push({ session, message: asSuccess(result) })
+      } else {
+        // This should not be possible. We should instead pass the session
+        // together with the message
       }
-
-      parsedMessages.push({ session, message: asSuccess(result) })
     }
   }
 
@@ -131,16 +125,14 @@ export default async function engine (
         }
       })
     } else {
-      let session = state.channelSession.get(channel.id)
+      const session = state.channelSession.get(channel.id)
 
-      if (!session) {
-        // TODO cleanup after a channel is closed
-        session = createControlSession()
-        state.channelSession.set(channel.id, session)
-        state.sessionChannel.set(session, channel.id)
+      if (session) {
+        parsedMessages.push({ session, message: asSuccess(result) })
+      } else {
+        // This should not be possible. We should instead pass the session
+        // together with the message
       }
-
-      parsedMessages.push({ session, message: asSuccess(result) })
     }
   }
 

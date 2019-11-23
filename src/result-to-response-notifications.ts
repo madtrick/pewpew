@@ -92,13 +92,8 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           component: {
             type: 'Player',
             data: {
-              // TODO remove the hardcoded player id
-              id: 'player-1',
-              // TODO remove this hardcoded value
-              position: {
-                x: 100,
-                y: 100
-              },
+              id: playerId,
+              position,
               rotation
             }
           }

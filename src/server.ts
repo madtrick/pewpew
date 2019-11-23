@@ -81,6 +81,19 @@ export function start (context: ServerContext): Server {
   function isMessage (a: any): a is { channel: ChannelRef, data: object } {
     return a !== undefined
   }
+
+  messaging.control.on('channelOpen', (channel: ChannelRef) => {
+    const session = createControlSession()
+    engineState.channelSession.set(channel.id, session)
+    engineState.sessionChannel.set(session, channel.id)
+  })
+
+  messaging.players.on('channelOpen', (channel: ChannelRef) => {
+    const session = createSession()
+    engineState.channelSession.set(channel.id, session)
+    engineState.sessionChannel.set(session, channel.id)
+  })
+
   ticker.atLeastEvery(100, async () => {
     const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
     const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
@@ -88,7 +101,7 @@ export function start (context: ServerContext): Server {
       logger.info(playerMessages)
     }
 
-    const { playerResultMessages, controlResultMessages } = await engine(engineState, loop, controlMessages, playerMessages, createSession, createControlSession, { logger })
+    const { playerResultMessages, controlResultMessages } = await engine(engineState, loop, controlMessages, playerMessages, { logger })
     debugger
 
     for (const message of controlResultMessages) {
