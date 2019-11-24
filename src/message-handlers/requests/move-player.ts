@@ -17,7 +17,6 @@ export interface MovePlayerResultDetails {
 }
 
 export default function movePlayer (session: Session, message: MovePlayerMessage, state: GameState): HandlerResult {
-  debugger
   if (!state.started) {
     return {
       result: {
@@ -30,8 +29,14 @@ export default function movePlayer (session: Session, message: MovePlayerMessage
     }
   }
 
-  // TODO fetch the player from the session
-  const [ player ] = state.players()
+  const player = state.players().find((player) => player.id === session.playerId)
+
+  if (!player) {
+    // TODO should we instead return a message with result === false
+    // When can this be the case? That is, that the player is not in the arena?
+    throw new Error('Player not found')
+  }
+
   const movement = message.data.movement
   const result = state.arena.movePlayer(movement, player)
 

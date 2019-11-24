@@ -3,7 +3,7 @@ import * as sinon from 'sinon'
 import { MovePlayerMessage, Movement } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
 import { createSession } from '../../../../src/session'
-import { createPlayer } from '../../../../src/player'
+import { createPlayer, PLAYER_RADIUS } from '../../../../src/player'
 import { Arena } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
 import { RequestType, SuccessfulMovePlayerRequest, FailureRequestResult } from '../../../../src/message-handlers'
@@ -21,19 +21,20 @@ type MovementTestOptions= {
 }
 
 const PLAYER_ID = 'player-1'
+const ARENA_WIDTH = 400
 
 function movementTest(options: MovementTestOptions): () => Promise<void> {
   return async () => {
     const arena = options.arena()
     const state: GameState = new GameState({ arena })
-    state.started = true
     const player = createPlayer({ id: PLAYER_ID })
+    const otherPlayer = createPlayer({ id: 'another-player' })
+    const session = createSession({ id: 'channel-1' })
+    arena.registerPlayer(otherPlayer, { position: { x: ARENA_WIDTH - PLAYER_RADIUS, y: 400 } })
     arena.registerPlayer(player, { position: options.player.position })
     player.rotation = options.player.rotation
-    // const player: Player = createPlayer({ id: 'player-1' })
-    // player.position = options.player.position
-    // state.players = [player]
-    const session = createSession()
+    state.started = true
+    session.playerId = player.id
     const message: MovePlayerMessage = {
       data: {
         movement: options.movement
@@ -52,15 +53,17 @@ describe('Requests - Move player', () => {
   let arena: Arena
 
   beforeEach(() => {
-    arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+    arena = new Arena({ width: ARENA_WIDTH, height: 500 }, { radar: scan })
   })
+
   describe('when the game is started', () => {
+    // TODO remove this tests and instead just test that we are calling the arena
     describe('when the player is not rotated', () => {
       it('moves the player forward', movementTest({
         player: { position: { x: 50, y: 17 }, rotation: 0 },
         movement: { direction: 'forward' },
         arena: () => arena,
-          expectedResult: {
+        expectedResult: {
           request: RequestType.MovePlayer,
           success: true,
           details: {
@@ -77,7 +80,7 @@ describe('Requests - Move player', () => {
         player: { position: { x: 84, y: 17 }, rotation: 0 },
         movement: { direction: 'backward' },
         arena: () => arena,
-          expectedResult: {
+        expectedResult: {
           request: RequestType.MovePlayer,
           success: true,
           details: {
@@ -92,16 +95,16 @@ describe('Requests - Move player', () => {
 
       it('does not move a player already at the arena edge', movementTest({
         // At the rigth edge
-        player: { position: { x: 84, y: 17 }, rotation: 0 },
+        player: { position: { x: ARENA_WIDTH - PLAYER_RADIUS, y: 17 }, rotation: 0 },
         movement: { direction: 'forward' },
         arena: () => arena,
-          expectedResult: {
+        expectedResult: {
           request: RequestType.MovePlayer,
           success: true,
           details: {
             id: PLAYER_ID,
             position: {
-              x: 84,
+              x: ARENA_WIDTH - PLAYER_RADIUS,
               y: 17
             }
           }
@@ -113,7 +116,7 @@ describe('Requests - Move player', () => {
   describe('when the game has not started', () => {
     it('rejects the request', () => {
       const state: GameState = new GameState({ arena })
-      const session = createSession()
+      const session = createSession({ id: 'channel-1' })
       const message: MovePlayerMessage = {
         type: 'Request',
         id: 'MovePlayer',
