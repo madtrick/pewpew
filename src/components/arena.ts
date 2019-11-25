@@ -337,6 +337,11 @@ export class Arena {
       // Formula got at http://stackoverflow.com/a/8367547/1078859
       // (R0-R1)^2 <= (x0-x1)^2+(y0-y1)^2 <= (R0+R1)^2
 
+      if (arenaPlayer.id === arenaShot.id) {
+        // Self harm is not possible
+        return false
+      }
+
       const { x: ox, y: oy } = arenaPlayer.position
       const value = Math.pow((x - ox), 2) + Math.pow((y - oy), 2)
 
