@@ -339,9 +339,6 @@ describe('Arena', () => {
         scanStub.returns(scanResult)
 
         const result = arena.update()
-
-        console.dir(result, { colors: true, depth: null })
-        console.dir(scanResult, { colors: true, depth: null })
         expect(result).to.deep.include(scanResult)
       })
     })

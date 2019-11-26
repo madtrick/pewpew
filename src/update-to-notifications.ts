@@ -52,7 +52,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
       ]
     }
     if (update.component.type === ComponentType.Player) {
-      const { component: { data: { id: playerId, damage } } } = update
+      const { component: { data: { id: playerId, damage, shotId } } } = update
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
       return [
         {
@@ -63,6 +63,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
             component: {
               type: 'Player',
               data: {
+                shotId,
                 id: playerId,
                 damage
               }

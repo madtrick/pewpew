@@ -120,6 +120,7 @@ describe('Update to notification', () => {
           component: {
             type: 'Player',
             data: {
+              shotId: shot.id,
               id: 'player-1',
               damage: 1
             }
