@@ -340,7 +340,7 @@ export class Arena {
       // Formula got at http://stackoverflow.com/a/8367547/1078859
       // (R0-R1)^2 <= (x0-x1)^2+(y0-y1)^2 <= (R0+R1)^2
 
-      if (arenaPlayer.id === arenaShot.id) {
+      if (arenaPlayer.id === arenaShot.player.id) {
         // Self harm is not possible
         return false
       }

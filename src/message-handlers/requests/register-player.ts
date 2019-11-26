@@ -31,6 +31,7 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
 
   session.playerId = result.player.id
 
+  // TODO include the initial life in the response
   return {
     result: {
       success: true,
