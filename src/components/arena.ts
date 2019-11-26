@@ -8,6 +8,9 @@ export type Failure<T> = { status: 'ko' } & T
 export type Result<T, F> = Success<T> | Failure<F>
 export type Position = { x: number, y: number }
 
+// TODO replace process.env with a configuration value passed to the app
+const MOVEMENT_SPEED = process.env.MOVEMENT_SPEED || 1
+
 export function asSuccess<T, F>(result: Result<T, F>): Success<T> | never {
   if (result.status === 'ok') {
     return result
@@ -431,8 +434,7 @@ export class Arena {
 
   private calculateNewPlayerPosition (movement: Movement, player: Player, currentPosition: Position): Position {
     const direction = movement.direction === 'forward' ? 1 : -1
-    const speed = 1
-    const magnitude = direction * speed
+    const magnitude = direction * MOVEMENT_SPEED
     const radians = (player.rotation * Math.PI) / 180
     const dX = magnitude * Math.cos(radians)
     const dY = magnitude * Math.sin(radians)
@@ -442,11 +444,13 @@ export class Arena {
     return { x: newX, y: newY }
   }
 
+  // TODO this dis duplicated with the calculation of the player coordinates
+  // and slightly duplicated with how the initial position of a shot is calculated
+  // in "registerShot"
   private calculateNewShotPosition (movement: Movement, shot: ArenaShot, currentPosition: Position): Position {
     const direction = movement.direction === 'forward' ? 1 : -1
-    const speed = 1
-    const magnitude = direction * speed
-    const radians = (shot.rotation * Math.PI) / 180
+    const magnitude = direction * MOVEMENT_SPEED
+    const radians = shot.rotation * Math.PI / 180
     const dX = magnitude * Math.cos(radians)
     const dY = magnitude * Math.sin(radians)
     const newX = round(dX + currentPosition.x)
