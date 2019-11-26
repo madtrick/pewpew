@@ -176,7 +176,7 @@ export class Arena {
         return {
           status: 'ko',
           details: {
-            msg: 'Give position is not valid'
+            msg: 'Given position is not valid'
           }
         }
       }
