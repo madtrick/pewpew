@@ -218,7 +218,7 @@ export class Arena {
      * Rotate from players origin to
      * get the origin of the shot
      */
-    const radians = Math.PI * arenaPlayer!.rotation
+    const radians = Math.PI/180 * arenaPlayer!.rotation
     /*
      * We add 1 to the player radius considering that the shot
      * starts already on the inmediate pixel after the player
@@ -230,10 +230,10 @@ export class Arena {
      * Translate points with relation to arena origin
      * using the players coordinates
      */
-    const shotX = offsetX + playerX
-    const shotY = offsetY + playerY
+    const shotX = round(offsetX + playerX)
+    const shotY = round(offsetY + playerY)
 
-    const arenaShot = { ...shot, position: { x: shotX, y: shotY } }
+    const arenaShot = { ...shot, rotation: arenaPlayer!.rotation, position: { x: shotX, y: shotY } }
     this.arenaShots.push(arenaShot)
 
     return { status: 'ok', shot: arenaShot }

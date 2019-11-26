@@ -20,8 +20,9 @@ describe('Update to notification', () => {
         }
       }
 
-      const playerSession = createSession()
-      const controlSession = createControlSession()
+      // TODO pull the channel ref generation to an utility function
+      const playerSession = createSession({ id: 'channel-1' })
+      const controlSession = createControlSession({ id: 'channel-2' })
       const sessions = [playerSession, controlSession]
 
       const result = updateToNotifications(update, sessions)
@@ -62,8 +63,8 @@ describe('Update to notification', () => {
           }
         }
 
-        const playerSession = createSession()
-        const controlSession = createControlSession()
+        const playerSession = createSession({ id: 'channel-1' })
+        const controlSession = createControlSession({ id: 'channel-2' })
         const sessions = [playerSession, controlSession]
 
         const result = updateToNotifications(update, sessions)
@@ -97,12 +98,12 @@ describe('Update to notification', () => {
         }
       }
 
-      const hitPlayerSession = createSession()
+      const hitPlayerSession = createSession({ id: 'channel-1' })
       hitPlayerSession.playerId = 'player-1'
-      const otherPlayerSession = createSession()
+      const otherPlayerSession = createSession({ id: 'channel-2' })
       otherPlayerSession.playerId = 'player-2'
 
-      const controlSession = createControlSession()
+      const controlSession = createControlSession({ id: 'channel-3' })
       const sessions = [hitPlayerSession, otherPlayerSession, controlSession]
 
       const result = updateToNotifications(update, sessions)
@@ -154,9 +155,9 @@ describe('Update to notification', () => {
         }
       }
 
-      const playerSession = createSession()
+      const playerSession = createSession({ id: 'channel-1' })
       playerSession.playerId = 'player-1'
-      const controlSession = createControlSession()
+      const controlSession = createControlSession({ id: 'channel-2' })
       const sessions = [playerSession, controlSession]
 
       const result = updateToNotifications(update, sessions)
@@ -189,11 +190,11 @@ describe('Update to notification', () => {
         }
       }
 
-      const playerOneSession = createSession()
+      const playerOneSession = createSession({ id: 'channel-1' })
       playerOneSession.playerId = 'player-1'
-      const playerTwoSession = createSession()
+      const playerTwoSession = createSession({ id: 'channel-2' })
       playerTwoSession.playerId = 'player-2'
-      const controlSession = createControlSession()
+      const controlSession = createControlSession({ id: 'channel-3' })
       const sessions = [playerOneSession, playerTwoSession, controlSession]
 
       const result = updateToNotifications(update, sessions)

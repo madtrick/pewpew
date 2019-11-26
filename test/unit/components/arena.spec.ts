@@ -257,15 +257,27 @@ describe('Arena', () => {
   describe('registerShot', () => {
     it('creates the shot relative to the player position', () => {
       const player = createPlayer({ id: 'player-1' })
-      const result = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
-      const shot = createShot({ player: result.player })
-      player.rotation = 0
+      const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
+      const shot = createShot({ player: registeredPlayer })
+      registeredPlayer.rotation = 0
 
       const registerShotResult = asSuccess(arena.registerShot(shot))
 
       // TODO maybe also return the arenaPlayer from `registerPlayer`
       expect(registerShotResult.shot.position).to.eql({ x: 67, y: 50 })
       // expect(registerShotResult.shot.position).to.eql({ x: 66, y: 50 })
+    })
+
+    it('creates the shot relative to the player position (player rotation different than 0)', () => {
+      const player = createPlayer({ id: 'player-1' })
+      const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
+      const shot = createShot({ player: registeredPlayer })
+      registeredPlayer.rotation = 45
+
+      const registerShotResult = asSuccess(arena.registerShot(shot))
+
+      expect(registerShotResult.shot.rotation).to.eql(45)
+      expect(registerShotResult.shot.position).to.eql({ x: 62.02082, y: 62.02082 })
     })
   })
 
@@ -390,6 +402,24 @@ describe('Arena', () => {
           expect(x).to.eql(initialX + i)
           expect(y).to.eql(initialY)
         }
+      })
+
+      it('moves the shots with rotation different than 0', () => {
+        const player = createPlayer({ id: 'player-1' })
+        const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
+        const shot = createShot({ player: registeredPlayer })
+        // TODO this rotation should be set on the registered player, or passed as an optional value
+        // to registerPlayer
+        registeredPlayer.rotation = 45
+        asSuccess(arena.registerShot(shot))
+
+        arena.update()
+
+        const [arenaShot] = arena.shots()
+        const { x, y } = arenaShot.position
+
+        expect(x).to.eql(62.72793)
+        expect(y).to.eql(62.72793)
       })
 
       // TODO missing tests for vertically and at an angle shot movements
