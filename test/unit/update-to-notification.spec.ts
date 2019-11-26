@@ -76,7 +76,10 @@ describe('Update to notification', () => {
             type: 'Notification',
             id: 'Hit',
             component: {
-              type: 'Wall'
+              type: 'Wall',
+              data: {
+                shotId: shot.id
+              }
             }
           }
         })

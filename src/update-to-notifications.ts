@@ -42,7 +42,10 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
             type: 'Notification',
             id: 'Hit',
             component: {
-              type: 'Wall'
+              type: 'Wall',
+              data: {
+                shotId: update.component.data.shotId
+              }
             }
           }
         }
