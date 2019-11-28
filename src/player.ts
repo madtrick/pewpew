@@ -10,6 +10,7 @@ export interface Player {
   type: ComponentType.Player
 }
 
+export type PlayerId = string
 export const PLAYER_RADIUS = 16 //px
 export const PLAYER_MAX_LIFE = 100
 

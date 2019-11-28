@@ -6,13 +6,22 @@ Missing
 
 - a way for control channels to know about players which registered before the game started
 - A notification to signal that a player just shot
+- A notification to signal that a player was removed from the game
+  - For example when it disconnected
 - Add version to the reply from RegisterPlayer
+- Maybe include the rotation in the successful `Response` `RotatePlayer` message
 - Replace `details` with `data` in responses and notifications
   - `RegisterPlayer `  failure and success
   - `MovePlayer` failure and success
   - `StartGame` failure
   - `Shoot` failure
   - `RotatePlayer` failure
+
+?
+
+* The `id` of the notification for when a player has moved is " id: 'Movement'," but I was expecting `id: 'MovePlayer'`
+* Clarify when occurs a hit
+* Should I remove the `shotId` from the hit wall and hit player notifications and then send a shot destroyed notification?
 
 ```json
 {
@@ -36,7 +45,10 @@ Missing
   type: 'Notification',
   id: 'Hit',
   component: {
-    type: 'Wall'
+    type: 'Wall',
+    data: {
+      shotId: <string>
+    }
   }
 }
 ```

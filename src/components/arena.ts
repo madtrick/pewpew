@@ -1,15 +1,16 @@
 import { Player, PLAYER_RADIUS } from '../player'
-import { Shot, SHOT_RADIUS } from '../shot'
+import { Shot } from '../shot'
 import { Movement } from '../messages'
 import { RadarScan, ScanResult } from './radar'
+import { Position } from '../types'
+import asyncStateUpdate from '../domain/async-state-update'
 
 export type Success<T> = { status: 'ok' } & T
 export type Failure<T> = { status: 'ko' } & T
 export type Result<T, F> = Success<T> | Failure<F>
-export type Position = { x: number, y: number }
 
 // TODO replace process.env with a configuration value passed to the app
-const MOVEMENT_SPEED = process.env.MOVEMENT_SPEED || 1
+const MOVEMENT_SPEED = process.env.MOVEMENT_SPEED ? Number(process.env.MOVEMENT_SPEED) : 1
 
 export function asSuccess<T, F>(result: Result<T, F>): Success<T> | never {
   if (result.status === 'ok') {
@@ -38,7 +39,7 @@ export type ArenaPlayer = Player & { position: Position }
 //   position: Position
 // }
 
-type ArenaShot = Shot & { position: Position }
+export type ArenaShot = Shot & { position: Position }
 // type ArenaShot = {
 //   shot: Shot
 //   position: Position
@@ -59,50 +60,7 @@ export enum UpdateType {
   PlayerDestroyed = 'playerDestroyed'
 }
 
-function isPlayerHit(hit: WallHitDescriptor | PlayerHitDescriptor): hit is PlayerHitDescriptor {
-  return hit.type === ComponentType.Player
-}
-
-function isWallHit(hit: WallHitDescriptor | PlayerHitDescriptor): hit is WallHitDescriptor {
-  return hit.type === ComponentType.Wall
-}
-
-// interface ComponentUpdate {
-//   type: UpdateType
-//   component: {
-//     type: ComponentType
-//     data: {
-//       position: Position
-//     }
-//   }
-// }
-
-// type ShotComponentUpdate = ComponentUpdate
-// type PlayerComponentUpdate = ComponentUpdate & {
-//   component: {
-//     data: {
-//       player: ArenaPlayer
-//     }
-//   }
-// }
-
-interface WallHitDescriptor {
-  type: ComponentType.Wall
-  data: {
-    position: Position
-  }
-}
-
-interface PlayerHitDescriptor {
-  type: ComponentType.Player
-  data: {
-    id: string
-    life: number
-    damage: number
-  }
-}
-
-type ArenaRadarScanResult = ScanResult & {
+export type ArenaRadarScanResult = ScanResult & {
   component: {
     data: {
       playerId: string
@@ -246,144 +204,13 @@ export class Arena {
     type: UpdateType,
     component: Foo
   }[] {
-    const shotsUpdates: { type: UpdateType, component: Foo }[] = this.arenaShots.map((shot) => {
-      const result = this.moveShot(shot)
+    const dimensions = { width: this.width, height: this.height }
+    const update = asyncStateUpdate(this.arenaShots, this.arenaPlayers, dimensions, this.radar)
 
-      // TODO move these transformation to Notifications to another module
-      // (module used from the game loop)
-      if (!result.hit) {
-        return {
-          type: UpdateType.Movement,
-          component: {
-            type: ComponentType.Shot,
-            data: {
-              id: shot.id,
-              position: result.position
-            }
-          }
-        }
-      }
+    this.arenaPlayers = update.players
+    this.arenaShots = update.shots
 
-      if (isPlayerHit(result.hit)){
-        return {
-          type: UpdateType.Hit,
-          component: {
-            type: ComponentType.Player,
-            data: { ...result.hit.data, shotId: shot.id }
-          }
-        }
-      }
-
-      if (isWallHit(result.hit)) {
-        return {
-          type: UpdateType.Hit,
-          component: {
-            type: ComponentType.Wall,
-            data: { ...result.hit.data, shotId: shot.id }
-          }
-        }
-      }
-
-      // TODO missing `Destroy` update for when a shots has to be destroyed
-
-      // TODO: use assertNever https://www.typescriptlang.org/docs/handbook/advanced-types.html
-      throw new Error('This is not possible')
-    })
-
-    const destroyedPlayersUpdates = shotsUpdates.filter((update) => {
-      return update.type === UpdateType.Hit
-        && update.component.type === ComponentType.Player
-        && update.component.data.life <= 0
-    }).map((update) => {
-      return {
-        type: UpdateType.PlayerDestroyed,
-        component: {
-          type: ComponentType.DestroyedPlayer,
-          data: {
-            // @ts-ignore fix the types
-            id: update.component.data.id
-          }
-        }
-      }
-    })
-
-    const destroyedPlayerIds = destroyedPlayersUpdates.map((destroyedPlayerUpdate) => destroyedPlayerUpdate.component.data.id)
-    this.arenaPlayers = this.arenaPlayers.filter((arenaPlayer) => !destroyedPlayerIds.includes(arenaPlayer.id))
-
-    const radarUpdates: ArenaRadarScanResult[] = this.arenaPlayers.map((player) => {
-      const scanResult = this.radar(player.position, [...this.arenaPlayers, ...this.arenaShots])
-      return {
-        type: scanResult.type,
-        component: {
-          type: scanResult.component.type,
-          data: {
-            playerId: player.id,
-            players: scanResult.component.data.players,
-            unknown: scanResult.component.data.unknown,
-            shots: scanResult.component.data.shots
-          }
-        }
-      }
-    })
-
-    // TODO fix the types
-    return [...shotsUpdates, ...destroyedPlayersUpdates, ...radarUpdates]
-  }
-
-  moveShot (arenaShot: ArenaShot):
-    { position: Position, hit: undefined | WallHitDescriptor | PlayerHitDescriptor }
-  {
-    const newPosition = this.calculateNewShotPosition({ direction: 'forward' }, arenaShot, arenaShot.position)
-
-    const { x, y } = newPosition
-    const hittedPlayer = this.arenaPlayers.find((arenaPlayer) => {
-      // Formula got at http://stackoverflow.com/a/8367547/1078859
-      // (R0-R1)^2 <= (x0-x1)^2+(y0-y1)^2 <= (R0+R1)^2
-
-      if (arenaPlayer.id === arenaShot.player.id) {
-        // Self harm is not possible
-        return false
-      }
-
-      const { x: ox, y: oy } = arenaPlayer.position
-      const value = Math.pow((x - ox), 2) + Math.pow((y - oy), 2)
-
-      return Math.pow(SHOT_RADIUS - PLAYER_RADIUS, 2) <= value && value <= Math.pow(SHOT_RADIUS + PLAYER_RADIUS, 2)
-    })
-
-    arenaShot.position = newPosition
-    const hitsWall = !this.isShotWithinBoundaries(newPosition)
-    if (hitsWall || hittedPlayer) {
-      this.arenaShots = this.arenaShots.filter((as) => as !== arenaShot)
-    }
-
-    let hit: any
-    if (hitsWall) {
-      hit = {
-        type: ComponentType.Wall,
-        data: {
-          position: newPosition
-        }
-      }
-    }
-
-    if (hittedPlayer) {
-      hittedPlayer.life = hittedPlayer.life - arenaShot.damage
-      // TODO: remove player if it's life has reached 0. Maybe do a `updatePlayers` method
-      // and handle that there :shrug:
-      hit = {
-        type: ComponentType.Player,
-        // TODO: fix the typings here. Since I set it to `any` I didn't catch that I was
-        // puting the `data` object inside `sys` (when we still had a `sys` wrapper)
-        data: {
-          id: hittedPlayer.id,
-          life: hittedPlayer.life,
-          damage: arenaShot.damage
-        }
-      }
-    }
-
-    return { position: newPosition, hit }
+    return update.updates
   }
 
   // TODO this should take an ArenaPlayer or instead the id of the player to move
@@ -444,34 +271,11 @@ export class Arena {
     return { x: newX, y: newY }
   }
 
-  // TODO this dis duplicated with the calculation of the player coordinates
-  // and slightly duplicated with how the initial position of a shot is calculated
-  // in "registerShot"
-  private calculateNewShotPosition (movement: Movement, shot: ArenaShot, currentPosition: Position): Position {
-    const direction = movement.direction === 'forward' ? 1 : -1
-    const magnitude = direction * MOVEMENT_SPEED
-    const radians = shot.rotation * Math.PI / 180
-    const dX = magnitude * Math.cos(radians)
-    const dY = magnitude * Math.sin(radians)
-    const newX = round(dX + currentPosition.x)
-    const newY = round(dY + currentPosition.y)
-
-    return { x: newX, y: newY }
-  }
-
   private isPlayerPositionWithinBoundaries ({ x, y }: Position): boolean {
     return ((x + PLAYER_RADIUS) <= this.width) &&
       ((y + PLAYER_RADIUS) <= this.height) &&
       ((x - PLAYER_RADIUS) >= 0) &&
       ((y - PLAYER_RADIUS) >= 0)
-  }
-
-  private isShotWithinBoundaries ({ x, y }: Position): boolean {
-    const shotRadius = 1
-    return ((x + shotRadius) <= this.width) &&
-      ((y + shotRadius) <= this.height) &&
-      ((x - shotRadius) >= 0) &&
-      ((y - shotRadius) >= 0)
   }
 
   private generatePlayerPosition (): { x: number, y: number } {
