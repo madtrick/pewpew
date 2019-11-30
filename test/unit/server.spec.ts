@@ -8,6 +8,7 @@ describe('Server', () => {
   it('calls the engine on each tick', async () => {
     let callback: Function
     const context = init({ WS: EventEmitter })
+    const currentTick = 1
     context.ticker = { atLeastEvery: (_, fn) => { callback = fn }, cancel: sinon.stub() }
 
     const responseToPlayer = { a: 1 }
@@ -41,9 +42,10 @@ describe('Server', () => {
     onOpenControlChannel!({ id: 'ch-1' })
     onOpenPlayerChannel!({ id: 'ch-2' })
 
-    await callback!()
+    await callback!(currentTick)
 
     expect(context.engine).to.have.been.calledWith(
+      currentTick,
       context.engineState,
       context.loop,
       [{ channel: { id: 'ch-1' }, data: {} }],

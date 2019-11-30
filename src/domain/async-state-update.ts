@@ -2,6 +2,7 @@ import { ArenaShot, ArenaPlayer, ArenaRadarScanResult, Foo, UpdateType, Componen
 import { RadarScan } from '../components/radar'
 import asyncMoveShots from './async-move-shot'
 import { shotHisWalls, shotHitsPlayer } from './async-determine-shot-hits'
+import { PLAYER_MAX_SHOTS } from '../player'
 
 interface Update {
   updates: { type: UpdateType, component: Foo }[]
@@ -13,7 +14,10 @@ export default function updateState (
   shots: ArenaShot[],
   players: ArenaPlayer[],
   arenaDimensions: { width: number, height: number },
-  radar: RadarScan
+  radar: RadarScan,
+  tick: number,
+  shotUpdateCadence: number,
+  shotIncrease: number
 ): Update {
   const movedShots = asyncMoveShots(shots, 1)
   const remainingShots: ArenaShot[] = []
@@ -104,6 +108,18 @@ export default function updateState (
       }
     }
   })
+
+  if (tick % shotUpdateCadence === 0) {
+    remainingPlayers.forEach((player) => {
+      if (player.shots < PLAYER_MAX_SHOTS) {
+        if (player.shots + shotIncrease > PLAYER_MAX_SHOTS) {
+          player.shots = PLAYER_MAX_SHOTS
+        } else {
+          player.shots = player.shots + shotIncrease
+        }
+      }
+    })
+  }
 
   return {
     updates: [...updates, ...radarUpdates],

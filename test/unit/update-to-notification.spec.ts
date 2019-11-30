@@ -1,9 +1,6 @@
 import { expect } from 'chai'
-import {
-  createControlSession,
-  createSession
-} from '../../src/session'
-import { UpdateType, ComponentType } from '../../src/components/arena'
+import { createControlSession, createSession } from '../../src/session'
+import { UpdateType, ComponentType, ArenaRadarScanResult } from '../../src/components/arena'
 import updateToNotifications, { ComponentUpdate } from '../../src/update-to-notifications'
 
 describe('Update to notification', () => {

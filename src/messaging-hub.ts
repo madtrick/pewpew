@@ -11,6 +11,9 @@ export interface Message {
   data?: string
 }
 
+export interface WebSocketServerConstructor {
+  new (options: { port: number }): WebSocketServer
+}
 export interface WebSocketServer {
   on (event: 'connection', cb: (socket: WebSocket) => void ): void
 }

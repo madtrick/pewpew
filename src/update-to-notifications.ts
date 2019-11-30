@@ -12,6 +12,7 @@ export interface ComponentUpdate {
   component: Foo
 }
 
+// TODO fix the return types
 export default function updateToNotifications (update: ComponentUpdate, sessions: (Session | ControlSession)[]): any[] {
   // NOTE I'm assuming here that there's only one control session
   const controlSession = sessions.find(isControlSession)

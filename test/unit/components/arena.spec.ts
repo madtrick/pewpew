@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { Arena, Success, Result, asSuccess, ComponentType, UpdateType } from '../../../src/components/arena'
 import { Player, createPlayer, PLAYER_MAX_LIFE } from '../../../src/player'
-import { createShot, SHOT_DAMAGE } from '../../../src/shot'
+import { createShot } from '../../../src/shot'
 import { scan, ScanResult as RadarScanResult } from '../../../src/components/radar'
 
 function makeSuccess<T>(data: T): Success<T> {
@@ -283,6 +283,10 @@ describe('Arena', () => {
 
   describe('update', () => {
     // TODO missing test which tests that update result includes scan and shot movement
+    let shotRefillQuantity = 1
+    let shotRefillCadence = 2
+    let currentTick = 1
+
     describe('radar', () => {
       let arena: Arena
       let scanStub: sinon.SinonStub
@@ -309,7 +313,7 @@ describe('Arena', () => {
           }
         })
 
-        arena.update()
+        arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
 
         expect(scanStub).to.have.been.calledTwice
         expect(scanStub).to.have.been.calledWith(registeredPlayer1.position, [...arena.players(), ...arena.shots()])
@@ -338,7 +342,7 @@ describe('Arena', () => {
         }
         scanStub.returns(scanResult)
 
-        const result = arena.update()
+        const result = arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
         expect(result).to.deep.include(scanResult)
       })
     })
@@ -391,7 +395,8 @@ describe('Arena', () => {
         const { x: initialX, y: initialY } = registerShotResult.shot.position
 
         for (let i = 1; i < 5; i++) {
-          arena.update()
+          arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
+          currentTick = currentTick + 1
 
           const [shot] = arena.shots()
           const { x, y } = shot.position
@@ -410,7 +415,7 @@ describe('Arena', () => {
         registeredPlayer.rotation = 45
         asSuccess(arena.registerShot(shot))
 
-        arena.update()
+        arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
 
         const [arenaShot] = arena.shots()
         const { x, y } = arenaShot.position
@@ -434,7 +439,8 @@ describe('Arena', () => {
           // TODO no need to use a loop here. We are already testing that the shot is movered
           // in another test. Remove this an instead place the shot next to the wall
           for (let i = 1; i < 6; i++) {
-            arena.update()
+            arena.update({ shotRefillQuantity, shotRefillCadence, currentTick })
+            currentTick = currentTick + 1
           }
 
           const shots = arena.shots()
@@ -461,7 +467,8 @@ describe('Arena', () => {
           // TODO no need to use a loop here. We are already testing that the shot is movered
           // in another test. Remove this an instead place the shot next to the wall
           for (let i = 1; i < 5; i++) {
-            arena.update()
+            arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
+            currentTick = currentTick + 1
 
             const shots = arena.shots()
             expect(shots).to.not.be.empty
@@ -470,7 +477,7 @@ describe('Arena', () => {
           // After the loop the shot is at x=47. One movement more and the
           // player will be tangential to the player which is considered a hit
 
-          arena.update()
+          arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
           const shots = arena.shots()
           expect(shots).to.be.empty
           const targetPlayer = arena.findPlayer('player-2')
@@ -493,7 +500,7 @@ describe('Arena', () => {
             // After the loop the shot is at x=47. One movement more and the
             // player will be tangential to the player which is considered a hit
 
-            arena.update()
+            arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
             const targetPlayer = arena.findPlayer('player-2')
             expect(targetPlayer).to.be.undefined
           })
@@ -513,7 +520,7 @@ describe('Arena', () => {
           const shot1 = createShot({ player: shooter })
           arena.registerShot(shot1)
 
-          const updates = arena.update()
+          const updates = arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
 
           expect(updates).to.have.lengthOf(3)
           expect(updates).to.have.deep.members([
@@ -547,7 +554,7 @@ describe('Arena', () => {
           const shot1 = createShot({ player: shooter })
           arena.registerShot(shot1)
 
-          const updates = arena.update()
+          const updates = arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
 
           expect(updates).to.have.lengthOf(3)
           expect(updates).to.have.deep.members([
@@ -584,7 +591,7 @@ describe('Arena', () => {
           const shot = createShot({ player: shooter })
           arena.registerShot(shot)
 
-          const updates = arena.update()
+          const updates = arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
 
           expect(updates).to.have.lengthOf(2)
           expect(updates).to.have.deep.members([
@@ -613,7 +620,7 @@ describe('Arena', () => {
           const shot = createShot({ player: shooter1 })
           arena.registerShot(shot)
 
-          const updates = arena.update()
+          const updates = arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
 
 
           expect(updates).to.have.lengthOf(2)

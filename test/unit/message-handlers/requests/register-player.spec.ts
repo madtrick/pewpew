@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { RegisterPlayerMessage } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
 import { createPlayer } from '../../../../src/player'
-import { createSession } from '../../../../src/session'
+import { createSession, Session } from '../../../../src/session'
 import { Arena } from '../../../../src/components/arena'
 import { RequestType } from '../../../../src/message-handlers'
 import { scan } from '../../../../src/components/radar'
@@ -12,11 +12,16 @@ describe('Requests - Register player', () => {
   const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
   const gameStateOptions = { arena }
 
+  let session: Session
+
+  beforeEach(() => {
+    session = createSession({ id: 'channel-1' })
+  })
+
   // TODO throw if the game has already started
   describe('when the game has not started', () => {
     it('registers player in game', () => {
       const state: GameState = new GameState(gameStateOptions)
-      const session = createSession()
       const message: RegisterPlayerMessage = {
         data: {
           id: 'player-1'
@@ -63,7 +68,6 @@ describe('Requests - Register player', () => {
     it('does not register player in game if duplicated id', () => {
       const player = createPlayer({ id: 'player-1'})
       const state: GameState = new GameState(gameStateOptions)
-      const session = createSession()
       state.registerPlayer(player)
       const message: RegisterPlayerMessage = {
         data: {

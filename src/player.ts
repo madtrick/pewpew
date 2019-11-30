@@ -13,6 +13,7 @@ export interface Player {
 export type PlayerId = string
 export const PLAYER_RADIUS = 16 //px
 export const PLAYER_MAX_LIFE = 100
+export const PLAYER_MAX_SHOTS = 50
 
 // TODO Right no the `Player` represents both the human who registerd to play and the bot in the game
 // I think I should split that into a:
@@ -30,7 +31,7 @@ export function createPlayer (options: { id: string }): Player {
     // type and not the base Player
     rotation: 0,
     life: PLAYER_MAX_LIFE,
-    shots: 50,
+    shots: PLAYER_MAX_SHOTS,
     type: ComponentType.Player
   }
 }

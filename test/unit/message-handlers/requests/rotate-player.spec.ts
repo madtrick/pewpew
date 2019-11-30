@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { RotatePlayerMessage } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
-import { createSession } from '../../../../src/session'
+import { createSession, Session } from '../../../../src/session'
 import { createPlayer } from '../../../../src/player'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { RequestType } from '../../../../src/message-handlers'
@@ -17,16 +17,17 @@ const PLAYER_ID = 'player-1'
 
 describe('Requests - Rotate player', () => {
   let arena: Arena
+  let session: Session
 
   beforeEach(() => {
     arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+    session = createSession({ id: 'channel-1' })
   })
 
   describe('when the game is started', () => {
     describe('when the session has no player registered', () => {
       it('rejects the request', () => {
         const state: GameState = new GameState({ arena })
-        const session = createSession()
         const message: RotatePlayerMessage = {
           type: 'Request',
           id: 'RotatePlayer',
@@ -53,7 +54,6 @@ describe('Requests - Rotate player', () => {
     describe('when the session has the player registered', () => {
       it('rotates the player', () => {
         const state: GameState = new GameState({ arena })
-        const session = createSession()
         const player = createPlayer({ id: PLAYER_ID })
         const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
         const rotation = 300
@@ -88,7 +88,6 @@ describe('Requests - Rotate player', () => {
   describe('when the game has not started', () => {
     it('rejects the request', () => {
       const state: GameState = new GameState({ arena })
-      const session = createSession()
       const message: RotatePlayerMessage = {
         type: 'Request',
         id: 'RotatePlayer',

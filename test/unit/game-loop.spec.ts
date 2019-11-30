@@ -18,11 +18,14 @@ import { scan } from '../../src/components/radar'
 describe('Game loop', () => {
   const loop = createGameLopp(handlers)
   const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+  const currentTick = 1
 
   let sandbox: sinon.SinonSandbox
+  let session: Session
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
+    session = createSession({ id: 'channel-1' })
   })
 
   afterEach(() => {
@@ -32,7 +35,6 @@ describe('Game loop', () => {
   describe('StartGameCommand', () => {
     it('starts the game', async () => {
       const state: GameState = new GameState({ arena })
-      const session: Session = createSession()
       const message: StartGameMessage = {
         type: 'Command',
         id: 'StartGame'
@@ -46,7 +48,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Command, 'StartGame').returns(result)
 
-      const { results } = await loop(state, [{ session, message }])
+      const { results } = await loop(currentTick, state, [{ session, message }])
 
       expect(handlers.Command.StartGame).to.have.been.calledOnceWith(message, state)
       expect(results).to.eql([result.result])
@@ -57,7 +59,6 @@ describe('Game loop', () => {
   describe('RegisterPlayerMessage', () => {
     it('registers player in game', async () => {
       const state: GameState = new GameState({ arena })
-      const session: Session = createSession()
       const message: RegisterPlayerMessage = {
         data: {
           id: 'player-1'
@@ -82,7 +83,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'RegisterPlayer').returns(result)
 
-      const { results } = await loop(state, [{ session, message }])
+      const { results } = await loop(currentTick, state, [{ session, message }])
 
       expect(handlers.Request.RegisterPlayer).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -92,7 +93,6 @@ describe('Game loop', () => {
   describe('MovePlayerMessage', () => {
     it('moves player', async () => {
       const state: GameState = new GameState({ arena })
-      const session: Session = createSession()
       const message: MovePlayerMessage = {
         data: {
           movement: {
@@ -117,7 +117,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'MovePlayer').returns(result)
 
-      const { results } = await loop(state, [{ session, message }])
+      const { results } = await loop(currentTick, state, [{ session, message }])
 
       expect(handlers.Request.MovePlayer).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -127,7 +127,6 @@ describe('Game loop', () => {
   describe('ShootMessage', () => {
     it('shoots', async () => {
       const state: GameState = new GameState({ arena })
-      const session: Session = createSession()
       const message: ShootMessage = {
         type: 'Request',
         id: 'Shoot' // TODO fix the messages typings. Here I could have RegisterPlayer and the type would not complain
@@ -143,7 +142,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'Shoot').returns(result)
 
-      const { results } = await loop(state, [{ session, message }])
+      const { results } = await loop(currentTick, state, [{ session, message }])
 
       expect(handlers.Request.Shoot).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -153,7 +152,6 @@ describe('Game loop', () => {
   describe('RotatePlayerMessage', () => {
     it('rotates the player', async () => {
       const state: GameState = new GameState({ arena })
-      const session: Session = createSession()
       const message: RotatePlayerMessage = {
         data: {
           rotation: 300
@@ -173,7 +171,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'RotatePlayer').returns(result)
 
-      const { results } = await loop(state, [{ session, message }])
+      const { results } = await loop(currentTick, state, [{ session, message }])
 
       expect(handlers.Request.RotatePlayer).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -184,7 +182,7 @@ describe('Game loop', () => {
   describe('when the game is not started', () => {
     it('does not send update notifications', async () => {
       const state: GameState = new GameState({ arena })
-      const { updates } = await loop(state, [])
+      const { updates } = await loop(currentTick, state, [])
 
       expect(updates).to.be.empty
     })
@@ -198,7 +196,7 @@ describe('Game loop', () => {
         state.registerPlayer(player)
         state.started = true
 
-        const { updates } = await loop(state, [])
+        const { updates } = await loop(currentTick, state, [])
 
         expect(updates).to.have.lengthOf(1)
         expect(updates[0]).to.eql({

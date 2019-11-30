@@ -1,5 +1,7 @@
 import { expect } from 'chai'
 import {
+  Session,
+  ControlSession,
   createSession,
   createControlSession
 } from '../../src/session'
@@ -20,17 +22,23 @@ import {
 describe('Result to response', () => {
   const playerOneId = 'player-1'
 
+  let playerSession: Session
+  let controlSession: ControlSession
+
+  beforeEach(() => {
+    playerSession = createSession({ id: 'channel-1' })
+    controlSession = createControlSession({ id: 'channel-2' })
+  })
+
   describe('RequesType.RegisterPlayer', () => {
     describe('when the player was could not be registered', () => {
       it('generates a Error response for the player', () => {
-        const playerSession = createSession()
         const result: FailureRegisterPlayerRequest = {
           session: playerSession,
           success: false,
           request: RequestType.RegisterPlayer,
           reason: `Some error`
         }
-        const controlSession = createControlSession()
         const sessions = [playerSession, controlSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
@@ -64,9 +72,7 @@ describe('Result to response', () => {
           }
         }
 
-        const playerSession = createSession()
         playerSession.playerId = playerOneId
-        const controlSession = createControlSession()
         const sessions = [playerSession, controlSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
@@ -113,7 +119,6 @@ describe('Result to response', () => {
   describe('RequesType.MovePlayer', () => {
     describe('when the player could not be moved', () => {
       it('generates a MovePlayer response', () => {
-        const playerSession = createSession()
         const sessions = [playerSession]
         const result: FailureMoveRequest = {
           session: playerSession,
@@ -152,8 +157,6 @@ describe('Result to response', () => {
           }
         }
 
-        const playerSession = createSession()
-        const controlSession = createControlSession()
         playerSession.playerId = playerOneId
         const sessions = [playerSession, controlSession]
 
@@ -198,7 +201,6 @@ describe('Result to response', () => {
   describe('RequesType.Shoot', () => {
     describe('when the request was a failure', () => {
       it('generates a failure response', () => {
-        const playerSession = createSession()
         const sessions = [playerSession]
         const result: FailureShootRequest = {
           session: playerSession,
@@ -235,7 +237,6 @@ describe('Result to response', () => {
           }
         }
 
-        const playerSession = createSession()
         playerSession.playerId = playerOneId
         const sessions = [playerSession]
 
@@ -257,7 +258,6 @@ describe('Result to response', () => {
   describe('RequesType.RotatePlayer', () => {
     describe('when the request was a failure', () => {
       it('generates a failure response', () => {
-        const playerSession = createSession()
         const sessions = [playerSession]
         const result: FailureRotatePlayerRequest = {
           session: playerSession,
@@ -296,8 +296,6 @@ describe('Result to response', () => {
           }
         }
 
-        const controlSession = createControlSession()
-        const playerSession = createSession()
         playerSession.playerId = playerOneId
         const sessions = [playerSession, controlSession]
 
@@ -340,8 +338,6 @@ describe('Result to response', () => {
             reason: 'Some error'
           }
 
-          const playerSession = createSession()
-          const controlSession = createControlSession()
           const sessions = [playerSession, controlSession]
 
           const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
@@ -367,9 +363,7 @@ describe('Result to response', () => {
             command: CommandType.StartGame
           }
 
-          const playerSession = createSession()
-          const otherPlayerSession = createSession()
-          const controlSession = createControlSession()
+          const otherPlayerSession = createSession({ id: 'channel-3' })
           const sessions = [playerSession, otherPlayerSession, controlSession]
 
           const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)

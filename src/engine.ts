@@ -63,14 +63,9 @@ export function createEngineState (arena: Arena, gameState: GameState): EngineSt
 
 // TODO create a module that takes messages from the messaging hub and parses and ensures that they are objects
 // TODO rather than reimplementing the type here use `typeof engine`
-export type Engine = (
-  state: EngineState,
-  loop: GameLoop,
-  controlMessages: InMessage[],
-  messages: InMessage[],
-  context: { logger: ILogger }
-) => Promise<EngineResult>
+export type Engine = typeof engine
 export default async function engine (
+  currentTick: number,
   state: EngineState,
   loop: GameLoop,
   controlMessages: InMessage[],
@@ -138,7 +133,7 @@ export default async function engine (
     }
   }
 
-  const { updates, results } = await loop(state.gameState, parsedMessages)
+  const { updates, results } = await loop(currentTick, state.gameState, parsedMessages)
 
   // TODO combine the notifications and responses
   if (results) {

@@ -1,11 +1,12 @@
-import { Position, ComponentType, UpdateType } from './arena'
+import { Position } from '../types'
+import { ComponentType, UpdateType } from './arena'
 import { PLAYER_RADIUS } from '../player'
 
 // TODO replace this with this Position type
 type ComponentPosition = { position: { x: number, y: number } }
 
 // TODO since this is an update, this type should be named
-// something like ScanUpdate. Or maybe keep the result and rename the 
+// something like ScanUpdate. Or maybe keep the result and rename the
 // updatetype prop :shrug:
 export interface ScanResult {
   type: UpdateType.Scan,

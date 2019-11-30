@@ -38,6 +38,20 @@ describe('Ticker', () => {
       expect(count).to.eql(3)
     })
 
+    it('calls its callback passing the current tick number', async () => {
+      const ticker = createTicker()
+
+      let count = 1
+      ticker.atLeastEvery(100, (tick) => {
+        expect(tick).to.eql(count)
+        count = count + 1
+      })
+
+      await sleep(350)
+
+      ticker.cancel()
+    })
+
     it('does not execute the callback before the timeout', () => {
       const ticker = createTicker()
 

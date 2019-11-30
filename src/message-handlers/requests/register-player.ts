@@ -3,7 +3,7 @@ import { HandlerResult, RequestType } from '../../message-handlers'
 import { RegisterPlayerMessage } from '../../messages'
 import { createPlayer } from '../../player'
 import { Session } from '../../session'
-import { Position } from '../../components/arena'
+import { Position } from '../../types'
 
 export interface RegisterPlayerResultDetails {
   id: string

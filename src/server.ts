@@ -1,5 +1,5 @@
 // TODO make MessagingHub, Arena and GameState default exports
-import { IMessagingHub, MessagingHub, Message, ChannelRef, WebSocketServer } from './messaging-hub'
+import { IMessagingHub, MessagingHub, Message, ChannelRef, WebSocketServerConstructor } from './messaging-hub'
 import { Arena } from './components/arena'
 import { scan } from './components/radar'
 import { GameState } from './game-state'
@@ -42,7 +42,7 @@ function parse (message: Message): { channel: ChannelRef, data: object } | undef
   }
 }
 
-export function init ({ WS }: { WS: WebSocketServer }): ServerContext {
+export function init ({ WS }: { WS: WebSocketServerConstructor }): ServerContext {
   const arena = new Arena({ width: 500, height: 500 }, { radar: scan })
   const gameState = new GameState({ arena })
   const engineState = createEngineState(arena, gameState)
@@ -92,14 +92,14 @@ export function start (context: ServerContext): Server {
     engineState.channelSession.set(channel.id, session)
   })
 
-  ticker.atLeastEvery(100, async () => {
+  ticker.atLeastEvery(100, async (tick) => {
     const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
     const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
     if (playerMessages.length > 0) {
       logger.info(playerMessages)
     }
 
-    const { playerResultMessages, controlResultMessages } = await engine(engineState, loop, controlMessages, playerMessages, { logger })
+    const { playerResultMessages, controlResultMessages } = await engine(tick, engineState, loop, controlMessages, playerMessages, { logger })
     debugger
 
     for (const message of controlResultMessages) {

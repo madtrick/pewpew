@@ -200,12 +200,15 @@ export class Arena {
     return { status: 'ok', shot: arenaShot }
   }
 
-  update (): {
+  update (
+    { currentTick, shotRefillCadence, shotRefillQuantity }:
+    { shotRefillCadence: number, shotRefillQuantity: number, currentTick: number }
+  ): {
     type: UpdateType,
     component: Foo
   }[] {
     const dimensions = { width: this.width, height: this.height }
-    const update = asyncStateUpdate(this.arenaShots, this.arenaPlayers, dimensions, this.radar)
+    const update = asyncStateUpdate(this.arenaShots, this.arenaPlayers, dimensions, this.radar, currentTick, shotRefillCadence, shotRefillQuantity)
 
     this.arenaPlayers = update.players
     this.arenaShots = update.shots
