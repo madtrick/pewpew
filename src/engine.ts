@@ -134,6 +134,7 @@ export default async function engine (
   }
 
   const { updates, results } = await loop(currentTick, state.gameState, parsedMessages)
+  const dataForChannel = new Map()
 
   // TODO combine the notifications and responses
   if (results) {
@@ -147,7 +148,12 @@ export default async function engine (
           // detail of how we communicate with players
           playerResultMessages.push({ channel, data: notification.notification || notification.response })
         } else {
-          controlResultMessages.push({ channel, data: notification.notification || notification.response })
+          // controlResultMessages.push({ channel, data: notification.notification || notification.response })
+          if (dataForChannel.has(channel)) {
+            dataForChannel.get(channel).push(notification.notification || notification.response)
+          } else {
+            dataForChannel.set(channel, [notification.notification || notification.response])
+          }
         }
       }
     }
@@ -160,14 +166,29 @@ export default async function engine (
       for (const notification of notifications) {
         const channel = notification.session.channel
 
+
         if (isPlayerSession(notification.session)) {
           playerResultMessages.push({ channel, data: notification.notification })
         } else {
-          controlResultMessages.push({ channel, data: notification.notification })
+          // controlResultMessages.push({ channel, data: notification.notification })
+          if (dataForChannel.has(channel)) {
+            dataForChannel.get(channel).push(notification.notification)
+          } else {
+            dataForChannel.set(channel, [notification.notification])
+          }
         }
       }
     }
   }
+
+  dataForChannel.forEach((v, k) => {
+    controlResultMessages.push({
+      channel: k, data: {
+        type: 'Summary',
+        data: v
+      }
+    })
+  })
 
   // TODO rename this properties
   return { playerResultMessages, controlResultMessages }
