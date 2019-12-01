@@ -83,9 +83,13 @@ describe('Engine - Integration', () => {
       expect(controlResultMessages).to.have.lengthOf(1)
       expect(controlResultMessages[0]).to.deep.include({
         data: {
-          type: 'Response',
-          id: 'StartGame',
-          success: true
+          type: 'Notification',
+          id: 'GameStateUpdate',
+          data: [{
+            type: 'Response',
+            id: 'StartGame',
+            success: true
+          }]
         }
       })
     })
@@ -138,9 +142,13 @@ describe('Engine - Integration', () => {
       const { playerResultMessages, controlResultMessages } = await engine(currentTick, engineState, gameLoop, controlMessages, [], { logger })
       expect(controlResultMessages).to.have.lengthOf(1)
       expect(controlResultMessages[0].data).to.eql({
-        type: 'Response',
-        id: 'StartGame',
-        success: true
+        type: 'Notification',
+        id: 'GameStateUpdate',
+        data: [{
+          type: 'Response',
+          id: 'StartGame',
+          success: true
+        }]
       })
       expect(playerResultMessages).to.have.lengthOf(2)
       expect(playerResultMessages[0].data).to.eql({

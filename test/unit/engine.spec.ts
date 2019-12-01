@@ -139,9 +139,13 @@ describe('Engine', () => {
       expect(controlResultMessages).to.eql([{
         channel: { id: 'channel-1' },
         data: {
-          type: 'Response',
-          id: 'StartGame',
-          success: true
+          type: 'Notification',
+          id: 'GameStateUpdate',
+          data: [{
+            type: 'Response',
+            id: 'StartGame',
+            success: true
+          }]
         }
       }])
     })
@@ -180,14 +184,18 @@ describe('Engine', () => {
         channel: { id: 'channel-1' },
         data: {
           type: 'Notification',
-          id: 'Movement',
-          component: {
-            type: 'Shot',
-            data: {
-              id: 'shot-1',
-              position: { x: 100, y: 100 }
+          id: 'GameStateUpdate',
+          data: [{
+            type: 'Notification',
+            id: 'Movement',
+            component: {
+              type: 'Shot',
+              data: {
+                id: 'shot-1',
+                position: { x: 100, y: 100 }
+              }
             }
-          }
+          }]
         }
       }])
     })
