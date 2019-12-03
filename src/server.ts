@@ -8,6 +8,7 @@ import createGameLopp, { GameLoop }  from './game-loop'
 import engine, { Engine, EngineState, createEngineState } from './engine'
 import { createSession, CreateSessionFn, createControlSession, CreateControlSessionFn } from './session'
 import { createTicker, Ticker } from './ticker'
+import { EventType, Event } from './types'
 import * as Logger from 'bunyan'
 
 interface ServerContext {
@@ -78,6 +79,8 @@ export function start (context: ServerContext): Server {
     logger
   } = context
 
+  let events: Event[] = []
+
   function isMessage (a: any): a is { channel: ChannelRef, data: object } {
     return a !== undefined
   }
@@ -92,6 +95,26 @@ export function start (context: ServerContext): Server {
     engineState.channelSession.set(channel.id, session)
   })
 
+  messaging.players.on('channelClose', (channel: ChannelRef) => {
+    const session = engineState.channelSession.get(channel.id)
+
+    engineState.channelSession.delete(channel.id)
+    events.push({
+      type: EventType.SessionClose,
+      data: session
+    })
+  })
+
+  messaging.control.on('channelClose', (channel: ChannelRef) => {
+    const session = engineState.channelSession.get(channel.id)
+
+    engineState.channelSession.delete(channel.id)
+    events.push({
+      type: EventType.SessionClose,
+      data: session
+    })
+  })
+
   ticker.atLeastEvery(100, async (tick) => {
     const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
     const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
@@ -99,7 +122,7 @@ export function start (context: ServerContext): Server {
       logger.info(playerMessages)
     }
 
-    const { playerResultMessages, controlResultMessages } = await engine(tick, engineState, loop, controlMessages, playerMessages, { logger })
+    const { playerResultMessages, controlResultMessages } = await engine(tick, engineState, loop, controlMessages, playerMessages, events, { logger })
     debugger
 
     for (const message of controlResultMessages) {
@@ -109,6 +132,11 @@ export function start (context: ServerContext): Server {
     for (const message of playerResultMessages) {
       messaging.players.send({ ...message, data: JSON.stringify(message.data) })
     }
+
+    // TODO could we use the events to also pass messages down to the engine. I mean
+    // instead of passing control and player messages, pass a MessageReceived event
+    // with objects for both player and control messages
+    events = []
   })
 
   return {

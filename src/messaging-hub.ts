@@ -33,6 +33,7 @@ export interface IMessagingHub {
   pull (): Message[]
   send (options: { channel: { id: ChannelId }, data: string }): Promise<void>
   on (event: 'channelOpen', listener: (ch: ChannelRef) => void): void
+  on (event: 'channelClose', listener: (ch: ChannelRef) => void): void
 }
 
 export class MessagingHub extends EventEmitter implements IMessagingHub {
@@ -101,6 +102,7 @@ export class MessagingHub extends EventEmitter implements IMessagingHub {
     const id = uuid()
     const channel = { id, socket }
     socket.on('close', () => {
+      this.emit('channelClose', { id: channel.id })
       this.channels.delete(id)
     })
     socket.on('message', (data) => {

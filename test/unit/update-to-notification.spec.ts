@@ -4,6 +4,42 @@ import { UpdateType, ComponentType, ArenaRadarScanResult } from '../../src/compo
 import updateToNotifications, { ComponentUpdate } from '../../src/update-to-notifications'
 
 describe('Update to notification', () => {
+  describe('UpdateType.RemovePlayer', () => {
+    it('generates a Movement notification for the controllers', () => {
+      const update: ComponentUpdate = {
+        type: UpdateType.RemovePlayer,
+        component: {
+          type: ComponentType.Player,
+          data: {
+            id: 'player-1',
+          }
+        }
+      }
+
+      // TODO pull the channel ref generation to an utility function
+      const playerSession = createSession({ id: 'channel-1' })
+      const controlSession = createControlSession({ id: 'channel-2' })
+      const sessions = [playerSession, controlSession]
+
+      const result = updateToNotifications(update, sessions)
+
+      expect(result).to.have.lengthOf(1)
+      expect(result[0]).to.eql({
+        session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'RemovePlayer',
+          component: {
+            type: 'Player',
+            data: {
+              id: 'player-1'
+            }
+          }
+        }
+      })
+    })
+  })
+
   describe('UpdateType.Movement', () => {
     it('generates a Movement notification for the controllers', () => {
       const update: ComponentUpdate = {

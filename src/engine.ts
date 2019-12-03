@@ -1,12 +1,12 @@
 import { GameLoop } from './game-loop'
-import { Arena } from './components/arena'
+import { Arena, UpdateType, ComponentType } from './components/arena'
 import { GameState } from './game-state'
 import { Session, isPlayerSession } from './session'
 import { IncommingMessages, validateMessage } from './messages'
 import { isFailure, asSuccess, failure, success, Result } from './success-failure'
-import updateToNotifications from './update-to-notifications'
+import updateToNotifications, { ComponentUpdate } from './update-to-notifications'
 import resultToResponseAndNotifications from './result-to-response-notifications'
-import { ILogger } from './types'
+import { ILogger, Event, EventType } from './types'
 
 function asIncomingMessage (message: object): Result<IncommingMessages, any> {
   // let object: object
@@ -57,6 +57,7 @@ export function createEngineState (arena: Arena, gameState: GameState): EngineSt
     gameState,
     arena,
     channelSession: new Map(),
+    // TODO remove this property, is no longer used
     sessionChannel: new Map()
   }
 }
@@ -70,11 +71,45 @@ export default async function engine (
   loop: GameLoop,
   controlMessages: InMessage[],
   messages: InMessage[],
+  events: Event[],
   context: { logger: ILogger }
 ): Promise<EngineResult> {
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
   const controlResultMessages: OutMessage[] = []
   const playerResultMessages: OutMessage[] = []
+
+  for (const event of events) {
+    if (event.type === EventType.SessionClose) {
+      const player = state.gameState.players().find((player) => player.id === event.data.playerId)
+      if (player) {
+        const result = state.gameState.removePlayer(player)
+
+        if (result.status === 'ok') {
+          const update: ComponentUpdate = {
+            type: UpdateType.RemovePlayer,
+            component: {
+              type: ComponentType.Player,
+              data: {
+                id: player.id
+              }
+            }
+          }
+
+          const [notification] = updateToNotifications(update, Array.from(state.channelSession.values()))
+          // TODO adding this GameStateUpdate here and also at the bottom of this file is a mess
+          // fix the GameStateUpdate message generation
+          controlResultMessages.push({
+            channel: notification.session.channel,
+            data: {
+              type: 'Notification',
+              id: 'GameStateUpdate',
+              data: [notification.notification]
+            }
+          })
+        }
+      }
+    }
+  }
 
   // TODO validate that only requests come in these messages
   // and not commands

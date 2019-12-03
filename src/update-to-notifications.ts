@@ -18,6 +18,25 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
   const controlSession = sessions.find(isControlSession)
   const playerSessions = sessions.filter(isPlayerSession)
 
+  if (update.type === UpdateType.RemovePlayer) {
+    if (update.component.type === ComponentType.Player) {
+      return [{
+        session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'RemovePlayer',
+          component: {
+            type: 'Player',
+            data: {
+              id: update.component.data.id
+            }
+          }
+        }
+      }]
+
+    }
+  }
+
   if (update.type === UpdateType.Movement) {
     if (update.component.type === ComponentType.Shot) {
       return [{

@@ -1,5 +1,5 @@
 import { Player } from './player'
-import { Arena, Success, Failure, ArenaPlayer } from './components/arena'
+import { Arena, Result, ArenaPlayer } from './components/arena'
 
 export enum GameStateUpdateResult {
   Success,
@@ -23,8 +23,12 @@ export class GameState {
     this.started = false
   }
 
-  registerPlayer (player: Player): Success<{ player: ArenaPlayer }> | Failure<{ details: { msg: string } }> {
+  registerPlayer (player: Player): Result<{ player: ArenaPlayer }, { details: { msg: string } }> {
     return this.arena.registerPlayer(player)
+  }
+
+  removePlayer (player: Player): Result<{}, { details: { msg: string } }> {
+    return this.arena.removePlayer(player)
   }
 
   players (): Player[] {

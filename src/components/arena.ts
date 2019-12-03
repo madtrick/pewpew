@@ -5,7 +5,7 @@ import { RadarScan, ScanResult } from './radar'
 import { Position } from '../types'
 import asyncStateUpdate from '../domain/async-state-update'
 
-export type Success<T> = { status: 'ok' } & T
+export type Success<T = {}> = { status: 'ok' } & T
 export type Failure<T> = { status: 'ko' } & T
 export type Result<T, F> = Success<T> | Failure<F>
 
@@ -57,7 +57,8 @@ export enum UpdateType {
   Movement = 'movement',
   Hit = 'hit',
   Scan = 'scan',
-  PlayerDestroyed = 'playerDestroyed'
+  PlayerDestroyed = 'playerDestroyed',
+  RemovePlayer = 'RemovePlayer'
 }
 
 export type ArenaRadarScanResult = ScanResult & {
@@ -69,6 +70,7 @@ export type ArenaRadarScanResult = ScanResult & {
 }
 
 export type Foo = (
+  { type: ComponentType.Player, data: { id: string } } |
   { type: ComponentType.Player, data: { shotId: string, id: string, damage: number, life: number } } |
   { type: ComponentType.Wall, data: { shotId: string, position: Position } } |
   { type: ComponentType.Shot, data: { id: string, position: Position } } |
@@ -113,6 +115,27 @@ export class Arena {
 
   shots (): ArenaShot[] {
     return this.arenaShots
+  }
+
+  removePlayer (player: Player): Result<{}, { details: { msg: string } }> {
+    const existingPlayer = this.arenaPlayers.find((arenaPlayer) => arenaPlayer.id === player.id)
+
+    // TODO could be that we are already checking somewhere else if the player exists
+    // so we shouldn't be re-checking it here
+    if (!existingPlayer) {
+      return {
+        status: 'ko',
+        details: {
+          msg: `A player with id ${player.id} can not be found in the arena`
+        }
+      }
+    }
+
+    this.arenaPlayers = this.arenaPlayers.filter((arenaPlayer) => arenaPlayer.id !== player.id)
+
+    return {
+      status: 'ok'
+    }
   }
 
   registerPlayer (player: Player, options?: { position: Position }): Result<{ player: ArenaPlayer }, { details: { msg: string } }> {

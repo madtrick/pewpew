@@ -44,7 +44,7 @@ describe('Engine - Integration', () => {
       engineState.channelSession.set('channel-2', session)
       engineState.channelSession.set('channel-1', controlSession)
 
-      const { playerResultMessages } = await engine(currentTick, engineState, gameLoop, [], playerMessages, { logger })
+      const { playerResultMessages } = await engine(currentTick, engineState, gameLoop, [], playerMessages, [], { logger })
 
       expect(playerResultMessages).to.have.lengthOf(1)
       expect(playerResultMessages[0].data).to.include({
@@ -74,7 +74,7 @@ describe('Engine - Integration', () => {
 
       engineState.channelSession.set('channel-1', controlSession)
 
-      const { controlResultMessages  } = await engine(currentTick, engineState, gameLoop, controlMessages, [], { logger })
+      const { controlResultMessages  } = await engine(currentTick, engineState, gameLoop, controlMessages, [], [], { logger })
 
       // TODO once chaijs is bumped to version 5 we might be able to write
       // loose matchers and then be able to combine these two expectations in one
@@ -127,7 +127,7 @@ describe('Engine - Integration', () => {
       engineState.channelSession.set('channel-2', session1)
       engineState.channelSession.set('channel-3', session2)
 
-      await engine(currentTick, engineState, gameLoop, [], playerMessages, { logger })
+      await engine(currentTick, engineState, gameLoop, [], playerMessages, [], { logger })
 
       const controlMessages = [
         {
@@ -139,7 +139,7 @@ describe('Engine - Integration', () => {
         }
       ]
 
-      const { playerResultMessages, controlResultMessages } = await engine(currentTick, engineState, gameLoop, controlMessages, [], { logger })
+      const { playerResultMessages, controlResultMessages } = await engine(currentTick, engineState, gameLoop, controlMessages, [], [], { logger })
       expect(controlResultMessages).to.have.lengthOf(1)
       expect(controlResultMessages[0].data).to.eql({
         type: 'Notification',

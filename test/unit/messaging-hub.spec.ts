@@ -29,6 +29,21 @@ describe('Messaging Hub', () => {
     expect(channels).to.be.empty
   })
 
+  it('calls the listener when a channel is closed', () => {
+    const wss = new EventEmitter()
+    const socket = new EventEmitter()
+    const hub = new MessagingHub(wss)
+    let openedChannel: ChannelRef | undefined
+    let closedChannel: ChannelRef | undefined
+
+    hub.on('channelOpen', (ch: ChannelRef) => openedChannel = ch)
+    hub.on('channelClose', (ch: ChannelRef) => closedChannel = ch)
+    wss.emit('connection', socket)
+    socket.emit('close')
+
+    expect(closedChannel).to.eql(openedChannel)
+  })
+
   it('clears the in memory messages after each pull', () => {
     const wss = new EventEmitter()
     const socket1 = new EventEmitter()

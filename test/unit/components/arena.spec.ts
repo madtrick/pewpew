@@ -55,6 +55,16 @@ describe('Arena', () => {
     sandbox.restore()
   })
 
+  describe('removePlayer', () => {
+    it('removes the player from the arena', () => {
+      const player = createPlayer({ id: 'player-1' })
+      arena.registerPlayer(player)
+      arena.removePlayer(player)
+
+      expect(arena.players()).to.be.empty
+    })
+  })
+
   describe('registerPlayer', () => {
     let player: Player
 
