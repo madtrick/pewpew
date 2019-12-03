@@ -58,36 +58,54 @@ describe('Result to response', () => {
     })
 
     describe('when the player was successfully registered', () => {
-      it('generates a RegisterPlayer response for the player and a notification for the controller', () => {
-        const result: SuccessRequestResult = {
-          success: true,
-          request: RequestType.RegisterPlayer,
-          details: {
-            id: playerOneId,
-            position: {
-              x: 100,
-              y: 100
-            },
-            rotation: 33
-          }
-        }
-
-        playerSession.playerId = playerOneId
-        const sessions = [playerSession, controlSession]
-
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
-
-        expect(responsesAndNotifications).to.have.lengthOf(2)
-        expect(responsesAndNotifications[0]).to.eql({
-          session: controlSession,
-          notification: {
-            type: 'Notification',
-            id: 'RegisterPlayer',
+      describe('when the game is already started', () => {
+        it('generates a RegisterPlayer response and a JoinGame notification for the player and a notification for the controller', () => {
+          const result: SuccessRequestResult = {
             success: true,
-            component: {
-              type: 'Player',
-              data: {
-                id: playerOneId,
+            request: RequestType.RegisterPlayer,
+            details: {
+              id: playerOneId,
+              position: {
+                x: 100,
+                y: 100
+              },
+              rotation: 33,
+              isGameStarted: true
+            }
+          }
+
+          playerSession.playerId = playerOneId
+          const sessions = [playerSession, controlSession]
+
+          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+
+          expect(responsesAndNotifications).to.have.lengthOf(3)
+          expect(responsesAndNotifications[0]).to.eql({
+            session: controlSession,
+            notification: {
+              type: 'Notification',
+              id: 'RegisterPlayer',
+              success: true,
+              component: {
+                type: 'Player',
+                data: {
+                  id: playerOneId,
+                  position: {
+                    x: 100,
+                    y: 100
+                  },
+                  rotation: 33
+                }
+              }
+            }
+          })
+          expect(responsesAndNotifications[1]).to.eql({
+            session: playerSession,
+            response: {
+              type: 'Response',
+              id: 'RegisterPlayer',
+              success: true,
+              details: {
                 position: {
                   x: 100,
                   y: 100
@@ -95,22 +113,72 @@ describe('Result to response', () => {
                 rotation: 33
               }
             }
-          }
+          })
+          expect(responsesAndNotifications[2]).to.eql({
+            session: playerSession,
+            response: {
+              type: 'Notification',
+              id: 'JoinGame',
+            }
+          })
         })
-        expect(responsesAndNotifications[1]).to.eql({
-          session: playerSession,
-          response: {
-            type: 'Response',
-            id: 'RegisterPlayer',
+      })
+      describe('when the game is not started', () => {
+        it('generates a RegisterPlayer response for the player and a notification for the controller', () => {
+          const result: SuccessRequestResult = {
             success: true,
+            request: RequestType.RegisterPlayer,
             details: {
+              id: playerOneId,
               position: {
                 x: 100,
                 y: 100
               },
-              rotation: 33
+              rotation: 33,
+              isGameStarted: false
             }
           }
+
+          playerSession.playerId = playerOneId
+          const sessions = [playerSession, controlSession]
+
+          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+
+          expect(responsesAndNotifications).to.have.lengthOf(2)
+          expect(responsesAndNotifications[0]).to.eql({
+            session: controlSession,
+            notification: {
+              type: 'Notification',
+              id: 'RegisterPlayer',
+              success: true,
+              component: {
+                type: 'Player',
+                data: {
+                  id: playerOneId,
+                  position: {
+                    x: 100,
+                    y: 100
+                  },
+                  rotation: 33
+                }
+              }
+            }
+          })
+          expect(responsesAndNotifications[1]).to.eql({
+            session: playerSession,
+            response: {
+              type: 'Response',
+              id: 'RegisterPlayer',
+              success: true,
+              details: {
+                position: {
+                  x: 100,
+                  y: 100
+                },
+                rotation: 33
+              }
+            }
+          })
         })
       })
     })

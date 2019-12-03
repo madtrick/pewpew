@@ -76,7 +76,8 @@ describe('Game loop', () => {
               x: 1,
               y: 1
             },
-            rotation: 0
+            rotation: 0,
+            isGameStarted: false
           }
         },
         state

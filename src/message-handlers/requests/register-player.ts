@@ -9,6 +9,7 @@ export interface RegisterPlayerResultDetails {
   id: string
   position: Position
   rotation: number
+  isGameStarted: boolean
 }
 
 export default function registerPlayer (session: Session, message: RegisterPlayerMessage, state: GameState): HandlerResult {
@@ -16,6 +17,7 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
   // TODO, maybe check if session.player is already set and reject
   const result = state.registerPlayer(player)
 
+  // TODO reject players registering in the game if the game already started?
   // TODO another reason for KO could be too many players in the arena
   if (result.status === 'ko') {
     return {
@@ -39,7 +41,8 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
       details: {
         id: result.player.id,
         position: result.player.position,
-        rotation: result.player.rotation
+        rotation: result.player.rotation,
+        isGameStarted: state.started
       }
     },
     state

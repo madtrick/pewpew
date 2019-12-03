@@ -84,7 +84,11 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       // TODO isn't the session alredy part of the result? why I'm finding it again here?
       const playerSession = playerSessions.find((s) => s.playerId === playerId )
 
-      return [{
+      // TODO I've to type the messages array as any
+      // as otherwise I can't add the `JoinGame` notification below
+      // because it's shape won't match that of the elements already in the
+      // array
+      const messages: any = [{
         session: controlSession,
         notification: {
           type: 'Notification',
@@ -112,6 +116,19 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           }
         }
       }]
+
+      if (result.details.isGameStarted) {
+        messages.push({
+          session: playerSession,
+          response: {
+            type: 'Notification',
+            // TODO create enum for notification types
+            id: 'JoinGame'
+          }
+        })
+      }
+
+      return messages
     }
 
     if (result.success === true && result.request === RequestType.MovePlayer) {
