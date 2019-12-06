@@ -40,9 +40,15 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
   const player = state.arena.findPlayer(playerId)
 
   if (!player) {
-    // TODO can I change with confidence the return type of `findPlayer` so it
-    // doesn't return `undefined` and we can avoid this is
-    throw new Error('This should not be possible')
+    return {
+      result: {
+        session,
+        success: false,
+        request: RequestType.Shoot,
+        reason: 'The player could not be found'
+      },
+      state
+    }
   }
 
   if (player.shots === 0) {

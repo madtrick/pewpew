@@ -48,7 +48,6 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
     //   return undefined
     // }).filter(Boolean)
 
-
     // TODO instead of creating a promise here, make the wrapping function async
     return new Promise((resolve) => {
       inputs.forEach(({ session, message }) => {

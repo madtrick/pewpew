@@ -75,6 +75,29 @@ describe('Requests - Shoot', () => {
   })
 
   describe('when the game is started and the session has a player registered', () => {
+    describe('when the player can not be found', () => {
+      it('rejects the request', () => {
+        const state: GameState = new GameState({ arena })
+        const message: ShootMessage = {
+          type: 'Request',
+          id: 'RotatePlayer'
+        }
+
+        state.started = true
+        session.playerId = 'some-player-id'
+
+        const { result } = handler(session, message, state)
+
+        expect(result).to.eql({
+          session,
+          success: false,
+          request: RequestType.Shoot,
+          reason: 'The player could not be found'
+        })
+        expect(arena.registerShot).to.not.have.been.called
+      })
+    })
+
     it('does not take the shot if the player has no shots left', () => {
       const state = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })

@@ -37,6 +37,7 @@ export default function rotatePlayer (session: Session, message: RotatePlayerMes
         session,
         success: false,
         request: RequestType.RotatePlayer,
+        // TODO mentioning "session" in this error message is a leaking detail
         reason: 'There is no player registered for this session'
       },
       state
@@ -46,10 +47,17 @@ export default function rotatePlayer (session: Session, message: RotatePlayerMes
   const player = state.arena.findPlayer(playerId)
 
   if (!player) {
-    // TODO can I change with confidence the return type of `findPlayer` so it
-    // doesn't return `undefined` and we can avoid this is
-    throw new Error('This should not be possible')
+    return {
+      result: {
+        session,
+        success: false,
+        request: RequestType.RotatePlayer,
+        reason: 'The player could not be found'
+      },
+      state
+    }
   }
+
   const { data: { rotation } } = message
   state.arena.rotatePlayer(rotation, player)
 

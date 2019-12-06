@@ -57,6 +57,34 @@ describe('Requests - Move player', () => {
   })
 
   describe('when the game is started', () => {
+    describe('when the player can not be found', () => {
+      it('rejects the request', () => {
+        const state: GameState = new GameState({ arena })
+        const session = createSession({ id: 'channel-1' })
+        const message: MovePlayerMessage = {
+          type: 'Request',
+          id: 'MovePlayer',
+          data: {
+            movement: { direction: 'forward' }
+          }
+        }
+        sinon.spy(arena, 'movePlayer')
+
+        state.started = true
+        session.playerId = 'some-player-id'
+
+        const { result } = handler(session, message, state)
+
+        expect(result).to.eql({
+          session,
+          success: false,
+          request: RequestType.MovePlayer,
+          reason: 'The player could not be found'
+        })
+        expect(arena.movePlayer).to.not.have.been.called
+      })
+    })
+
     // TODO remove this tests and instead just test that we are calling the arena
     describe('when the player is not rotated', () => {
       it('moves the player forward', movementTest({

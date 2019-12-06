@@ -32,9 +32,15 @@ export default function movePlayer (session: Session, message: MovePlayerMessage
   const player = state.players().find((player) => player.id === session.playerId)
 
   if (!player) {
-    // TODO should we instead return a message with result === false
-    // When can this be the case? That is, that the player is not in the arena?
-    throw new Error('Player not found')
+    return {
+      result: {
+        session,
+        success: false,
+        request: RequestType.MovePlayer,
+        reason: 'The player could not be found'
+      },
+      state
+    }
   }
 
   const movement = message.data.movement

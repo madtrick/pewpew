@@ -25,6 +25,33 @@ describe('Requests - Rotate player', () => {
   })
 
   describe('when the game is started', () => {
+    describe('when the player can not be found', () => {
+      it('rejects the request', () => {
+        const state: GameState = new GameState({ arena })
+        const message: RotatePlayerMessage = {
+          type: 'Request',
+          id: 'RotatePlayer',
+          data: {
+            rotation: 30
+          }
+        }
+        sinon.spy(arena, 'rotatePlayer')
+
+        state.started = true
+        session.playerId = 'some-player-id'
+
+        const { result } = handler(session, message, state)
+
+        expect(result).to.eql({
+          session,
+          success: false,
+          request: RequestType.RotatePlayer,
+          reason: 'The player could not be found'
+        })
+        expect(arena.rotatePlayer).to.not.have.been.called
+      })
+    })
+
     describe('when the session has no player registered', () => {
       it('rejects the request', () => {
         const state: GameState = new GameState({ arena })
