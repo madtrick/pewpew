@@ -8,7 +8,8 @@ import {
   FailureRegisterPlayerRequest,
   FailureShootRequest,
   FailureMoveRequest,
-  FailureCommandResult
+  FailureCommandResult,
+  FailureDeployMineRequest
 } from './message-handlers'
 
 function isCommandResult (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult): result is SuccessCommandResult | FailureCommandResult {
@@ -63,6 +64,52 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
   }
 
   if (isRequestResult(result)) {
+    if (result.success === false && result.request === RequestType.DeployMine) {
+      const { session, reason } = result as FailureDeployMineRequest
+
+      return [{
+        session,
+        response: {
+          type: 'Response',
+          id: RequestType.DeployMine,
+          success: false,
+          details: {
+            msg: reason
+          }
+        }
+      }]
+    }
+
+    if (result.success === true && result.request === RequestType.DeployMine) {
+      const { details: { playerId, id, position } } = result
+      // TODO isn't the session alredy part of the result? why I'm finding it again here?
+      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+
+      return [{
+        session: playerSession,
+        response: {
+          type: 'Response',
+          id: RequestType.DeployMine,
+          success: true
+        }
+      },
+      {
+        session: controlSession,
+        response: {
+          type: 'Notification',
+          id: RequestType.DeployMine,
+          component: {
+            type: 'Mine',
+            data: {
+              playerId,
+              id,
+              position
+            }
+          }
+        }
+      }]
+    }
+
     if (result.success === false && result.request === RequestType.RegisterPlayer) {
       const { session, reason } = result as FailureRegisterPlayerRequest
 
@@ -260,6 +307,5 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       }]
     }
   }
-
 }
 

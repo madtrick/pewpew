@@ -130,17 +130,20 @@ describe('Requests - Deploy mine', () => {
 
       const { result } = handler(session, message, state)
 
+      expect(registeredPlayer.mines).to.eql(initialMines - 1)
+      expect(arena.mines).to.have.lengthOf(1)
+      const [mine] = arena.mines
+      expect(mine).to.deep.include({
+        position: { x: 74, y: 74 }
+      })
       expect(result).to.eql({
         success: true,
         request: RequestType.DeployMine,
         details: {
-          id: 'player-1'
+          playerId: 'player-1',
+          id: mine.id,
+          position: mine.position
         }
-      })
-      expect(registeredPlayer.mines).to.eql(initialMines - 1)
-      expect(arena.mines).to.have.lengthOf(1)
-      expect(arena.mines[0]).to.deep.include({
-        position: { x: 74, y: 74 }
       })
     })
 
@@ -160,16 +163,19 @@ describe('Requests - Deploy mine', () => {
 
       const { result } = handler(session, message, state)
 
+      expect(registeredPlayer.mines).to.eql(initialMines - 1)
+      const [mine] = arena.mines
+      expect(mine).to.deep.include({
+        position: { x: 126, y: 74 }
+      })
       expect(result).to.eql({
         success: true,
         request: RequestType.DeployMine,
         details: {
-          id: 'player-1'
+          playerId: 'player-1',
+          id: mine.id,
+          position: mine.position
         }
-      })
-      expect(registeredPlayer.mines).to.eql(initialMines - 1)
-      expect(arena.mines[0]).to.deep.include({
-        position: { x: 126, y: 74 }
       })
     })
 

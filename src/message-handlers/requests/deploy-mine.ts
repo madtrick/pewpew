@@ -4,9 +4,12 @@ import { HandlerResult, RequestType } from '../../message-handlers'
 import { DeployMineMessage } from '../../messages'
 import { PLAYER_RADIUS } from '../../player'
 import { createMine, MINE_RADIUS } from '../../mine'
+import { Position } from '../../types'
 
-export interface ShootPlayerResultDetails {
+export interface DeployMineResultDetails {
+  playerId: string
   id: string
+  position: Position
 }
 
 // TODO note that by not havign HandlerResult parameterized with the kind of request result that
@@ -107,7 +110,9 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
       success: true,
       request: RequestType.DeployMine,
       details: {
-        id: player.id
+        playerId: player.id,
+        id: mine.id,
+        position: mine.position
       }
     },
     state

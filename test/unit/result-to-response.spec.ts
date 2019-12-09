@@ -16,7 +16,9 @@ import {
   FailureMoveRequest,
   FailureRotatePlayerRequest,
   SuccessCommandResult,
-  FailureCommandResult
+  FailureCommandResult,
+  SuccessfulDeployMineRequest,
+  FailureDeployMineRequest
 } from '../../src/message-handlers'
 
 describe('Result to response', () => {
@@ -388,6 +390,82 @@ describe('Result to response', () => {
               data: {
                 id: playerOneId,
                 rotation
+              }
+            }
+          }
+        })
+      })
+    })
+  })
+
+  describe.only('RequesType.DeployMine', () => {
+    describe('when the request was a failure', () => {
+      it('generates a failure response', () => {
+        const sessions = [playerSession]
+        const result: FailureDeployMineRequest = {
+          session: playerSession,
+          success: false,
+          request: RequestType.DeployMine,
+          reason: 'Some reason'
+        }
+
+
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+
+        expect(responsesAndNotifications).to.have.lengthOf(1)
+        expect(responsesAndNotifications[0]).to.eql({
+          session: playerSession,
+          response: {
+            type: 'Response',
+            id: RequestType.DeployMine,
+            success: false,
+            details: {
+              msg: 'Some reason'
+            }
+          }
+        })
+      })
+    })
+
+    describe('when the request was successful', () => {
+      it('generates a DeployMine response', () => {
+        const mineId = 'mine-id'
+        const minePosition = { x: 100, y: 100 }
+        const result: SuccessfulDeployMineRequest = {
+          success: true,
+          request: RequestType.DeployMine,
+          details: {
+            playerId: playerOneId,
+            id: mineId,
+            position: minePosition
+          }
+        }
+
+        playerSession.playerId = playerOneId
+        const sessions = [playerSession, controlSession]
+
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+
+        expect(responsesAndNotifications).to.have.lengthOf(2)
+        expect(responsesAndNotifications[0]).to.eql({
+          session: playerSession,
+          response: {
+            type: 'Response',
+            id: RequestType.DeployMine,
+            success: true
+          }
+        })
+        expect(responsesAndNotifications[1]).to.eql({
+          session: controlSession,
+          response: {
+            type: 'Notification',
+            id: 'DeployMine',
+            component: {
+              type: 'Mine',
+              data: {
+                playerId: playerOneId,
+                id: mineId,
+                position: minePosition
               }
             }
           }

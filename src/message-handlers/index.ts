@@ -13,7 +13,7 @@ import RegisterPlayerHandler, { RegisterPlayerResultDetails } from './requests/r
 import MovePlayerHandler, { MovePlayerResultDetails } from './requests/move-player'
 import ShootHandler, { ShootPlayerResultDetails } from './requests/shoot'
 import RotatePlayerHandler, { RotatePlayerResultDetails } from './requests/rotate-player'
-import DeployMineHandler, { DeployMineResultDetails } from './requests/rotate-player'
+import DeployMineHandler, { DeployMineResultDetails } from './requests/deploy-mine'
 
 
 export enum RequestType {
@@ -69,13 +69,19 @@ export type SuccessfulRotateRequest = RequestResult & SuccessfulRequest & {
   details: RotatePlayerResultDetails
 }
 
-export type SuccessRequestResult = SuccessfulRegiserPlayerRequest | SuccessfulMovePlayerRequest | SuccessfulShootRequest | SuccessfulRotateRequest
+export type SuccessfulDeployMineRequest = RequestResult & SuccessfulRequest & {
+  request: RequestType.DeployMine,
+  details: DeployMineResultDetails
+}
+
+export type SuccessRequestResult = SuccessfulRegiserPlayerRequest | SuccessfulMovePlayerRequest | SuccessfulShootRequest | SuccessfulRotateRequest | SuccessfulDeployMineRequest
 export type FailureRequestResult = RequestResult & {
   success: false,
   reason: string
 }
 
 // TODO maybe the FailureRequestResult should have the session
+// TODO do we need the session in all responses or only when we fail to register a player
 export type FailureRegisterPlayerRequest = FailureRequestResult & {
   session: Session // we need the session to be able to respond to the request
 }
@@ -90,6 +96,10 @@ export type FailureMoveRequest = FailureRequestResult & {
 
 export type FailureRotatePlayerRequest = FailureRequestResult & {
   session: Session // we need the session to be able to respond to the request
+}
+
+export type FailureDeployMineRequest = FailureRequestResult & {
+  session: Session
 }
 
 export interface CommandHandlerResult {
