@@ -1,5 +1,6 @@
 import { Player, PLAYER_RADIUS } from '../player'
 import { Shot } from '../shot'
+import { Mine } from '../mine'
 import { Movement } from '../messages'
 import { RadarScan, ScanResult } from './radar'
 import { Position } from '../types'
@@ -91,6 +92,7 @@ export class Arena {
   readonly height: number
   private arenaPlayers: ArenaPlayer[]
   private arenaShots: ArenaShot[]
+  public mines: Mine[]
   private radar: RadarScan
 
   constructor (options: { width: number, height: number }, modules: { radar: RadarScan }) {
@@ -98,6 +100,7 @@ export class Arena {
     this.height = options.height
     this.arenaPlayers = []
     this.arenaShots = []
+    this.mines = []
     this.radar = modules.radar
   }
 
