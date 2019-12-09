@@ -5,20 +5,23 @@ import {
   MovePlayerMessage,
   RotatePlayerMessage,
   ShootMessage,
-  StartGameMessage
+  StartGameMessage,
+  DeployMineMessage
 } from '../messages'
 import StartGameHandler from './commands/start-game'
 import RegisterPlayerHandler, { RegisterPlayerResultDetails } from './requests/register-player'
 import MovePlayerHandler, { MovePlayerResultDetails } from './requests/move-player'
 import ShootHandler, { ShootPlayerResultDetails } from './requests/shoot'
 import RotatePlayerHandler, { RotatePlayerResultDetails } from './requests/rotate-player'
+import DeployMineHandler, { DeployMineResultDetails } from './requests/rotate-player'
 
 
 export enum RequestType {
   RegisterPlayer = 'RegisterPlayer',
   MovePlayer = 'MovePlayer',
   Shoot = 'Shoot',
-  RotatePlayer = 'RotatePlayer'
+  RotatePlayer = 'RotatePlayer',
+  DeployMine = 'DeployMine'
 }
 
 export enum CommandType {
@@ -105,6 +108,7 @@ export interface IncommingMessageHandlers {
     MovePlayer: (session: Session, message: MovePlayerMessage, state: GameState) => HandlerResult
     RotatePlayer: (session: Session, message: RotatePlayerMessage, state: GameState) => HandlerResult
     Shoot: (session: Session, message: ShootMessage, state: GameState) => HandlerResult
+    DeployMine: (session: Session, message: DeployMineMessage, state: GameState) => HandlerResult
   },
   Command: {
     StartGame: (message: StartGameMessage, state: GameState) => CommandHandlerResult
@@ -120,6 +124,7 @@ export const handlers: IncommingMessageHandlers = {
     RegisterPlayer: RegisterPlayerHandler,
     MovePlayer: MovePlayerHandler,
     RotatePlayer: RotatePlayerHandler,
-    Shoot: ShootHandler
+    Shoot: ShootHandler,
+    DeployMine: DeployMineHandler
   }
 }
