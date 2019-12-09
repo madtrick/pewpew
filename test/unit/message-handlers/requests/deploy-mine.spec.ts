@@ -5,6 +5,7 @@ import { createPlayer } from '../../../../src/player'
 import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
+import { PLAYER_RADIUS } from '../../../../src/player'
 import { RequestType } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/deploy-mine'
 
@@ -171,8 +172,39 @@ describe('Requests - Deploy mine', () => {
         position: { x: 126, y: 74 }
       })
     })
+
+    it('does not deploy the mine if the mine would be outside of the arena', () => {
+      const state = new GameState(gameStateOptions)
+      const player = createPlayer({ id: 'player-1' })
+      // Position the player besides the left vertical edge of the
+      // arena so that there's no place to deploy a mine
+      const playerPosition = {
+        position: {
+          x: PLAYER_RADIUS + 5,
+          y: 74
+        }
+      }
+      const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, playerPosition))
+      const initiallyAvailablePlayerMines = registeredPlayer.mines
+      const initialArenaMines = arena.mines
+      const message: DeployMineMessage = {
+        type: 'Request',
+        id: 'DeployMine'
+      }
+
+      session.playerId = registeredPlayer.id
+      state.started = true
+
+      const { result } = handler(session, message, state)
+
+      expect(result).to.eql({
+        session,
+        success: false,
+        request: RequestType.DeployMine,
+        reason: 'The mine can not be deployed'
+      })
+      expect(registeredPlayer.mines).to.eql(initiallyAvailablePlayerMines)
+      expect(arena.mines).to.eql(initialArenaMines)
+    })
   })
 })
-
-
-

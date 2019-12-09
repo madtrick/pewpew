@@ -80,10 +80,22 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
   const y = playerPosition.y + ySign * distance * slope * Math.sqrt(1/(1 + Math.pow(slope, 2)))
   // detect collision with walls
   // TODO pull this to an utils module. It's used in other places (i.e. the arena)
-  // const withinArena = ((x + MINE_RADIUS) <= arena.width) &&
-  //   ((y + ARENA_RADIUS) <= arena.height) &&
-  //   ((x - ARENA_RADIUS) >= 0) &&
-  //   ((y - ARENA_RADIUS) >= 0)
+  const withinArena = ((x + MINE_RADIUS) <= arena.width) &&
+    ((y + MINE_RADIUS) <= arena.height) &&
+    ((x - MINE_RADIUS) >= 0) &&
+    ((y - MINE_RADIUS) >= 0)
+
+  if (!withinArena) {
+    return {
+      result: {
+        session,
+        success: false,
+        request: RequestType.DeployMine,
+        reason: 'The mine can not be deployed'
+      },
+      state
+    }
+  }
 
 
   const mine = createMine({ position: { x, y } })
