@@ -5,6 +5,7 @@ import {
   RotatePlayerMessage,
   ShootMessage,
   StartGameMessage,
+  DeployMineMessage,
   validateMessage
 } from '../../src/messages'
 
@@ -96,6 +97,17 @@ describe('Messages', () => {
         data: {
           rotation: 120
         }
+      }
+
+      const result = validateMessage(message)
+
+      expect(result).to.be.true
+    })
+
+    it('returns true for valid DeployMine messages', () => {
+      const message: DeployMineMessage = {
+        type: 'Request',
+        id: 'DeployMine',
       }
 
       const result = validateMessage(message)

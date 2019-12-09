@@ -4,7 +4,8 @@ import {
   RotatePlayerMessage,
   MovePlayerMessage,
   ShootMessage,
-  StartGameMessage
+  StartGameMessage,
+  DeployMineMessage
 } from './messages'
 import {
   IncommingMessageHandlers,
@@ -72,6 +73,11 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
 
           if (messageId === 'RotatePlayer') {
             const result = handlers.Request.RotatePlayer(session, message as RotatePlayerMessage, state)
+            loopCycleRunResult.results.push(result.result)
+          }
+
+          if (messageId === 'DeployMine') {
+            const result = handlers.Request.DeployMine(session, message as DeployMineMessage, state)
             loopCycleRunResult.results.push(result.result)
           }
         }

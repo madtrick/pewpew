@@ -18,6 +18,8 @@ export type RotatePlayerMessage = IncommingMessage<'Request'> & {
   }
 }
 
+export interface DeployMineMessage extends IncommingMessage<'Request'> {}
+
 export interface ShootMessage extends IncommingMessage<'Request'> {}
 
 export interface StartGameMessage extends IncommingMessage<'Command'> {}
@@ -86,7 +88,19 @@ const START_GAME_SCHEMA = Joi.object().keys({
   id: Joi.string().valid('StartGame').required()
 })
 
-const schemas = [REGISTER_PLAYER_SCHEMA, MOVE_PLAYER_SCHEMA, ROTATE_PLAYER_SCHEMA, SHOOT_SCHHEMA, START_GAME_SCHEMA]
+const DEPLOY_MINE_SCHEMA = Joi.object().keys({
+  type: Joi.string().valid('Request').required(),
+  id: Joi.string().valid('DeployMine').required()
+})
+
+const schemas = [
+  REGISTER_PLAYER_SCHEMA,
+  MOVE_PLAYER_SCHEMA,
+  ROTATE_PLAYER_SCHEMA,
+  SHOOT_SCHHEMA,
+  START_GAME_SCHEMA,
+  DEPLOY_MINE_SCHEMA
+]
 
 export function validateMessage (message: object): boolean {
   // TODO maybe first check if message.type is present

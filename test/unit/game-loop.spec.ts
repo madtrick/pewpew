@@ -5,7 +5,8 @@ import {
   MovePlayerMessage,
   ShootMessage,
   StartGameMessage,
-  RotatePlayerMessage
+  RotatePlayerMessage,
+  DeployMineMessage
 } from '../../src/messages'
 import { GameState } from '../../src/game-state'
 import { handlers, RequestType, CommandType } from '../../src/message-handlers'
@@ -87,6 +88,38 @@ describe('Game loop', () => {
       const { results } = await loop(currentTick, state, [{ session, message }])
 
       expect(handlers.Request.RegisterPlayer).to.have.been.calledOnceWith(session, message, state)
+      expect(results).to.eql([result.result])
+    })
+  })
+
+  describe.only('DeployMineMessage', () => {
+    it('deploys a player\'s mine in the game', async () => {
+      const state: GameState = new GameState({ arena })
+      const message: DeployMineMessage = {
+        // TODO use enums for id and type
+        type: 'Request',
+        id: 'DeployMine'
+      }
+      const result = {
+        result: {
+          success: true,
+          request: RequestType.DeployMine,
+          details: {
+            playerId: 'player-1',
+            id: 'mine-1',
+            position: {
+              x: 1,
+              y: 1
+            }
+          }
+        },
+        state
+      } as const
+      sandbox.stub(handlers.Request, 'DeployMine').returns(result)
+
+      const { results } = await loop(currentTick, state, [{ session, message }])
+
+      expect(handlers.Request.DeployMine).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
     })
   })
