@@ -15,6 +15,7 @@ export type PlayerId = string
 export const PLAYER_RADIUS = 16 //px
 export const PLAYER_MAX_LIFE = 100
 export const PLAYER_MAX_SHOTS = 50
+export const PLAYER_MINES = 3
 
 // TODO Right no the `Player` represents both the human who registerd to play and the bot in the game
 // I think I should split that into a:
