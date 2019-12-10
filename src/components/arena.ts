@@ -77,7 +77,7 @@ export type Foo = (
   { type: ComponentType.Player, data: { shotId: string, id: string, damage: number, life: number } } |
   { type: ComponentType.Wall, data: { shotId: string, position: Position } } |
   { type: ComponentType.Shot, data: { id: string, position: Position } } |
-  { type: ComponentType.Mine, data: { id: string, playerId: string } } |
+  { type: ComponentType.Mine, data: { id: string, damage: number, playerId: string } } |
   {
     type: ComponentType.Radar,
     data: {

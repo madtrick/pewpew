@@ -53,6 +53,38 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
     }
   }
 
+  if (update.type === UpdateType.MineHit && update.component.type === ComponentType.Mine) {
+    const { component: { data: { playerId, damage, id } } } = update
+    const playerSession = playerSessions.find((s) => s.playerId === playerId )
+    return [
+      {
+        session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'MineHit',
+          component: {
+            type: 'Mine',
+            data: {
+              playerId,
+              id,
+              damage
+            }
+          }
+        }
+      },
+      {
+        session: playerSession,
+        notification: {
+          type: 'Notification',
+          id: 'MineHit',
+          data: {
+            damage
+          }
+        }
+      }
+    ]
+  }
+
   if (update.type === UpdateType.Hit) {
     if (update.component.type === ComponentType.Wall) {
       return [

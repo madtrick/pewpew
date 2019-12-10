@@ -81,6 +81,61 @@ describe('Update to notification', () => {
     })
   })
 
+  describe.only('UpdateType.MineHit', () => {
+    it('generates a Hit notification for the controllers and the affected player', () => {
+      const playerId = 'player-1'
+      const mine = { id: 'mine-1' }
+      const update: ComponentUpdate = {
+        type: UpdateType.MineHit,
+        component: {
+          type: ComponentType.Mine,
+          data: {
+            id: 'mine-1',
+            playerId,
+            damage: 20
+          }
+        }
+      }
+
+      const hitPlayerSession = createSession({ id: 'channel-1' })
+      hitPlayerSession.playerId = playerId
+      const otherPlayerSession = createSession({ id: 'channel-2' })
+      otherPlayerSession.playerId = 'player-2'
+
+      const controlSession = createControlSession({ id: 'channel-3' })
+      const sessions = [hitPlayerSession, otherPlayerSession, controlSession]
+
+      const result = updateToNotifications(update, sessions)
+
+      expect(result).to.have.lengthOf(2)
+      expect(result[0]).to.eql({
+        session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'MineHit',
+          component: {
+            type: 'Mine',
+            data: {
+              id: mine.id,
+              playerId: 'player-1',
+              damage: 20
+            }
+          }
+        }
+      })
+      expect(result[1]).to.eql({
+        session: hitPlayerSession,
+        notification: {
+          type: 'Notification',
+          id: 'MineHit',
+          data: {
+            damage: 20
+          }
+        }
+      })
+    })
+  })
+
   describe('UpdateType.Hit', () => {
     describe('when the shot hit a wall', () => {
       it('generates a Hit notification for the controllers', () => {
