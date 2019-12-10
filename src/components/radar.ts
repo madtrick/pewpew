@@ -15,7 +15,8 @@ export interface ScanResult {
     data: {
       players: { position: { x: number, y: number } }[],
       unknown: { position: { x: number, y: number } }[],
-      shots: ComponentPosition[]
+      shots: ComponentPosition[],
+      mines: ComponentPosition[]
     }
   }
 }
@@ -34,6 +35,7 @@ export function scan (position: Position, components: ElementWithPosition[]): Sc
   })
   const scanRadius = 40
   const shotIdentifyRadius = scanRadius - 5
+  const mineIdentifyRadius = scanRadius - 5
 
   const distancesToPlayers = componentsToEvaluate.map((component) => {
     const { x, y } = component.position
@@ -49,12 +51,23 @@ export function scan (position: Position, components: ElementWithPosition[]): Sc
   const scanResult = distancesToPlayers.reduce((acc: {
     players: ComponentPosition[],
     unknown: ComponentPosition[],
-    shots: ComponentPosition[]
+    shots: ComponentPosition[],
+    mines: ComponentPosition[]
   }, { distance, component }) => {
     if (component.type === ComponentType.Shot) {
       if (distance <= scanRadius) {
         if (distance <= shotIdentifyRadius) {
           acc.shots.push({ position: { x: component.position.x, y: component.position.y } })
+        } else {
+          acc.unknown.push({ position: { x: component.position.x, y: component.position.y } })
+        }
+      }
+    }
+
+    if (component.type === ComponentType.Mine) {
+      if (distance <= scanRadius) {
+        if (distance <= mineIdentifyRadius) {
+          acc.mines.push({ position: { x: component.position.x, y: component.position.y } })
         } else {
           acc.unknown.push({ position: { x: component.position.x, y: component.position.y } })
         }
@@ -73,7 +86,7 @@ export function scan (position: Position, components: ElementWithPosition[]): Sc
     }
 
     return acc
-  }, { players: [], unknown: [], shots: [] })
+  }, { players: [], unknown: [], shots: [], mines: [] })
 
   return {
     type: UpdateType.Scan,
@@ -82,7 +95,8 @@ export function scan (position: Position, components: ElementWithPosition[]): Sc
       data: {
         players: scanResult.players,
         unknown: scanResult.unknown,
-        shots: scanResult.shots
+        shots: scanResult.shots,
+        mines: scanResult.mines
       }
     }
   }

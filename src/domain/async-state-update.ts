@@ -148,7 +148,7 @@ export default function updateState (
   })
 
   const radarUpdates: ArenaRadarScanResult[] = finalPlayers.map((player) => {
-    const scanResult = radar(player.position, [...finalPlayers, ...remainingShots])
+    const scanResult = radar(player.position, [...finalPlayers, ...remainingShots, ...remainingMines])
     return {
       type: scanResult.type,
       component: {
@@ -158,7 +158,8 @@ export default function updateState (
           playerId: player.id,
           players: scanResult.component.data.players,
           unknown: scanResult.component.data.unknown,
-          shots: scanResult.component.data.shots
+          shots: scanResult.component.data.shots,
+          mines: scanResult.component.data.mines
         }
       }
     }

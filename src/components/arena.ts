@@ -237,7 +237,16 @@ export class Arena {
     component: Foo
   }[] {
     const dimensions = { width: this.width, height: this.height }
-    const update = asyncStateUpdate(this.arenaShots, this.arenaPlayers, dimensions, this.radar, currentTick, shotRefillCadence, shotRefillQuantity)
+    const update = asyncStateUpdate(
+      this.arenaShots,
+      this.mines,
+      this.arenaPlayers,
+      dimensions,
+      this.radar,
+      currentTick,
+      shotRefillCadence,
+      shotRefillQuantity
+    )
 
     this.arenaPlayers = update.players
     this.arenaShots = update.shots

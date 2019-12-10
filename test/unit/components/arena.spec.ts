@@ -367,7 +367,8 @@ describe('Arena', () => {
           data: {
             players: [],
             unknown: [],
-            shots: []
+            shots: [],
+            mines: []
           }
         }
       }
