@@ -2,16 +2,19 @@ import { ArenaShot, ArenaPlayer, ArenaRadarScanResult, Foo, UpdateType, Componen
 import { RadarScan } from '../components/radar'
 import asyncMoveShots from './async-move-shot'
 import { shotHisWalls, shotHitsPlayer } from './async-determine-shot-hits'
-import { PLAYER_MAX_SHOTS } from '../player'
+import { PLAYER_MAX_SHOTS, PLAYER_RADIUS } from '../player'
+import { Mine, MINE_RADIUS, MINE_HIT_COST, } from '../mine'
 
 interface Update {
   updates: { type: UpdateType, component: Foo }[]
   players: ArenaPlayer[]
   shots: ArenaShot[]
+  mines: Mine[]
 }
 
 export default function updateState (
   shots: ArenaShot[],
+  mines: Mine[],
   players: ArenaPlayer[],
   arenaDimensions: { width: number, height: number },
   radar: RadarScan,
@@ -93,13 +96,65 @@ export default function updateState (
     })
   })
 
-  const radarUpdates: ArenaRadarScanResult[] = remainingPlayers.map((player) => {
-    const scanResult = radar(player.position, [...remainingPlayers, ...remainingShots])
+  const remainingMines: Mine[] = []
+  mines.forEach((mine) => {
+    const { x: ox, y: oy } = mine.position
+    remainingPlayers.forEach((player) => {
+      const { x: px, y: py } = player.position
+      const value = Math.pow((px - ox), 2) + Math.pow((py - oy), 2)
+      // TODO the Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) part is useless
+      // but will it keep it here in case we have players with different radius
+
+      const collision = Math.pow(PLAYER_RADIUS - MINE_RADIUS, 2) <= value && value <= Math.pow(PLAYER_RADIUS + MINE_RADIUS, 2)
+
+      if (!collision) {
+        remainingMines.push(mine)
+      } else {
+        player.life = player.life - MINE_HIT_COST
+        updates.push({
+          type: UpdateType.MineHit,
+          component: {
+            type: ComponentType.Mine,
+            data: {
+              id: mine.id,
+              playerId: player.id
+            }
+          }
+        })
+      }
+    })
+  })
+
+  // TODO OMG, fix this at some point. I'm duplicating the same logic
+  // to check for removed players plu introducing a new variable to
+  // handle the new set of remaining players
+  const finalPlayers: ArenaPlayer[] = []
+  remainingPlayers.forEach((player) => {
+    if (player.life > 0) {
+      finalPlayers.push(player)
+
+      return
+    }
+
+    updates.push({
+      type: UpdateType.PlayerDestroyed,
+      component: {
+        type: ComponentType.DestroyedPlayer,
+        data: {
+          id: player.id
+        }
+      }
+    })
+  })
+
+  const radarUpdates: ArenaRadarScanResult[] = finalPlayers.map((player) => {
+    const scanResult = radar(player.position, [...finalPlayers, ...remainingShots])
     return {
       type: scanResult.type,
       component: {
         type: scanResult.component.type,
         data: {
+          // TODO include mines in the radar?
           playerId: player.id,
           players: scanResult.component.data.players,
           unknown: scanResult.component.data.unknown,
@@ -110,7 +165,7 @@ export default function updateState (
   })
 
   if (tick % shotUpdateCadence === 0) {
-    remainingPlayers.forEach((player) => {
+    finalPlayers.forEach((player) => {
       if (player.shots < PLAYER_MAX_SHOTS) {
         if (player.shots + shotIncrease > PLAYER_MAX_SHOTS) {
           player.shots = PLAYER_MAX_SHOTS
@@ -123,7 +178,8 @@ export default function updateState (
 
   return {
     updates: [...updates, ...radarUpdates],
-    players: remainingPlayers,
-    shots: remainingShots
+    players: finalPlayers,
+    shots: remainingShots,
+    mines: remainingMines
   }
 }

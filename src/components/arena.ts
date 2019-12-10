@@ -51,7 +51,8 @@ export enum ComponentType {
   DestroyedPlayer = 'destroyedPlayer',
   Shot = 'shot',
   Wall = 'wall',
-  Radar = 'Radar'
+  Radar = 'Radar',
+  Mine = 'Mine'
 }
 
 export enum UpdateType {
@@ -59,7 +60,8 @@ export enum UpdateType {
   Hit = 'hit',
   Scan = 'scan',
   PlayerDestroyed = 'playerDestroyed',
-  RemovePlayer = 'RemovePlayer'
+  RemovePlayer = 'RemovePlayer',
+  MineHit = 'MineHit'
 }
 
 export type ArenaRadarScanResult = ScanResult & {
@@ -75,6 +77,7 @@ export type Foo = (
   { type: ComponentType.Player, data: { shotId: string, id: string, damage: number, life: number } } |
   { type: ComponentType.Wall, data: { shotId: string, position: Position } } |
   { type: ComponentType.Shot, data: { id: string, position: Position } } |
+  { type: ComponentType.Mine, data: { id: string, playerId: string } } |
   {
     type: ComponentType.Radar,
     data: {
