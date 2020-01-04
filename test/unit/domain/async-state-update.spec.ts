@@ -88,6 +88,19 @@ describe.only('Async update', () => {
     })
   })
 
+  describe('shot hits', () => {
+    it('recognizes hits when the shot is inside the player', () => {
+      const player = { ...createPlayer({ id: 'player-1' }), position: { x: 100, y: 100 } }
+      const shooter = { ...createPlayer({ id: 'shooter' }), position: { x: 200, y: 200 } }
+      const shot = { ...createShot({ player: shooter }), rotation: 0, position: { x: 90, y: 90 } }
+      const initialLife = player.life
+
+      asyncStateUpdate([shot], [], [player, shooter], { width: 500, height: 500 }, scan, 9, 3, 1)
+
+      expect(player.life).to.eql(initialLife - shot.damage)
+    })
+  })
+
   describe('shot counter', () => {
     let player: ArenaPlayer
     let shot: ArenaShot

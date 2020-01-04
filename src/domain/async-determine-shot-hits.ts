@@ -26,5 +26,9 @@ export function shotHitsPlayer (shot: ArenaShot, player: ArenaPlayer): boolean {
   const { x: ox, y: oy } = player.position
   const value = Math.pow((shotX - ox), 2) + Math.pow((shotY - oy), 2)
 
-  return Math.pow(SHOT_RADIUS - PLAYER_RADIUS, 2) <= value && value <= Math.pow(SHOT_RADIUS + PLAYER_RADIUS, 2)
+  const circleIntersect = Math.pow(SHOT_RADIUS - PLAYER_RADIUS, 2) <= value && value <= Math.pow(SHOT_RADIUS + PLAYER_RADIUS, 2)
+  // Check if the shot is inside the player https://stackoverflow.com/a/33490701
+  const shotInsidePlayer = PLAYER_RADIUS > (Math.sqrt(value) + SHOT_RADIUS)
+
+  return circleIntersect || shotInsidePlayer
 }
