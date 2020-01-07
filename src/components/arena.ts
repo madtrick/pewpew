@@ -302,6 +302,7 @@ export class Arena {
 
   private calculateNewPlayerPosition (movement: Movement, player: Player, currentPosition: Position): Position {
     const direction = movement.direction === 'forward' ? 1 : -1
+    // TODO read the movement speed from the configuration
     const magnitude = direction * MOVEMENT_SPEED
     const radians = (player.rotation * Math.PI) / 180
     const dX = magnitude * Math.cos(radians)

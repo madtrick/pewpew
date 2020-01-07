@@ -18,9 +18,9 @@ export class GameState {
   readonly arena: Arena
   started: boolean
 
-  constructor (options: { arena: Arena }) {
+  constructor (options: { arena: Arena, started?: boolean }) {
     this.arena = options.arena
-    this.started = false
+    this.started = options.started || false
   }
 
   registerPlayer (player: Player): Result<{ player: ArenaPlayer }, { details: { msg: string } }> {

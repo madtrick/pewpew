@@ -9,6 +9,7 @@ import engine, { Engine, EngineState, createEngineState } from './engine'
 import { createSession, CreateSessionFn, createControlSession, CreateControlSessionFn } from './session'
 import { createTicker, Ticker } from './ticker'
 import { EventType, Event } from './types'
+import Config from './config'
 import * as Logger from 'bunyan'
 
 interface ServerContext {
@@ -43,9 +44,9 @@ function parse (message: Message): { channel: ChannelRef, data: object } | undef
   }
 }
 
-export function init ({ WS }: { WS: WebSocketServerConstructor }): ServerContext {
+export function init ({ WS }: { WS: WebSocketServerConstructor }, config: Config): ServerContext {
   const arena = new Arena({ width: 500, height: 500 }, { radar: scan })
-  const gameState = new GameState({ arena })
+  const gameState = new GameState({ arena, started: config.autoStartGame })
   const engineState = createEngineState(arena, gameState)
   const ticker = createTicker()
   const loop = createGameLopp(handlers)

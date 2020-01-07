@@ -1,3 +1,3 @@
 export default interface Config {
-  loopDelayInMs: number
+  autoStartGame: boolean
 }

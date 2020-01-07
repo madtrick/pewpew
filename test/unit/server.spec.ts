@@ -3,11 +3,12 @@ import * as sinon from 'sinon'
 import { EventEmitter } from 'events'
 import { ChannelRef } from '../../src/messaging-hub'
 import { start as startServer, init } from '../../src/server'
+import { config } from '../config'
 
 describe('Server', () => {
   it('calls the engine on each tick', async () => {
     let callback: Function
-    const context = init({ WS: EventEmitter })
+    const context = init({ WS: EventEmitter }, config)
     const currentTick = 1
     context.ticker = { atLeastEvery: (_, fn) => { callback = fn }, cancel: sinon.stub() }
 

@@ -4,11 +4,12 @@
 
 require('ts-node').register({ transpileOnly: true });
 const { Server } = require('ws');
+const config = require('../config');
 
 const { init, start } = require('../src/server');
 
 const run = async () => {
-  const context = init({ WS: Server });
+  const context = init({ WS: Server }, config);
   const server = await start(context);
 
   console.log('Server started');
