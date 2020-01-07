@@ -176,7 +176,21 @@ export default async function engine (
     for (const result of results) {
       const responsesAndNotifications = resultToResponseAndNotifications(result, Array.from(state.channelSession.values()))
       for (const notification of responsesAndNotifications) {
-        const channel = notification.session.channel
+        const session = notification.session
+
+        if (!session) {
+          // TODO one of the case I'm aware when there won't be a session
+          // is when the game has started but there's no control session attached yet.
+          // The game should continue running even on that case so for now just
+          // bail early to avoid 'Cannot read property 'channel' of undefined'
+          // errors
+          //
+          // Ideally we shouldn't have the notifications being generated in the first place
+          //
+          continue
+        }
+
+        const channel = session.channel
 
         if (isPlayerSession(notification.session)) {
           // TODO we shoult pass the session here and not the channel. The channel is an implementation
@@ -199,8 +213,21 @@ export default async function engine (
       const notifications = updateToNotifications(update, Array.from(state.channelSession.values()))
 
       for (const notification of notifications) {
-        const channel = notification.session.channel
+        const session = notification.session
 
+        if (!session) {
+          // TODO one of the case I'm aware when there won't be a session
+          // is when the game has started but there's no control session attached yet.
+          // The game should continue running even on that case so for now just
+          // bail early to avoid 'Cannot read property 'channel' of undefined'
+          // errors
+          //
+          // Ideally we shouldn't have the notifications being generated in the first place
+          //
+          continue
+        }
+
+        const channel = session.channel
 
         if (isPlayerSession(notification.session)) {
           playerResultMessages.push({ channel, data: notification.notification })
