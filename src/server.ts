@@ -86,6 +86,11 @@ export function start (context: ServerContext): Server {
     return a !== undefined
   }
 
+  // TODO for now disable receiving messages from control channels if
+  // the game is auto started. For now starting the game is the only reason for
+  // the control channel and if that's already handled by the 'autoStartGame'
+  // config option, we should limit what can be sent through the channel if
+  // it's not needed
   messaging.control.on('channelOpen', (channel: ChannelRef) => {
     const session = createControlSession(channel)
     engineState.channelSession.set(channel.id, session)
