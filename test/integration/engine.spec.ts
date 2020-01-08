@@ -74,7 +74,7 @@ describe('Engine - Integration', () => {
 
       engineState.channelSession.set('channel-1', controlSession)
 
-      const { controlResultMessages  } = await engine(currentTick, engineState, gameLoop, controlMessages, [], [], { logger })
+      const { controlResultMessages } = await engine(currentTick, engineState, gameLoop, controlMessages, [], [], { logger })
 
       // TODO once chaijs is bumped to version 5 we might be able to write
       // loose matchers and then be able to combine these two expectations in one

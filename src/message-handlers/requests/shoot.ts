@@ -9,7 +9,7 @@ export interface ShootPlayerResultDetails {
 }
 
 // TODO note that by not havign HandlerResult parameterized with the kind of request result that
-// we are supposed to return from here, we could be returning 
+// we are supposed to return from here, we could be returning
 export default function shoot (session: Session, _message: ShootMessage, state: GameState): HandlerResult {
   if (!state.started) {
     return {

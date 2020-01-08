@@ -1,5 +1,5 @@
 export interface Ticker {
-  atLeastEvery: (ms: number, fn: (currentTick: number) => void) => void
+  atLeastEvery: (ms: number, fn: (currentTick: number) => Promise<void>) => void
   cancel: () => void
 }
 
@@ -9,7 +9,7 @@ export function createTicker (): Ticker {
   let currentTick = 0
 
   const ticker = {
-    atLeastEvery: (ms: number, fn: (currentTick: number) => void): void => {
+    atLeastEvery: (ms: number, fn: (currentTick: number) => Promise<void>): void => {
       if (cancel) {
         clearTimeout(timeout)
       }

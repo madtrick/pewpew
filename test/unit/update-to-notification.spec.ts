@@ -11,7 +11,7 @@ describe('Update to notification', () => {
         component: {
           type: ComponentType.Player,
           data: {
-            id: 'player-1',
+            id: 'player-1'
           }
         }
       }
@@ -277,7 +277,7 @@ describe('Update to notification', () => {
         component: {
           type: ComponentType.DestroyedPlayer,
           data: {
-            id: 'player-1',
+            id: 'player-1'
           }
         }
       }
@@ -296,7 +296,7 @@ describe('Update to notification', () => {
         session: playerOneSession,
         notification: {
           type: 'Notification',
-          id: 'Destroyed',
+          id: 'Destroyed'
         }
       })
       expect(result[1]).to.eql({

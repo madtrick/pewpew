@@ -3,7 +3,7 @@ import { RadarScan } from '../components/radar'
 import asyncMoveShots from './async-move-shot'
 import { shotHisWalls, shotHitsPlayer } from './async-determine-shot-hits'
 import { PLAYER_MAX_SHOTS, PLAYER_RADIUS } from '../player'
-import { Mine, MINE_RADIUS, MINE_HIT_COST, } from '../mine'
+import { Mine, MINE_RADIUS, MINE_HIT_COST } from '../mine'
 
 interface Update {
   updates: { type: UpdateType, component: Foo }[]

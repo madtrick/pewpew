@@ -120,7 +120,7 @@ describe('Result to response', () => {
             session: playerSession,
             response: {
               type: 'Notification',
-              id: 'JoinGame',
+              id: 'JoinGame'
             }
           })
         })

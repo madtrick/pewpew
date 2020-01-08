@@ -10,7 +10,10 @@ describe('Server', () => {
     let callback: Function
     const context = init({ WS: EventEmitter }, config)
     const currentTick = 1
-    context.ticker = { atLeastEvery: (_, fn) => { callback = fn }, cancel: sinon.stub() }
+    context.ticker = {
+      atLeastEvery: (_, fn) => callback = fn,
+      cancel: sinon.stub()
+    }
 
     const responseToPlayer = { a: 1 }
     const responseToControl = { b: 2 }
@@ -40,17 +43,17 @@ describe('Server', () => {
 
     startServer(context)
 
-    onOpenControlChannel!({ id: 'ch-1' })
-    onOpenPlayerChannel!({ id: 'ch-2' })
+    onOpenControlChannel({ id: 'ch-1' })
+    onOpenPlayerChannel({ id: 'ch-2' })
 
-    await callback!(currentTick)
+    await callback(currentTick)
 
     expect(context.engine).to.have.been.calledWith(
       currentTick,
       context.engineState,
       context.loop,
       [{ channel: { id: 'ch-1' }, data: {} }],
-      [{ channel: { id: 'ch-2' }, data: {} }],
+      [{ channel: { id: 'ch-2' }, data: {} }]
     )
     expect(context.messaging.control.send).to.have.been.calledWith({
       channel: { id: 'ch-1' },

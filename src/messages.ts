@@ -57,7 +57,7 @@ const REGISTER_PLAYER_SCHEMA = Joi.object().keys({
   id: Joi.string().valid('RegisterPlayer').required(),
   data: Joi.object().keys({
     id: Joi.string().required()
-  }).required() //TODO restrict the id more
+  }).required() // TODO restrict the id more
 })
 
 const MOVE_PLAYER_SCHEMA = Joi.object().keys({

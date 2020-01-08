@@ -15,7 +15,7 @@ import handler from '../../../../src/message-handlers/requests/move-player'
 
 type MovementTestOptions= {
   arena: () => Arena,
-    player: { position: { x: number, y: number }, rotation: number },
+  player: { position: { x: number, y: number }, rotation: number },
   movement: Movement,
   expectedResult: SuccessfulMovePlayerRequest | FailureRequestResult
 }
@@ -23,8 +23,8 @@ type MovementTestOptions= {
 const PLAYER_ID = 'player-1'
 const ARENA_WIDTH = 400
 
-function movementTest(options: MovementTestOptions): () => Promise<void> {
-  return async () => {
+function movementTest (options: MovementTestOptions): () => void {
+  return () => {
     const arena = options.arena()
     const state: GameState = new GameState({ arena })
     const player = createPlayer({ id: PLAYER_ID })
@@ -43,7 +43,7 @@ function movementTest(options: MovementTestOptions): () => Promise<void> {
       id: 'MovePlayer'
     }
 
-    const { result } = await handler(session, message, state)
+    const { result } = handler(session, message, state)
 
     expect(result).to.eql(options.expectedResult)
   }

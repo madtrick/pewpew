@@ -28,7 +28,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
   if (isCommandResult(result)) {
     if (result.success === false && result.command === CommandType.StartGame) {
-      const { reason } = result as FailureCommandResult
+      const { reason } = result
 
       return [{
         session: controlSession,
@@ -83,7 +83,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     if (result.success === true && result.request === RequestType.DeployMine) {
       const { details: { playerId, id, position } } = result
       // TODO isn't the session alredy part of the result? why I'm finding it again here?
-      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+      const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [{
         session: playerSession,
@@ -129,40 +129,42 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     if (result.success === true && result.request === RequestType.RegisterPlayer) {
       const { details: { id: playerId, position, rotation } } = result
       // TODO isn't the session alredy part of the result? why I'm finding it again here?
-      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+      const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       // TODO I've to type the messages array as any
       // as otherwise I can't add the `JoinGame` notification below
       // because it's shape won't match that of the elements already in the
       // array
-      const messages: any = [{
-        session: controlSession,
-        notification: {
-          type: 'Notification',
-          id: RequestType.RegisterPlayer,
-          success: true,
-          component: {
-            type: 'Player',
-            data: {
-              id: playerId,
+      const messages: any = [
+        {
+          session: controlSession,
+          notification: {
+            type: 'Notification',
+            id: RequestType.RegisterPlayer,
+            success: true,
+            component: {
+              type: 'Player',
+              data: {
+                id: playerId,
+                position,
+                rotation
+              }
+            }
+          }
+        },
+        {
+          session: playerSession,
+          response: {
+            type: 'Response',
+            id: RequestType.RegisterPlayer,
+            success: true,
+            details: {
               position,
               rotation
             }
           }
         }
-      },
-      {
-        session: playerSession,
-        response: {
-          type: 'Response',
-          id: RequestType.RegisterPlayer,
-          success: true,
-          details: {
-            position,
-            rotation
-          }
-        }
-      }]
+      ]
 
       if (result.details.isGameStarted) {
         messages.push({
@@ -182,7 +184,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       // TODO maybe always include the session in the result so it's easier
       // to find to which user send the response
       const { details: { id: playerId, position } } = result
-      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+      const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [
         {
@@ -231,7 +233,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
     if (result.success === true && result.request === RequestType.Shoot) {
       const { details: { id: playerId } } = result
-      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+      const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [{
         session: playerSession,
@@ -261,7 +263,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
     if (result.success === true && result.request === RequestType.RotatePlayer) {
       const { details: { id: playerId, rotation } } = result
-      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+      const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [
         {

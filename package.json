@@ -7,12 +7,12 @@
     "test": "mocha 'test/**/*.spec.ts'",
     "test-debug": "mocha --inspect-brk 'test/**/*.spec.ts'",
     "clean": "rimraf built",
-    "build": "npm run clean && tsc -p ."
+    "build": "npm run clean && tsc -p .",
+    "lint": "tslint -p tsconfig.json -c tslint.js"
   },
   "author": "farruco.sanjurjo@gmail.com",
   "license": "ISC",
   "devDependencies": {
-    "@contentful/tslint-config-backend": "^1.0.0",
     "@types/chai": "^4.2.2",
     "@types/mocha": "^5.2.7",
     "@types/sinon": "^7.0.13",
@@ -24,6 +24,11 @@
     "sinon-chai": "^3.3.0",
     "source-map-support": "^0.5.13",
     "ts-node": "^8.3.0",
+    "tslint": "^5.20.1",
+    "tslint-config-standard": "^9.0.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-microsoft-contrib": "^6.2.0",
+    "tslint-no-unused-expression-chai": "^0.1.4",
     "typescript": "^3.5.3"
   },
   "dependencies": {

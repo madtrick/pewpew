@@ -41,7 +41,7 @@ export function scan (position: Position, components: ElementWithPosition[]): Sc
     const { x, y } = component.position
     const A = Math.abs(x - position.x)
     const B = Math.abs(y - position.y)
-    const distance = Math.sqrt(A*A + B*B)
+    const distance = Math.sqrt(A * A + B * B)
 
     return { distance, component }
   })

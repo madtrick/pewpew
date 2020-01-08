@@ -1,11 +1,10 @@
 import { expect } from 'chai'
 import { DeployMineMessage } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
-import { createPlayer } from '../../../../src/player'
+import { createPlayer, PLAYER_RADIUS } from '../../../../src/player'
 import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
-import { PLAYER_RADIUS } from '../../../../src/player'
 import { RequestType } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/deploy-mine'
 

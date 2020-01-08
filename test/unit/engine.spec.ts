@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { ILogger } from '../../src/types'
-import { createSession, createControlSession } from '../../src/session'
+import { ILogger, EventType } from '../../src/types'
+import { createSession, createControlSession, Session } from '../../src/session'
 import { CommandType } from '../../src/message-handlers'
 import { createPlayer } from '../../src/player'
 import engine, { EngineState } from '../../src/engine'
@@ -9,8 +9,6 @@ import { UpdateType, ComponentType, Arena, asSuccess } from '../../src/component
 import { GameState } from '../../src/game-state'
 import { scan } from '../../src/components/radar'
 import createLogger from '../utils/create-logger'
-import { Session } from '../../src/session'
-import { EventType } from '../../src/types'
 
 describe('Engine', () => {
   describe('on each game tick', () => {
@@ -215,7 +213,7 @@ describe('Engine', () => {
 
     it('sends an error on messages that do not follow the schemas', async () => {
       const messages = [
-        { channel: { id: 'channel-1' }, data: {foo: 'bar'} }
+        { channel: { id: 'channel-1' }, data: { foo: 'bar' } }
       ]
 
       const { playerResultMessages, controlResultMessages } = await engine(currentTick, engineState, loopStub, [], messages, [], { logger })
@@ -259,7 +257,7 @@ describe('Engine', () => {
         channel: { id: 'channel-2' },
         data: {
           type: 'Notification',
-          id: 'StartGame',
+          id: 'StartGame'
         }
       }])
       expect(controlResultMessages).to.eql([{

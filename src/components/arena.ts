@@ -13,7 +13,7 @@ export type Result<T, F> = Success<T> | Failure<F>
 // TODO replace process.env with a configuration value passed to the app
 const MOVEMENT_SPEED = process.env.MOVEMENT_SPEED ? Number(process.env.MOVEMENT_SPEED) : 1
 
-export function asSuccess<T, F>(result: Result<T, F>): Success<T> | never {
+export function asSuccess<T, F> (result: Result<T, F>): Success<T> | never {
   if (result.status === 'ok') {
     return result
   }
@@ -187,7 +187,7 @@ export class Arena {
         const collides = this.playerCollidesWithPlayer(position)
 
         if (!collides) {
-          break;
+          break
         }
       }
 
@@ -208,7 +208,7 @@ export class Arena {
      * Rotate from players origin to
      * get the origin of the shot
      */
-    const radians = Math.PI/180 * arenaPlayer!.rotation
+    const radians = Math.PI / 180 * arenaPlayer!.rotation
     /*
      * We add 1 to the player radius considering that the shot
      * starts already on the inmediate pixel after the player
@@ -339,8 +339,8 @@ export class Arena {
        * Formula got at http://stackoverflow.com/a/8367547/1078859
        * (R0-R1)^2 <= (x0-x1)^2+(y0-y1)^2 <= (R0+R1)^2
        */
-        const { x: ox, y: oy } = arenaPlayer.position
-        const value = Math.pow((x - ox), 2) + Math.pow((y - oy), 2)
+      const { x: ox, y: oy } = arenaPlayer.position
+      const value = Math.pow((x - ox), 2) + Math.pow((y - oy), 2)
         // TODO the Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) part is useless
         // but will it keep it here in case we have players with different radius
 

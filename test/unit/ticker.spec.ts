@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { createTicker } from '../../src/ticker'
 
-function sleep (ms = 100) {
+function sleep (ms: number = 100): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 

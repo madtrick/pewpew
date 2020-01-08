@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { EventEmitter } from 'events'
-import { MessagingHub, WebSocket, ChannelRef } from '../../src/messaging-hub'
+import { MessagingHub, WebSocket, ChannelRef, IMessagingHub } from '../../src/messaging-hub'
 
 describe('Messaging Hub', () => {
   it('creates a channel when a new WebSocket connection is openened', () => {
@@ -86,8 +86,9 @@ describe('Messaging Hub', () => {
     // Doing {...emitter, send: sendStub} (or Object.assign) won't work
     // because some of the properties in the EventEmitter instances are
     // non enumerable
-    const socket1: WebSocket = new class extends EventEmitter { send = sinon.stub().yieldsAsync() }
-    const socket2: WebSocket = new class extends EventEmitter { send = sinon.stub().yieldsAsync() }
+    type SendFn = IMessagingHub['send']
+    const socket1: WebSocket = new class extends EventEmitter { send: SendFn = sinon.stub().yieldsAsync() }()
+    const socket2: WebSocket = new class extends EventEmitter { send: SendFn = sinon.stub().yieldsAsync() }()
     const hub = new MessagingHub(wss)
     const data = 'my-message'
 
@@ -114,7 +115,7 @@ describe('Messaging Hub', () => {
     expect(channels[0]).to.eql(channel)
   })
 
-  //TODO don't send messages to a socket that just closed
-  //TODO add test for messages in the buffer but socket closed
+  // TODO don't send messages to a socket that just closed
+  // TODO add test for messages in the buffer but socket closed
 })
 

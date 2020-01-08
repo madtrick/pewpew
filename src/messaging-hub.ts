@@ -15,7 +15,7 @@ export interface WebSocketServerConstructor {
   new (options: { port: number }): WebSocketServer
 }
 export interface WebSocketServer {
-  on (event: 'connection', cb: (socket: WebSocket) => void ): void
+  on (event: 'connection', cb: (socket: WebSocket) => void): void
 }
 
 export interface WebSocket {
@@ -32,14 +32,13 @@ interface Channel {
 export interface IMessagingHub {
   pull (): Message[]
   send (options: { channel: { id: ChannelId }, data: string }): Promise<void>
-  on (event: 'channelOpen', listener: (ch: ChannelRef) => void): void
-  on (event: 'channelClose', listener: (ch: ChannelRef) => void): void
+  on (event: 'channelOpen' | 'channelClose', listener: (ch: ChannelRef) => void): void
 }
 
 export class MessagingHub extends EventEmitter implements IMessagingHub {
   private connection: WebSocketServer
   private channels: Map<string, Channel>
-  private messages: [Channel, any][] //TODO replace that any
+  private messages: [Channel, any][] // TODO replace that any
 
   constructor (wss: WebSocketServer) {
     super()

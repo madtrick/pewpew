@@ -107,7 +107,7 @@ describe('Messages', () => {
     it('returns true for valid DeployMine messages', () => {
       const message: DeployMineMessage = {
         type: 'Request',
-        id: 'DeployMine',
+        id: 'DeployMine'
       }
 
       const result = validateMessage(message)

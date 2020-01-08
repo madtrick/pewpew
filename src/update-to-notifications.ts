@@ -55,7 +55,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
 
   if (update.type === UpdateType.MineHit && update.component.type === ComponentType.Mine) {
     const { component: { data: { playerId, damage, id } } } = update
-    const playerSession = playerSessions.find((s) => s.playerId === playerId )
+    const playerSession = playerSessions.find((s) => s.playerId === playerId)
     return [
       {
         session: controlSession,
@@ -105,7 +105,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
     }
     if (update.component.type === ComponentType.Player) {
       const { component: { data: { id: playerId, damage, shotId } } } = update
-      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+      const playerSession = playerSessions.find((s) => s.playerId === playerId)
       return [
         {
           session: controlSession,
@@ -141,7 +141,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
     // of the update.type (this is :poop:)
     if (update.component.type === ComponentType.Radar) {
       const { component: { data: { playerId, players, unknown, shots } } } = update
-      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+      const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [{
         session: playerSession,
@@ -161,13 +161,13 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
   if (update.type === UpdateType.PlayerDestroyed) {
     if (update.component.type === ComponentType.DestroyedPlayer) {
       const { component: { data: { id: playerId } } } = update
-      const playerSession = playerSessions.find((s) => s.playerId === playerId )
+      const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [{
         session: playerSession,
         notification: {
           type: 'Notification',
-          id: 'Destroyed',
+          id: 'Destroyed'
         }
       },
       {

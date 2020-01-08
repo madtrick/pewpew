@@ -77,7 +77,7 @@ describe(' Radar', () => {
           const shot1 = { position: { x: 55, y: 40 }, type: ComponentType.Shot }
           const shot2 = { position: { x: 50, y: 40 }, type: ComponentType.Shot }
 
-          const result = scan({ x: 30, y: 40 }, [ shot1, shot2 ])
+          const result = scan({ x: 30, y: 40 }, [shot1, shot2])
 
           expect(result).to.eql({
             type: UpdateType.Scan,
@@ -101,7 +101,7 @@ describe(' Radar', () => {
         it('returns the match as "unknown"', () => {
           const shot1 = { position: { x: 66, y: 40 }, type: ComponentType.Shot }
 
-          const result = scan({ x: 30, y: 40 }, [ shot1])
+          const result = scan({ x: 30, y: 40 }, [shot1])
 
           expect(result).to.eql({
             type: UpdateType.Scan,

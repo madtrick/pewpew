@@ -18,7 +18,7 @@ export function failure<F> (data: F): Failure<F> {
   return { status: 'ko', data }
 }
 
-export function asSuccess<T, F>(result: Result<T, F>): T | never {
+export function asSuccess<T, F> (result: Result<T, F>): T | never {
   if (result.status === 'ok') {
     return result.data
   }

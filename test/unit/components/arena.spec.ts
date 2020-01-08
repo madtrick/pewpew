@@ -5,7 +5,7 @@ import { Player, createPlayer, PLAYER_MAX_LIFE } from '../../../src/player'
 import { createShot } from '../../../src/shot'
 import { scan, ScanResult as RadarScanResult } from '../../../src/components/radar'
 
-function makeSuccess<T>(data: T): Success<T> {
+function makeSuccess<T> (data: T): Success<T> {
   return { ...data, status: 'ok' }
 }
 
@@ -22,7 +22,7 @@ type MovementTestOptions<T, F>= {
   movements: ({ type: 'displacement', direction: DisplacementDirection } | { type: 'rotation', degrees: number })[],
   expectedResponses: Result<T, F>[]
 }
-function movementTest<T, F>(options: MovementTestOptions<T, F>): () => Promise<void> {
+function movementTest<T, F> (options: MovementTestOptions<T, F>): () => Promise<void> {
   return async () => {
     const arena = options.arena()
     const player = createPlayer({ id: 'player-1' })
@@ -229,7 +229,7 @@ describe('Arena', () => {
 
     it('moves the player - if it does not collide with others', movementTest({
       movements: [
-        { type: 'displacement', direction: DisplacementDirection.FORWARD },
+        { type: 'displacement', direction: DisplacementDirection.FORWARD }
       ],
       arena: () => {
         const player = createPlayer({ id: 'player-2' })
@@ -246,7 +246,7 @@ describe('Arena', () => {
 
     it('does not move the player - if it collides with others', movementTest({
       movements: [
-        { type: 'displacement', direction: DisplacementDirection.FORWARD },
+        { type: 'displacement', direction: DisplacementDirection.FORWARD }
       ],
       arena: () => {
         const player = createPlayer({ id: 'player-2' })
@@ -332,6 +332,7 @@ describe('Arena', () => {
 
       it('includes the results from the radar scan in the update result', () => {
         const player1 = createPlayer({ id: 'player-1' })
+        // tslint:disable-next-line
         asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
         const scanResult = {
           type: UpdateType.Scan,
@@ -354,7 +355,6 @@ describe('Arena', () => {
         scanStub.returns(scanResult)
 
         const result = arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
-        console.dir(result, { depth: null, colors: true })
         expect(result).to.deep.include(scanResult)
       })
     })

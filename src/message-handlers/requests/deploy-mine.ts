@@ -13,7 +13,7 @@ export interface DeployMineResultDetails {
 }
 
 // TODO note that by not havign HandlerResult parameterized with the kind of request result that
-// we are supposed to return from here, we could be returning 
+// we are supposed to return from here, we could be returning
 export default function shoot (session: Session, _message: DeployMineMessage, state: GameState): HandlerResult {
   if (!state.started) {
     return {
@@ -73,14 +73,14 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
   const distance = PLAYER_RADIUS + MINE_RADIUS + 2
 
   // calculate mine position
-  const xSign = player.rotation >=0 && player.rotation < 90 || player.rotation > 270 && player.rotation <= 360 ? -1 : 1
+  const xSign = player.rotation >= 0 && player.rotation < 90 || player.rotation > 270 && player.rotation <= 360 ? -1 : 1
   const ySign = player.rotation > 0 && player.rotation < 180 ? -1 : 1
-  const rotationRadians = rotation * Math.PI/180
+  const rotationRadians = rotation * Math.PI / 180
   const slope = Math.tan(rotationRadians)
 
   // Formula: https://www.geeksforgeeks.org/find-points-at-a-given-distance-on-a-line-of-given-slope/
-  const x = playerPosition.x + xSign * distance * Math.sqrt(1/(1 + Math.pow(slope, 2)))
-  const y = playerPosition.y + ySign * distance * slope * Math.sqrt(1/(1 + Math.pow(slope, 2)))
+  const x = playerPosition.x + xSign * distance * Math.sqrt(1 / (1 + Math.pow(slope, 2)))
+  const y = playerPosition.y + ySign * distance * slope * Math.sqrt(1 / (1 + Math.pow(slope, 2)))
   // detect collision with walls
   // TODO pull this to an utils module. It's used in other places (i.e. the arena)
   const withinArena = ((x + MINE_RADIUS) <= arena.width) &&
@@ -118,5 +118,4 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
     state
   }
 }
-
 

@@ -6,7 +6,7 @@ function P (fn: (resolver: (value?: any | PromiseLike<void>) => void) => void): 
   return new Promise((resolve) => fn(resolve))
 }
 
-function sleep (ms = 100) {
+function sleep (ms: number = 100): Promise<void> {
   return P((resolve) => setTimeout(resolve, ms))
 }
 
@@ -16,7 +16,7 @@ describe('Messaging Hub - Integration', () => {
   let hub: MessagingHub
 
   beforeEach(async () => {
-    await P((r) => { server = new WS.Server({ port: 8888 }, r) })
+    await P((r) => server = new WS.Server({ port: 8888 }, r))
 
     hub = new MessagingHub(server)
 

@@ -12,7 +12,7 @@ export interface Player {
 }
 
 export type PlayerId = string
-export const PLAYER_RADIUS = 16 //px
+export const PLAYER_RADIUS = 16 // px
 export const PLAYER_MAX_LIFE = 100
 export const PLAYER_MAX_SHOTS = 50
 export const PLAYER_MINES = 3

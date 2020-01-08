@@ -25,7 +25,7 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
         session,
         success: false,
         request: RequestType.RegisterPlayer,
-        reason: `Player already registered with id ${message.data.id}`,
+        reason: `Player already registered with id ${message.data.id}`
       },
       state
     }
