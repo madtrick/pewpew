@@ -346,13 +346,15 @@ describe('Arena', () => {
                 }
               }],
               unknown: [],
-              shots: []
+              shots: [],
+              mines: []
             }
           }
         }
         scanStub.returns(scanResult)
 
         const result = arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
+        console.dir(result, { depth: null, colors: true })
         expect(result).to.deep.include(scanResult)
       })
     })
@@ -381,7 +383,8 @@ describe('Arena', () => {
               playerId,
               players: fakeScanResult.component.data.players,
               unknown: fakeScanResult.component.data.unknown,
-              shots: fakeScanResult.component.data.shots
+              shots: fakeScanResult.component.data.shots,
+              mines: fakeScanResult.component.data.mines
             }
           }
         }

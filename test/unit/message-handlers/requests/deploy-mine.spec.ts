@@ -67,7 +67,7 @@ describe('Requests - Deploy mine', () => {
     })
   })
 
-  describe.only('when the game is started and the session has a player registered', () => {
+  describe('when the game is started and the session has a player registered', () => {
     describe('when the player can not be found', () => {
       it('rejects the request', () => {
         const state: GameState = new GameState({ arena })

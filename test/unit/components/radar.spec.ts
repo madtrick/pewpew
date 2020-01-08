@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { ComponentType, UpdateType } from '../../../src/components/arena'
 import { scan } from '../../../src/components/radar'
 
-describe.only(' Radar', () => {
+describe(' Radar', () => {
   describe('scan', () => {
     describe('when there is only the scanning player', () => {
       it('returns no matches', () => {

@@ -20,9 +20,10 @@ describe('Engine', () => {
     let engineState: EngineState
     let loopStub: sinon.SinonStub
     let logger: ILogger
+    let arena: Arena
 
     beforeEach(() => {
-      const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+      arena = new Arena({ width: 100, height: 100 }, { radar: scan })
       const gameState = new GameState({ arena })
       engineState = { arena, gameState, channelSession: new Map(), sessionChannel: new Map() }
       sandbox = sinon.createSandbox()
@@ -40,7 +41,60 @@ describe('Engine', () => {
       expect(loopStub).to.have.been.calledOnce
     })
 
-    describe('ChannelClose event', () => {
+    describe('Control channel - ChannelOpen event', () => {
+      let controlSession: Session
+      let playerSession: Session
+
+      beforeEach(() => {
+        controlSession = createControlSession({ id: 'channel-1' })
+        playerSession = createSession({ id: 'channel-2' })
+        loopStub.resolves({ results: [] })
+        engineState.channelSession = new Map([
+          ['channel-2', playerSession]
+        ])
+        engineState.sessionChannel = new Map([
+          [playerSession, 'channel-2']
+        ])
+      })
+
+      describe('when the game has already been started', () => {
+        it('sends a message to notify the control channel of the initial game state', async () => {
+          engineState.gameState = new GameState({ arena, started: true })
+          const { player } = asSuccess(engineState.gameState.registerPlayer(createPlayer({ id: 'player-1' })))
+
+          const event = {
+            type: EventType.SessionOpen,
+            data: controlSession
+
+          }
+          const { controlResultMessages, playerResultMessages } = await engine(currentTick, engineState, loopStub, [], [], [event], { logger })
+
+          expect(playerResultMessages).to.eql([])
+          expect(controlResultMessages).to.eql([{
+            channel: { id: 'channel-1' },
+            data: {
+              type: 'Notification',
+              id: 'GameStateInit',
+              data: {
+                isGameStarted: true,
+                players: [
+                  {
+                    id: 'player-1',
+                    position: player.position,
+                    rotation: player.rotation,
+                    life: player.life
+                  }
+                ],
+                shots: [],
+                mines: []
+              }
+            }
+          }])
+        })
+      })
+    })
+
+    describe('Player channel - ChannelClose event', () => {
       let controlSession: Session
       let playerSession: Session
 
@@ -107,7 +161,6 @@ describe('Engine', () => {
           }
         }])
       })
-
     })
 
     it('calls the game loop with the valid messages along with the session', async () => {

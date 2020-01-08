@@ -398,7 +398,7 @@ describe('Result to response', () => {
     })
   })
 
-  describe.only('RequesType.DeployMine', () => {
+  describe('RequesType.DeployMine', () => {
     describe('when the request was a failure', () => {
       it('generates a failure response', () => {
         const sessions = [playerSession]

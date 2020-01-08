@@ -81,7 +81,7 @@ describe('Update to notification', () => {
     })
   })
 
-  describe.only('UpdateType.MineHit', () => {
+  describe('UpdateType.MineHit', () => {
     it('generates a Hit notification for the controllers and the affected player', () => {
       const playerId = 'player-1'
       const mine = { id: 'mine-1' }

@@ -94,6 +94,10 @@ export function start (context: ServerContext): Server {
   messaging.control.on('channelOpen', (channel: ChannelRef) => {
     const session = createControlSession(channel)
     engineState.channelSession.set(channel.id, session)
+    events.push({
+      type: EventType.SessionOpen,
+      data: session
+    })
   })
 
   messaging.players.on('channelOpen', (channel: ChannelRef) => {
@@ -129,7 +133,6 @@ export function start (context: ServerContext): Server {
     }
 
     const { playerResultMessages, controlResultMessages } = await engine(tick, engineState, loop, controlMessages, playerMessages, events, { logger })
-    debugger
 
     for (const message of controlResultMessages) {
       messaging.control.send({ ...message, data: JSON.stringify(message.data) })

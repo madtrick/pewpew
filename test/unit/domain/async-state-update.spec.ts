@@ -7,7 +7,7 @@ import { scan } from '../../../src/components/radar'
 import asyncStateUpdate from '../../../src/domain/async-state-update'
 import { createMine, Mine, MINE_HIT_COST } from '../../../src/mine'
 
-describe.only('Async update', () => {
+describe('Async update', () => {
   describe('collision with mines', () => {
     let player: ArenaPlayer
     let mine: Mine

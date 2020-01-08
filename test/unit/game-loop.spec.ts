@@ -92,7 +92,7 @@ describe('Game loop', () => {
     })
   })
 
-  describe.only('DeployMineMessage', () => {
+  describe('DeployMineMessage', () => {
     it('deploys a player\'s mine in the game', async () => {
       const state: GameState = new GameState({ arena })
       const message: DeployMineMessage = {

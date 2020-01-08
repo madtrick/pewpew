@@ -1,7 +1,8 @@
 import { Session } from './session'
 
 export enum EventType {
-  SessionClose
+  SessionClose,
+  SessionOpen
 }
 
 export interface Event {

@@ -1,12 +1,12 @@
 import { GameLoop } from './game-loop'
 import { Arena, UpdateType, ComponentType } from './components/arena'
 import { GameState } from './game-state'
-import { Session, isPlayerSession } from './session'
+import { Session, isPlayerSession, isControlSession } from './session'
 import { IncommingMessages, validateMessage } from './messages'
 import { isFailure, asSuccess, failure, success, Result } from './success-failure'
 import updateToNotifications, { ComponentUpdate } from './update-to-notifications'
 import resultToResponseAndNotifications from './result-to-response-notifications'
-import { ILogger, Event, EventType } from './types'
+import { ILogger, Event, EventType, Position, Rotation } from './types'
 
 function asIncomingMessage (message: object): Result<IncommingMessages, any> {
   // let object: object
@@ -52,6 +52,29 @@ interface EngineResult {
   controlResultMessages: OutMessage[]
 }
 
+interface GameStateInitNotification {
+  type: 'Notification'
+  id: 'GameStateInit'
+  data: {
+    players: {
+      id: string
+      position: Position
+      rotation: Rotation
+      life: number
+    }[]
+    shots: {
+      id: string
+      position: Position
+      rotation: Rotation
+    }[]
+    mines: {
+      id: string
+      position: Position
+    }[]
+    isGameStarted: boolean
+  }
+}
+
 export function createEngineState (arena: Arena, gameState: GameState): EngineState {
   return {
     gameState,
@@ -78,8 +101,51 @@ export default async function engine (
   const controlResultMessages: OutMessage[] = []
   const playerResultMessages: OutMessage[] = []
 
+  // TODO move all the event handling logic to a separa module so it's easier to test
   for (const event of events) {
-    if (event.type === EventType.SessionClose) {
+    debugger
+    if (event.type === EventType.SessionOpen) {
+      if (event.data && isControlSession(event.data)) {
+        if (state.gameState.started) {
+          const players = state.gameState.arena.players().map((player) => {
+            return {
+              id: player.id,
+              position: player.position,
+              rotation: player.rotation,
+              life: player.life
+            }
+          })
+          const shots = state.gameState.arena.shots().map((shot) => {
+            return {
+              id: shot.id,
+              position: shot.position,
+              rotation: shot.rotation
+            }
+          })
+          const mines = state.gameState.arena.mines.map((mine) => {
+            return {
+              id: mine.id,
+              position: mine.position
+            }
+          })
+
+          const update: GameStateInitNotification = {
+            type: 'Notification',
+            id: 'GameStateInit',
+            data: {
+              players,
+              shots,
+              mines,
+              isGameStarted: state.gameState.started
+            }
+          }
+
+          // TODO piggybacking on the array that contains the results to be send to the
+          // control sessions
+          controlResultMessages.push({ channel: event.data.channel, data: update })
+        }
+      }
+    } else if (event.type === EventType.SessionClose) {
       const player = state.gameState.players().find((player) => player.id === event.data.playerId)
       if (player) {
         const result = state.gameState.removePlayer(player)
