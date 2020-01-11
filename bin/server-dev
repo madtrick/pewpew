@@ -2,10 +2,11 @@
 
 'use strict';
 
+require('ts-node').register({ transpileOnly: true });
 const { Server } = require('ws');
 const config = require('../config');
 
-const { init, start } = require('../built/server');
+const { init, start } = require('../src/server');
 
 const run = async () => {
   const context = init({ WS: Server }, config);
@@ -15,4 +16,3 @@ const run = async () => {
 }
 
 run()
-
