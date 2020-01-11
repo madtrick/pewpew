@@ -20,6 +20,7 @@ function isRequestResult (result: SuccessRequestResult | SuccessCommandResult | 
   return 'request' in result
 }
 
+// @ts-ignore TODO remove this ignore
 export default function resultToResponseAndNotifications (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult, sessions: Session[]): any[] {
   const controlSession = sessions.find(isControlSession)
   const playerSessions = sessions.filter(isPlayerSession)

@@ -52,6 +52,7 @@ export function init ({ WS }: { WS: WebSocketServerConstructor }, config: Config
   const loop = createGameLopp(handlers)
   const logger = Logger.createLogger({ name: 'pewpew' })
   const messaging = {
+    // TODO grab the ports from configuration
     control: new MessagingHub(new WS({ port: 8888 })),
     players:  new MessagingHub(new WS({ port: 8889 }))
   }

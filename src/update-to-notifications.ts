@@ -13,6 +13,7 @@ export interface ComponentUpdate {
 }
 
 // TODO fix the return types
+// @ts-ignore TODO remove this ignore
 export default function updateToNotifications (update: ComponentUpdate, sessions: (Session | ControlSession)[]): any[] {
   // NOTE I'm assuming here that there's only one control session
   const controlSession = sessions.find(isControlSession)
@@ -104,6 +105,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
       ]
     }
     if (update.component.type === ComponentType.Player) {
+      // @ts-ignore TODO remove this ignore
       const { component: { data: { id: playerId, damage, shotId } } } = update
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
       return [
