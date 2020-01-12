@@ -8,6 +8,11 @@ const config = require('../config');
 const { init, start } = require('../built/server');
 
 const run = async () => {
+  process.on('SIGTERM', () => {
+    console.log('Exit');
+    process.exit();
+  });
+
   const context = init({ WS: Server }, config);
   const server = await start(context);
 
