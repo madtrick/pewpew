@@ -21,4 +21,4 @@ COPY --from=Build /app/built ./built/
 COPY config.js ./
 COPY bin ./bin/
 
-CMD bin/server
+CMD ["bin/server"]
