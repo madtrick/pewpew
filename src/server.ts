@@ -128,9 +128,6 @@ export function start (context: ServerContext): Server {
   ticker.atLeastEvery(100, async (tick) => {
     const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
     const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
-    if (playerMessages.length > 0) {
-      logger.info(playerMessages)
-    }
 
     const { playerResultMessages, controlResultMessages } = await engine(tick, engineState, loop, controlMessages, playerMessages, events, { logger })
 

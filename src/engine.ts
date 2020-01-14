@@ -194,7 +194,7 @@ export default async function engine (
         }
       })
     } else {
-      context.logger.info({ msg: result })
+      context.logger.info({ message: result })
       const session = state.channelSession.get(channel.id)
 
       if (session) {
