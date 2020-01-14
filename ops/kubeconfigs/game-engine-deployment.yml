@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-engine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: game-engine
+  template:
+    metadata:
+      labels:
+        app: game-engine
+    spec:
+      containers:
+        - name: game-engine
+          image: 'gcr.io/nth-segment-264718/game-engine:bfd9c3a'
+          env:
+            - name: AUTO_START_GAME
+              value: 'true'
+            - name: MOVEMENT_SPEED
+              value: '5'
+          ports:
+            - name: ws-control
+              containerPort: 8888
+            - name: ws-player
+              containerPort: 8889
