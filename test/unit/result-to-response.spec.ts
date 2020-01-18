@@ -444,7 +444,8 @@ describe('Result to response', () => {
           details: {
             playerId: playerOneId,
             id: mineId,
-            position: minePosition
+            position: minePosition,
+            remainingMines: 2
           }
         }
 
@@ -459,7 +460,10 @@ describe('Result to response', () => {
           response: {
             type: 'Response',
             id: RequestType.DeployMine,
-            success: true
+            success: true,
+            data: {
+              mines: 2
+            }
           }
         })
         expect(responsesAndNotifications[1]).to.eql({

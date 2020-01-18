@@ -10,6 +10,7 @@ export interface DeployMineResultDetails {
   playerId: string
   id: string
   position: Position
+  remainingMines: number
 }
 
 // TODO note that by not havign HandlerResult parameterized with the kind of request result that
@@ -112,7 +113,8 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
       details: {
         playerId: player.id,
         id: mine.id,
-        position: mine.position
+        position: mine.position,
+        remainingMines: player.mines
       }
     },
     state

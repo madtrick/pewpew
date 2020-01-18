@@ -141,7 +141,8 @@ describe('Requests - Deploy mine', () => {
         details: {
           playerId: 'player-1',
           id: mine.id,
-          position: mine.position
+          position: mine.position,
+          remainingMines: registeredPlayer.mines
         }
       })
     })
@@ -173,7 +174,8 @@ describe('Requests - Deploy mine', () => {
         details: {
           playerId: 'player-1',
           id: mine.id,
-          position: mine.position
+          position: mine.position,
+          remainingMines: registeredPlayer.mines
         }
       })
     })

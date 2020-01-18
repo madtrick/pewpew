@@ -82,7 +82,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.DeployMine) {
-      const { details: { playerId, id, position } } = result
+      const { details: { playerId, id, position, remainingMines } } = result
       // TODO isn't the session alredy part of the result? why I'm finding it again here?
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
@@ -91,7 +91,10 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
         response: {
           type: 'Response',
           id: RequestType.DeployMine,
-          success: true
+          success: true,
+          data: {
+            mines: remainingMines
+          }
         }
       },
       {
