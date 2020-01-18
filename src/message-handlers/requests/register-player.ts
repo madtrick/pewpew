@@ -34,6 +34,8 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
   session.playerId = result.player.id
 
   // TODO include the initial life in the response
+  // TODO control player id length
+  // TODO regex for valid ids?
   return {
     result: {
       success: true,

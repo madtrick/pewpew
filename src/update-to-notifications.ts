@@ -34,7 +34,6 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
           }
         }
       }]
-
     }
   }
 
@@ -130,6 +129,8 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
             type: 'Notification',
             id: 'Hit',
             data: {
+              // TODO remove the damage value from this message? what's the value of including it?
+              // TODO include the coordinates of the hit?
               damage
             }
           }
