@@ -6,6 +6,7 @@ import { createShot } from '../../shot'
 
 export interface ShootPlayerResultDetails {
   id: string
+  shots: number
 }
 
 // TODO note that by not havign HandlerResult parameterized with the kind of request result that
@@ -72,6 +73,7 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
       success: true,
       request: RequestType.Shoot,
       details: {
+        shots: player.shots,
         id: player.id
       }
     },

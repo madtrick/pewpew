@@ -303,7 +303,8 @@ describe('Result to response', () => {
           success: true,
           request: RequestType.Shoot,
           details: {
-            id: playerOneId
+            id: playerOneId,
+            shots: 10
           }
         }
 
@@ -318,7 +319,10 @@ describe('Result to response', () => {
           response: {
             type: 'Response',
             id: 'Shoot',
-            success: true
+            success: true,
+            data: {
+              shots: 10
+            }
           }
         })
       })

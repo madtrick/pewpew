@@ -141,7 +141,8 @@ describe('Requests - Shoot', () => {
         success: true,
         request: RequestType.Shoot,
         details: {
-          id: 'player-1'
+          id: 'player-1',
+          shots: registeredPlayer.shots
         }
       })
       expect(registeredPlayer.shots).to.eql(initialShots - 1)

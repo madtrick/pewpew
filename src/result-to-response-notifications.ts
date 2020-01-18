@@ -233,7 +233,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.Shoot) {
-      const { details: { id: playerId } } = result
+      const { details: { id: playerId, shots } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [{
@@ -241,7 +241,10 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
         response: {
           type: 'Response',
           id: RequestType.Shoot,
-          success: true
+          success: true,
+          data: {
+            shots
+          }
         }
       }]
     }
