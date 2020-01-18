@@ -272,7 +272,10 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           response: {
             type: 'Response',
             id: RequestType.RotatePlayer,
-            success: true
+            success: true,
+            data: {
+              rotation
+            }
           }
         },
         {

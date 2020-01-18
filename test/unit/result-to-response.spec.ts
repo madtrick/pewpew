@@ -377,7 +377,10 @@ describe('Result to response', () => {
           response: {
             type: 'Response',
             id: RequestType.RotatePlayer,
-            success: true
+            success: true,
+            data: {
+              rotation
+            }
           }
         })
         expect(responsesAndNotifications[1]).to.eql({
