@@ -231,18 +231,20 @@ describe('Update to notification', () => {
   describe('UpdateType.Scan', () => {
     it('generates a scan notification', () => {
       // TODO add another player
-      const scannedPlayerPosition = { position: { x: 1, y: 2 } }
-      const scannedUnknownPosition = { position: { x: 2, y: 3 } }
-      const scannedShotPosition = { position: { x: 3, y: 4 } }
+      const scannedPlayer= { position: { x: 1, y: 2 }, id: 'player-1', rotation: 45 }
+      const scannedUnknown= { position: { x: 2, y: 3 } }
+      const scannedShot= { position: { x: 3, y: 4 }, rotation: 30 }
+      const scannedMine = { position: { x: 4, y: 5 } }
       const update: ArenaRadarScanResult = {
         type: UpdateType.Scan,
         component: {
           type: ComponentType.Radar,
           data: {
             playerId: 'player-1',
-            players: [scannedPlayerPosition],
-            unknown: [scannedUnknownPosition],
-            shots: [scannedShotPosition]
+            players: [scannedPlayer],
+            unknown: [scannedUnknown],
+            shots: [scannedShot],
+            mines: [scannedMine]
           }
         }
       }
@@ -261,9 +263,9 @@ describe('Update to notification', () => {
           type: 'Notification',
           id: 'RadarScan',
           data: {
-            players: [scannedPlayerPosition],
-            unknown: [scannedUnknownPosition],
-            shots: [scannedShotPosition]
+            players: [scannedPlayer],
+            unknown: [scannedUnknown],
+            shots: [scannedShot]
           }
         }
       })

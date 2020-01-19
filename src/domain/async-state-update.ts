@@ -149,13 +149,13 @@ export default function updateState (
   })
 
   const radarUpdates: ArenaRadarScanResult[] = finalPlayers.map((player) => {
-    const scanResult = radar(player.position, [...finalPlayers, ...remainingShots, ...remainingMines])
+    const components = { players: finalPlayers, mines: remainingMines, shots: remainingShots }
+    const scanResult = radar(player.position, components)
     return {
       type: scanResult.type,
       component: {
         type: scanResult.component.type,
         data: {
-          // TODO include mines in the radar?
           playerId: player.id,
           players: scanResult.component.data.players,
           unknown: scanResult.component.data.unknown,

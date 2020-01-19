@@ -1,103 +1,106 @@
-import { Position } from '../types'
-import { ComponentType, UpdateType } from './arena'
+import { Position, Rotation } from '../types'
+import { ComponentType, UpdateType, ArenaPlayer, ArenaShot } from './arena'
+import { Mine } from '../mine'
 import { PLAYER_RADIUS } from '../player'
-
-// TODO replace this with this Position type
-type ComponentPosition = { position: { x: number, y: number } }
 
 // TODO since this is an update, this type should be named
 // something like ScanUpdate. Or maybe keep the result and rename the
 // updatetype prop :shrug:
+type ScannedUnknown = { position: Position }
+type ScannedPlayer = { id: string, rotation: Rotation, position: Position }
+type ScannedShot = { rotation: Rotation, position: Position }
+type ScannedMine = { position: Position }
 export interface ScanResult {
   type: UpdateType.Scan,
   component: {
     type: ComponentType.Radar,
     data: {
-      players: { position: { x: number, y: number } }[],
-      unknown: { position: { x: number, y: number } }[],
-      shots: ComponentPosition[],
-      mines: ComponentPosition[]
+      unknown: ScannedUnknown[]
+      players: ScannedPlayer[]
+      shots: ScannedShot[]
+      mines: ScannedMine[]
     }
   }
 }
 
-// TODO: rename this interface to ComponentWithPosition
-interface ElementWithPosition {
-  type: ComponentType,
-  position: Position
+export type ScannablePlayer = Pick<ArenaPlayer, 'id' | 'position' | 'rotation'>
+export type ScannableShot = Pick<ArenaShot, 'position' | 'rotation'>
+export type ScannableMine = Pick<Mine, 'position'>
+export type ScannableComponents = { players: ScannablePlayer[], shots: ScannableShot[], mines: ScannableMine[] }
+
+function calculateDistanceBetweenPositions (positionA: Position, positionB: Position): number {
+  const A = Math.abs(positionA.x - positionB.x)
+  const B = Math.abs(positionA.y - positionB.y)
+  const distance = Math.sqrt(A * A + B * B)
+
+  return distance
 }
 
 export type RadarScan = typeof scan
-export function scan (position: Position, components: ElementWithPosition[]): ScanResult {
+export function scan (
+  position: Position,
+  components: ScannableComponents
+): ScanResult {
   // TODO: exclude the scanning player from the array of elements to scan
-  const componentsToEvaluate = components.filter(({ position: playerPosition }) => {
+  const players = components.players.filter(({ position: playerPosition }) => {
     return playerPosition.x !== position.x || playerPosition.y !== position.y
   })
   const scanRadius = 40
   const shotIdentifyRadius = scanRadius - 5
   const mineIdentifyRadius = scanRadius - 5
+  const detectedComponents: ScanResult['component']['data'] = { players: [], shots: [], mines: [], unknown: [] }
 
-  const distancesToPlayers = componentsToEvaluate.map((component) => {
-    const { x, y } = component.position
-    const A = Math.abs(x - position.x)
-    const B = Math.abs(y - position.y)
-    const distance = Math.sqrt(A * A + B * B)
+  components.shots.forEach((shot) => {
+    const distance = calculateDistanceBetweenPositions(position, shot.position)
 
-    return { distance, component }
+    if (distance <= scanRadius) {
+      if (distance <= shotIdentifyRadius) {
+        detectedComponents.shots.push({
+          rotation: shot.rotation,
+          position: shot.position
+        })
+      } else {
+        detectedComponents.unknown.push({
+          position: shot.position
+        })
+      }
+    }
   })
 
-  // TODO decouple this from the player. The scan function should take the scan radious
-  // and also detection thresholds as parameters
-  const scanResult = distancesToPlayers.reduce((acc: {
-    players: ComponentPosition[],
-    unknown: ComponentPosition[],
-    shots: ComponentPosition[],
-    mines: ComponentPosition[]
-  }, { distance, component }) => {
-    if (component.type === ComponentType.Shot) {
-      if (distance <= scanRadius) {
-        if (distance <= shotIdentifyRadius) {
-          acc.shots.push({ position: { x: component.position.x, y: component.position.y } })
-        } else {
-          acc.unknown.push({ position: { x: component.position.x, y: component.position.y } })
-        }
-      }
-    }
+  components.mines.forEach((mine) => {
+    const distance = calculateDistanceBetweenPositions(position, mine.position)
 
-    if (component.type === ComponentType.Mine) {
-      if (distance <= scanRadius) {
-        if (distance <= mineIdentifyRadius) {
-          acc.mines.push({ position: { x: component.position.x, y: component.position.y } })
-        } else {
-          acc.unknown.push({ position: { x: component.position.x, y: component.position.y } })
-        }
+    if (distance <= scanRadius) {
+      if (distance <= mineIdentifyRadius) {
+        detectedComponents.mines.push({ position: mine.position })
+      } else {
+        detectedComponents.unknown.push({ position: mine.position })
       }
     }
+  })
+
+  players.forEach((player) => {
+    const distance = calculateDistanceBetweenPositions(position, player.position)
 
     if (distance <= (scanRadius + PLAYER_RADIUS)) {
       if (distance <= scanRadius) {
         // the center of the component is within the range of the radar
-        if (component.type === ComponentType.Player) {
-          acc.players.push({ position: { x: component.position.x, y: component.position.y } })
-        }
+        detectedComponents.players.push({
+          id: player.id,
+          rotation: player.rotation,
+          position: player.position
+        })
       } else {
-        acc.unknown.push({ position: { x: component.position.x, y: component.position.y } })
+        detectedComponents.unknown.push({ position: player.position })
       }
     }
-
-    return acc
-  }, { players: [], unknown: [], shots: [], mines: [] })
+  })
 
   return {
     type: UpdateType.Scan,
     component: {
       type: ComponentType.Radar,
-      data: {
-        players: scanResult.players,
-        unknown: scanResult.unknown,
-        shots: scanResult.shots,
-        mines: scanResult.mines
-      }
+      data: detectedComponents
     }
   }
 }
