@@ -327,8 +327,8 @@ describe('Arena', () => {
         arena.update({ shotRefillCadence, shotRefillQuantity, currentTick })
 
         expect(scanStub).to.have.been.calledTwice
-        expect(scanStub).to.have.been.calledWith( registeredPlayer1.position, scannableComponents)
-        expect(scanStub).to.have.been.calledWith( registeredPlayer2.position, scannableComponents)
+        expect(scanStub).to.have.been.calledWith(registeredPlayer1.position, scannableComponents)
+        expect(scanStub).to.have.been.calledWith(registeredPlayer2.position, scannableComponents)
       })
 
       it('includes the results from the radar scan in the update result', () => {

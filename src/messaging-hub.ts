@@ -21,7 +21,7 @@ export interface WebSocketServer {
 export interface WebSocket {
   on (event: 'close', cb: (code: number, reason: string) => void): void
   on (event: 'message', cb: (data: string) => void): void
-  send (data: any, options: undefined, cb: () => void): Promise<void>
+  send (data: any, options: undefined, cb: () => void): void
 }
 
 interface Channel {

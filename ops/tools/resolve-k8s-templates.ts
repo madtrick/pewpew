@@ -25,7 +25,7 @@ export default function (options: { templatedFile: string, context: Context }): 
 
   // Note: can't use fat arrow functions because the traverse library
   // exposes its functionality through `this` in the callback function
-  const templated = traverse(templateYaml).map(function (node: string | object) {
+  const templated = traverse(templateYaml).map(function (node: string | object): string | object {
     if (typeof node !== 'string') {
       return node
     }
