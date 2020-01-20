@@ -105,6 +105,13 @@ const schemas = [
 export function validateMessage (message: object): boolean {
   // TODO maybe first check if message.type is present
   // and then use that to find the schema it should validate
+  // TODO remove this tslint ignore. The typings say that ".error" can't be
+  // null but the docs says otherwise. Because of this inconsistence I'm getting
+  // the following linting error:
+  //
+  // src/messages.ts:108:55 - Expression is always false (the line number should
+  // refer to the one below)
+  // tslint:disable-next-line:strict-type-predicates
   return !!schemas.find((schema) => schema.validate(message).error === null)
 }
 

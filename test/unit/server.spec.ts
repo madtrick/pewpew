@@ -43,9 +43,12 @@ describe('Server', () => {
 
     startServer(context)
 
+    // @ts-ignore: TODO remove this ignore
     onOpenControlChannel({ id: 'ch-1' })
+    // @ts-ignore: TODO remove this ignore
     onOpenPlayerChannel({ id: 'ch-2' })
 
+    // @ts-ignore: TODO remove this ignore
     await callback(currentTick)
 
     expect(context.engine).to.have.been.calledWith(

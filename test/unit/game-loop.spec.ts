@@ -110,7 +110,8 @@ describe('Game loop', () => {
             position: {
               x: 1,
               y: 1
-            }
+            },
+            remainingMines: 10
           }
         },
         state
@@ -170,6 +171,7 @@ describe('Game loop', () => {
           success: true,
           request: RequestType.Shoot,
           details: {
+            shots: 10,
             id: 'player-1'
           }
         }, state

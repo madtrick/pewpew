@@ -5,14 +5,14 @@ function sleep (ms: number = 100): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-interface Deferred<T> {
-  promise: Promise<T>
-  resolve: (value?: T) => void
+interface Deferred {
+  promise: Promise<void>
+  resolve: () => void
 }
 
-function createDeferred<T> (): Deferred<T> {
-  let resolver: (value?: T) => void = () => undefined
-  const promise = new Promise<T>((resolve) => {
+function createDeferred (): Deferred {
+  let resolver: () => void = () => undefined
+  const promise = new Promise<void>((resolve) => {
     resolver = resolve
   })
 
@@ -28,7 +28,7 @@ describe('Ticker', () => {
       const ticker = createTicker()
 
       let count = 0
-      ticker.atLeastEvery(100, () => {
+      ticker.atLeastEvery(100, async () => {
         count = count + 1
       })
 
@@ -42,7 +42,7 @@ describe('Ticker', () => {
       const ticker = createTicker()
 
       let count = 1
-      ticker.atLeastEvery(100, (tick) => {
+      ticker.atLeastEvery(100, async (tick) => {
         expect(tick).to.eql(count)
         count = count + 1
       })
@@ -56,7 +56,7 @@ describe('Ticker', () => {
       const ticker = createTicker()
 
       let count = 0
-      ticker.atLeastEvery(100, () => {
+      ticker.atLeastEvery(100, async () => {
         count = count + 1
       })
 
@@ -70,7 +70,7 @@ describe('Ticker', () => {
 
         let count = 0
         const deferred = createDeferred()
-        ticker.atLeastEvery(100, () => {
+        ticker.atLeastEvery(100, async () => {
           count = count + 1
           return deferred.promise
         })
