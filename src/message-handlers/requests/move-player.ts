@@ -2,6 +2,7 @@ import { MovePlayerMessage } from '../../messages'
 import { GameState } from '../../game-state'
 import { Session } from '../../session'
 import { HandlerResult, RequestType } from '../index'
+import { MovePlayer } from '../../domain/move-player'
 
 // TODO unifiy the PlayerPosition (or Position) in just one place
 // instead of having the same structure used in different places
@@ -16,7 +17,12 @@ export interface MovePlayerResultDetails {
   position: PlayerPosition
 }
 
-export default function movePlayer (session: Session, message: MovePlayerMessage, state: GameState): HandlerResult {
+export default function movePlayer (
+  session: Session,
+  message: MovePlayerMessage,
+  state: GameState,
+  domain: MovePlayer
+): HandlerResult {
   if (!state.started) {
     return {
       result: {
@@ -44,7 +50,8 @@ export default function movePlayer (session: Session, message: MovePlayerMessage
   }
 
   const movement = message.data.movement
-  const result = state.arena.movePlayer(movement, player)
+  const arena = state.arena
+  const result = domain(movement, player, arena.players(), { width: arena.width, height: arena.height })
 
   return {
     result: {

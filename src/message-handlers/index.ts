@@ -10,6 +10,7 @@ import {
 } from '../messages'
 import StartGameHandler from './commands/start-game'
 import RegisterPlayerHandler, { RegisterPlayerResultDetails } from './requests/register-player'
+import { MovePlayer } from '../domain/move-player'
 import MovePlayerHandler, { MovePlayerResultDetails } from './requests/move-player'
 import ShootHandler, { ShootPlayerResultDetails } from './requests/shoot'
 import RotatePlayerHandler, { RotatePlayerResultDetails } from './requests/rotate-player'
@@ -115,7 +116,7 @@ export interface HandlerResult {
 export interface IncommingMessageHandlers {
   Request: {
     RegisterPlayer: (session: Session, message: RegisterPlayerMessage, state: GameState) => HandlerResult
-    MovePlayer: (session: Session, message: MovePlayerMessage, state: GameState) => HandlerResult
+    MovePlayer: (session: Session, message: MovePlayerMessage, state: GameState, domain: MovePlayer) => HandlerResult
     RotatePlayer: (session: Session, message: RotatePlayerMessage, state: GameState) => HandlerResult
     Shoot: (session: Session, message: ShootMessage, state: GameState) => HandlerResult
     DeployMine: (session: Session, message: DeployMineMessage, state: GameState) => HandlerResult
