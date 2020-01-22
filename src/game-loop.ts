@@ -17,6 +17,7 @@ import {
 import { GameState } from './game-state'
 import { Session } from './session'
 import { ComponentUpdate } from './update-to-notifications'
+import movePlayer from './domain/move-player'
 
 interface GameLoopResult {
   state: GameState
@@ -62,7 +63,7 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
           }
 
           if (messageId === 'MovePlayer') {
-            const result = handlers.Request.MovePlayer(session, message as MovePlayerMessage, state)
+            const result = handlers.Request.MovePlayer(session, message as MovePlayerMessage, state, movePlayer)
             loopCycleRunResult.results.push(result.result)
           }
 

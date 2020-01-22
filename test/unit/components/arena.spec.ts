@@ -1,46 +1,9 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
-import { Arena, Success, Result, asSuccess, ComponentType, UpdateType } from '../../../src/components/arena'
+import { Arena, asSuccess, ComponentType, UpdateType } from '../../../src/components/arena'
 import { Player, createPlayer, PLAYER_MAX_LIFE } from '../../../src/player'
 import { createShot } from '../../../src/shot'
 import { scan, ScanResult as RadarScanResult } from '../../../src/components/radar'
-
-function makeSuccess<T> (data: T): Success<T> {
-  return { ...data, status: 'ok' }
-}
-
-enum DisplacementDirection {
-  FORWARD = 'forward',
-  BACKWARD = 'backward'
-}
-
-type MovementTestOptions<T, F>= {
-  arena: () => Arena,
-  initialPosition: { x: number, y: number },
-  // TODO temporary type while I don't figure out if
-  // rotations are also considered a Movement or something else
-  movements: ({ type: 'displacement', direction: DisplacementDirection } | { type: 'rotation', degrees: number })[],
-  expectedResponses: Result<T, F>[]
-}
-function movementTest<T, F> (options: MovementTestOptions<T, F>): () => Promise<void> {
-  return async () => {
-    const arena = options.arena()
-    const player = createPlayer({ id: 'player-1' })
-    arena.registerPlayer(player, { position: options.initialPosition })
-    player.rotation = 0
-
-    const results = options.movements.map((movement) => {
-      if (movement.type === 'rotation') {
-        player.rotation = movement.degrees
-        return
-      }
-
-      return asSuccess(arena.movePlayer(movement, player))
-    }).filter(Boolean)
-
-    results.forEach((result, index) => expect(result).to.eql(options.expectedResponses[index]))
-  }
-}
 
 describe('Arena', () => {
   let sandbox: sinon.SinonSandbox
@@ -175,93 +138,6 @@ describe('Arena', () => {
         })
       })
     })
-  })
-
-  describe('movePlayer', () => {
-    it('moves the player - horizontally', movementTest({
-      movements: [
-        { type: 'displacement', direction: DisplacementDirection.FORWARD },
-        { type: 'displacement', direction: DisplacementDirection.BACKWARD }
-      ],
-      arena: () => arena,
-      initialPosition: { x: 50, y: 50 },
-      expectedResponses: [
-        makeSuccess({ position: { x: 51, y: 50 } }),
-        makeSuccess({ position: { x: 50, y: 50 } })
-      ]
-    }))
-
-    it('moves the player - vertically', movementTest({
-      movements: [
-        { type: 'rotation', degrees: 90 },
-        { type: 'displacement', direction: DisplacementDirection.BACKWARD }],
-      arena: () => arena,
-      initialPosition: { x: 50, y: 50 },
-      expectedResponses: [
-        makeSuccess({ position: { x: 50, y: 49 } })
-      ]
-    }))
-
-    it('moves the player - at an angle', movementTest({
-      movements: [
-        { type: 'rotation', degrees: 30 },
-        { type: 'displacement', direction: DisplacementDirection.FORWARD }],
-      arena: () => arena,
-      initialPosition: { x: 50, y: 50 },
-      expectedResponses: [
-        makeSuccess({ position: { x: 50.86603, y: 50.5 } })
-      ]
-    }))
-
-    it('moves the player - at an angle', movementTest({
-      movements: [
-        { type: 'rotation', degrees: 30 },
-        { type: 'displacement', direction: DisplacementDirection.FORWARD },
-        { type: 'displacement', direction: DisplacementDirection.BACKWARD }
-      ],
-      arena: () => arena,
-      initialPosition: { x: 50, y: 50 },
-      expectedResponses: [
-        makeSuccess({ position: { x: 50.86603, y: 50.5 } }),
-        makeSuccess({ position: { x: 50, y: 50 } })
-      ]
-    }))
-
-    it('moves the player - if it does not collide with others', movementTest({
-      movements: [
-        { type: 'displacement', direction: DisplacementDirection.FORWARD }
-      ],
-      arena: () => {
-        const player = createPlayer({ id: 'player-2' })
-
-        arena.registerPlayer(player, { position: { x: 84, y: 50 } })
-
-        return arena
-      },
-      initialPosition: { x: 50, y: 50 },
-      expectedResponses: [
-        makeSuccess({ position: { x: 51, y: 50 } })
-      ]
-    }))
-
-    it('does not move the player - if it collides with others', movementTest({
-      movements: [
-        { type: 'displacement', direction: DisplacementDirection.FORWARD }
-      ],
-      arena: () => {
-        const player = createPlayer({ id: 'player-2' })
-
-        // 50 + 16 = 66
-        // 83 - 16 = 67
-        arena.registerPlayer(player, { position: { x: 83, y: 50 } })
-
-        return arena
-      },
-      initialPosition: { x: 50, y: 50 },
-      expectedResponses: [
-        makeSuccess({ position: { x: 50, y: 50 } })
-      ]
-    }))
   })
 
   describe('registerShot', () => {
