@@ -6,8 +6,9 @@ export interface Player {
   rotation: number
   life: number
   // TODO rename this to shot tokens
-  shots: number,
+  shots: number
   mines: number
+  status: undefined
   type: ComponentType.Player
 }
 
@@ -35,6 +36,7 @@ export function createPlayer (options: { id: string }): Player {
     life: PLAYER_MAX_LIFE,
     shots: PLAYER_MAX_SHOTS,
     mines: PLAYER_MINES,
+    status: undefined,
     type: ComponentType.Player
   }
 }

@@ -90,7 +90,7 @@ describe('Requests - Deploy mine', () => {
       })
     })
 
-    it('does deploy the mine if the player has no mines left', () => {
+    it('does not deploy the mine if the player has no mines left', () => {
       const state = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))

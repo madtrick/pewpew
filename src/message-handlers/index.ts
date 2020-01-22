@@ -14,14 +14,15 @@ import MovePlayerHandler, { MovePlayerResultDetails } from './requests/move-play
 import ShootHandler, { ShootPlayerResultDetails } from './requests/shoot'
 import RotatePlayerHandler, { RotatePlayerResultDetails } from './requests/rotate-player'
 import DeployMineHandler, { DeployMineResultDetails } from './requests/deploy-mine'
-
+import { ComponentUpdateResultDetails } from './requests/component-update'
 
 export enum RequestType {
   RegisterPlayer = 'RegisterPlayer',
   MovePlayer = 'MovePlayer',
   Shoot = 'Shoot',
   RotatePlayer = 'RotatePlayer',
-  DeployMine = 'DeployMine'
+  DeployMine = 'DeployMine',
+  ComponentUpdate = 'ComponentUpdate'
 }
 
 export enum CommandType {
@@ -74,7 +75,18 @@ export type SuccessfulDeployMineRequest = RequestResult & SuccessfulRequest & {
   details: DeployMineResultDetails
 }
 
-export type SuccessRequestResult = SuccessfulRegiserPlayerRequest | SuccessfulMovePlayerRequest | SuccessfulShootRequest | SuccessfulRotateRequest | SuccessfulDeployMineRequest
+export type SuccessfulComponentUpdateRequest = RequestResult & SuccessfulRequest & {
+  request: RequestType.ComponentUpdate,
+  details: ComponentUpdateResultDetails
+}
+
+export type SuccessRequestResult = SuccessfulRegiserPlayerRequest
+  | SuccessfulMovePlayerRequest
+  | SuccessfulShootRequest
+  | SuccessfulRotateRequest
+  | SuccessfulDeployMineRequest
+  | SuccessfulComponentUpdateRequest
+
 export type FailureRequestResult = RequestResult & {
   success: false,
   reason: string
