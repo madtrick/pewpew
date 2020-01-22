@@ -187,7 +187,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     if (result.success === true && result.request === RequestType.MovePlayer) {
       // TODO maybe always include the session in the result so it's easier
       // to find to which user send the response
-      const { details: { id: playerId, position } } = result
+      const { details: { id: playerId, position, remainingTokens, requestCostInTokens, turboApplied } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [
@@ -197,8 +197,17 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
             type: 'Response',
             id: RequestType.MovePlayer,
             success: true,
-            details: {
-              position
+            data: {
+              component: {
+                details: {
+                  tokens: remainingTokens,
+                  position
+                }
+              },
+              request: {
+                withTurbo: turboApplied,
+                cost: requestCostInTokens
+              }
             }
           }
         },
@@ -246,6 +255,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           id: RequestType.Shoot,
           success: true,
           data: {
+            // TODO rename this to remainingShots
             shots
           }
         }

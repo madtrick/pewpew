@@ -4,12 +4,21 @@ import { Position } from '../types'
 import { round } from '../helpers'
 import { Result, ArenaPlayer } from '../components/arena'
 
-const MOVEMENT_SPEED = process.env.MOVEMENT_SPEED ? Number(process.env.MOVEMENT_SPEED) : 1
+// TODO this should be taken as an argument
+const TURBO_FACTOR = 2
+export const TURBO_COST_IN_TOKENS = 2
 
-function calculateNewPlayerPosition (movement: Movement, player: Player, currentPosition: Position): Position {
+interface ActionResult {
+  player: ArenaPlayer
+  turboApplied: boolean
+  actionCostInTokens: number
+  errors: { msg: string }[]
+}
+
+function calculateNewPlayerPosition (movement: Movement, movementSpeed: number, player: Player, currentPosition: Position): Position {
   const direction = movement.direction === 'forward' ? 1 : -1
   // TODO read the movement speed from the configuration
-  const magnitude = direction * MOVEMENT_SPEED
+  const magnitude = direction * movementSpeed
   const radians = (player.rotation * Math.PI) / 180
   const dX = magnitude * Math.cos(radians)
   const dY = magnitude * Math.sin(radians)
@@ -31,13 +40,32 @@ function isPlayerPositionWithinBoundaries ({ x, y }: Position, arenaDimensions: 
 export type MovePlayer = typeof movePlayer
 export default function movePlayer (
   movement: Movement,
+  speed: number,
   player: Player,
   players: ArenaPlayer[],
   arenaDimensions: { width: number, height: number }
-): Result<{ position: Position }, null> {
+): Result<ActionResult, null> {
   const arenaPlayer = players.find((arenaPlayer) => arenaPlayer.id === player.id)
-  // TODO throw if the player hasn't been found
-  const newPosition = calculateNewPlayerPosition(movement, player, arenaPlayer!.position)
+  // TODO return a failure in the result if the player hasn't been found
+
+  let speedWithTurbo
+  let errors: { msg: string }[] = []
+  let turboApplied: boolean = false
+
+  if (movement.withTurbo) {
+    if (arenaPlayer!.tokens >= TURBO_COST_IN_TOKENS) {
+      turboApplied = true
+      speedWithTurbo = speed * TURBO_FACTOR
+      arenaPlayer!.tokens = arenaPlayer!.tokens - TURBO_COST_IN_TOKENS
+    } else {
+      errors.push({ msg: 'The player does not have enough tokens to use the turbo' })
+      speedWithTurbo = speed
+    }
+  } else {
+    speedWithTurbo = speed
+  }
+
+  const newPosition = calculateNewPlayerPosition(movement, speedWithTurbo, player, arenaPlayer!.position)
 
   const { x, y } = newPosition
   const collides = players.find((arenaPlayer) => {
@@ -63,12 +91,18 @@ export default function movePlayer (
 
     return {
       status: 'ok',
-      position: newPosition
+      player: arenaPlayer!,
+      turboApplied,
+      actionCostInTokens: turboApplied ? TURBO_COST_IN_TOKENS : 0,
+      errors: errors
     }
   } else {
     return {
       status: 'ok',
-      position: arenaPlayer!.position
+      player: arenaPlayer!,
+      turboApplied,
+      actionCostInTokens: turboApplied ? TURBO_COST_IN_TOKENS : 0,
+      errors: errors
     }
   }
 }

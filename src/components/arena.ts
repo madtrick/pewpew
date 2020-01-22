@@ -70,6 +70,9 @@ export type Foo = (
   {
     type: ComponentType.Radar,
     data: {
+      // TODO change the types of "players", "unknown" and "shots" to
+      // ScannedPlayer, ScannedUnknown and ScannedShot.
+      // TODO add mines to this type
       playerId: string,
       players: { position: Position }[],
       unknown: { position: Position }[],
@@ -219,8 +222,8 @@ export class Arena {
   }
 
   update (
-    { currentTick, shotRefillCadence, shotRefillQuantity }:
-    { shotRefillCadence: number, shotRefillQuantity: number, currentTick: number }
+    { currentTick, shotRefillCadence, shotRefillQuantity, tokenIncreaseQuantity }:
+    { shotRefillCadence: number, shotRefillQuantity: number, currentTick: number, tokenIncreaseQuantity: number }
   ): {
     type: UpdateType,
     component: Foo
@@ -234,7 +237,8 @@ export class Arena {
       this.radar,
       currentTick,
       shotRefillCadence,
-      shotRefillQuantity
+      shotRefillQuantity,
+      tokenIncreaseQuantity
     )
 
     this.arenaPlayers = update.players

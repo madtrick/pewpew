@@ -154,6 +154,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
           data: {
             players,
             unknown,
+            // TODO include mines
             shots
           }
         }

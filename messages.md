@@ -54,6 +54,7 @@ Missing
 ```
 
 ```json
+// Notification sent to the control channel
 {
   type: 'Notification',
   id: 'Hit',
@@ -61,7 +62,8 @@ Missing
     type: 'Player',
     data: {
       id: <string>,
-      damage: <number>
+      damage: <number>,
+      shotId: <string>
     }
   }
 }
@@ -84,9 +86,18 @@ Missing
   type: 'Notification',
   id: 'RadarScan',
   data: {
-    players: { position: { x: <number>, y: <number> } }[],
-    unknown: { position: { x: <number>, y: <number> } }[],
-    shots: { position: { x: <number>, y: <number> } }[]
+    players: {
+      id: <string>,
+      rotation: <number>,
+      position: { x: <number>, y: <number>}
+  	}[],
+    unknown: {
+      position: { x: <number>, y: <number> }
+    }[],
+    shots: {
+      rotation: <number>,
+      position: { x: <number>, y: <number> }
+    }[]
   }
 }
 ```
@@ -157,7 +168,7 @@ Missing
 
 
 
-Request
+### Requests
 
 #### ShootRequest
 
@@ -172,7 +183,10 @@ Request
 {
   type: 'Response',
   id: 'Shoot',
-  success: true
+  success: true,
+  data: {
+    shots: <number>
+  }
 }
 ```
 
@@ -195,7 +209,8 @@ Request
   id: 'MovePlayer',
   data: {
     movement: {
-      direction: <'forward'|'backward'>
+      direction: <'forward'|'backward'>,
+      withTurbo: <boolean>
     }
   }
 }
@@ -206,10 +221,16 @@ Request
   type: 'Response',
   id: 'MovePlayer',
   success: true,
-  details: {
-    position: {
-      x: <number>,
-      y: <number>
+  data: {
+    component: {
+      details: {
+        position: { x: <number>, y: <number> },
+        tokens: <number>
+      }
+    },
+    request: {
+      cost: <number>
+      withTurbo: <boolean>
     }
   }
 }
@@ -221,7 +242,7 @@ Request
   id: 'MovePlayer',
   success: false,
   details: {
-    msg: <tring>
+    msg: <string>
   }
 }
 ```
@@ -271,18 +292,22 @@ Request
 {
   type: 'Response',
   id: 'RotatePlayer',
-  success: true
+  success: true,
+  data: {
+    rotation: <number>
+  }
 }
 ```
 
 ```json
+// Message sent to control channel
 {
   type: 'Notification',
   id: 'ComponentUpdate', // this has to be fixed
   component: {
     type: 'Player',
     data: {
-      id: playerId,
+      id: <string>,
       rotation
     }
   }
@@ -338,7 +363,6 @@ Request
   	type: 'Player',
     data: {
       id: <string>,
-      // TODO remove this hardcoded value
       position: {
         x: <number>,
         y: <number>
@@ -349,5 +373,51 @@ Request
 }
 ```
 
+#### DeployMineRequest
 
+```json
+{
+  type: 'Request',
+  id: 'DeployMine'
+}
+```
+
+
+
+```json
+{
+  type: 'Response',
+  id: 'DeployMine',
+  success: false,
+  details: {
+  	msg: <string>
+  }
+}
+```
+
+```json
+{
+  type: 'Response',
+  id: 'DeployMine',
+  success: true,
+  data: {
+    mines: <number>
+  }
+}
+```
+
+```json
+{
+  type: 'Notification',
+  id: 'DeployMine',
+  component: {
+    type: 'Mine',
+    data: {
+      playerId: <string>,
+      id: <string>,
+      position: { x: <number>, y: <number> }
+    }
+  }
+}
+```
 

@@ -20,7 +20,8 @@ export default function updateState (
   radar: RadarScan,
   tick: number,
   shotUpdateCadence: number,
-  shotIncrease: number
+  shotIncrease: number,
+  tokenIncrease: number
 ): Update {
   const movedShots = asyncMoveShots(shots, 1)
   const remainingShots: ArenaShot[] = []
@@ -166,8 +167,11 @@ export default function updateState (
     }
   })
 
-  if (tick % shotUpdateCadence === 0) {
-    finalPlayers.forEach((player) => {
+  finalPlayers.forEach((player) => {
+    // TODO set an upper limit to the max number of tokens a player can have
+    player.tokens = player.tokens + tokenIncrease
+
+    if (tick % shotUpdateCadence === 0) {
       if (player.shots < PLAYER_MAX_SHOTS) {
         if (player.shots + shotIncrease > PLAYER_MAX_SHOTS) {
           player.shots = PLAYER_MAX_SHOTS
@@ -175,8 +179,8 @@ export default function updateState (
           player.shots = player.shots + shotIncrease
         }
       }
-    })
-  }
+    }
+  })
 
   return {
     updates: [...updates, ...radarUpdates],

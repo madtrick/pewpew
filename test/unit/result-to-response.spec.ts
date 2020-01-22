@@ -220,6 +220,9 @@ describe('Result to response', () => {
           request: RequestType.MovePlayer,
           details: {
             id: playerOneId,
+            turboApplied: false,
+            remainingTokens: 100,
+            requestCostInTokens: 3,
             position: {
               x: 100,
               y: 100
@@ -239,10 +242,19 @@ describe('Result to response', () => {
             type: 'Response',
             id: 'MovePlayer',
             success: true,
-            details: {
-              position: {
-                x: 100,
-                y: 100
+            data: {
+              component: {
+                details: {
+                  tokens: 100,
+                  position: {
+                    x: 100,
+                    y: 100
+                  }
+                }
+              },
+              request: {
+                withTurbo: false,
+                cost: 3
               }
             }
           }
