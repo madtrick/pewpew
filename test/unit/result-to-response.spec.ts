@@ -316,7 +316,8 @@ describe('Result to response', () => {
           request: RequestType.Shoot,
           details: {
             id: playerOneId,
-            shots: 10
+            remainingTokens: 100,
+            requestCostInTokens: 3
           }
         }
 
@@ -333,7 +334,14 @@ describe('Result to response', () => {
             id: 'Shoot',
             success: true,
             data: {
-              shots: 10
+              component: {
+                details: {
+                  tokens: 100
+                }
+              },
+              request: {
+                cost: 3
+              }
             }
           }
         })
@@ -425,6 +433,7 @@ describe('Result to response', () => {
           session: playerSession,
           success: false,
           request: RequestType.DeployMine,
+          // TODO use a proper error message
           reason: 'Some reason'
         }
 
@@ -457,7 +466,8 @@ describe('Result to response', () => {
             playerId: playerOneId,
             id: mineId,
             position: minePosition,
-            remainingMines: 2
+            remainingTokens: 2,
+            requestCostInTokens: 2
           }
         }
 
@@ -474,7 +484,14 @@ describe('Result to response', () => {
             id: RequestType.DeployMine,
             success: true,
             data: {
-              mines: 2
+              component: {
+                details: {
+                  tokens: 2
+                }
+              },
+              request: {
+                cost: 2
+              }
             }
           }
         })
