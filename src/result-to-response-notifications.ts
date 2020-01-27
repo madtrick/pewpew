@@ -292,7 +292,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.RotatePlayer) {
-      const { details: { id: playerId, rotation } } = result
+      const { details: { id: playerId, rotation, remainingTokens, requestCostInTokens } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [
@@ -303,7 +303,15 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
             id: RequestType.RotatePlayer,
             success: true,
             data: {
-              rotation
+              component: {
+                details: {
+                  rotation,
+                  tokens: remainingTokens
+                }
+              },
+              request: {
+                cost: requestCostInTokens
+              }
             }
           }
         },

@@ -386,7 +386,9 @@ describe('Result to response', () => {
           request: RequestType.RotatePlayer,
           details: {
             id: playerOneId,
-            rotation
+            rotation,
+            remainingTokens: 100,
+            requestCostInTokens: 3
           }
         }
 
@@ -403,7 +405,15 @@ describe('Result to response', () => {
             id: RequestType.RotatePlayer,
             success: true,
             data: {
-              rotation
+              component: {
+                details: {
+                  rotation,
+                  tokens: 100
+                }
+              },
+              request: {
+                cost: 3
+              }
             }
           }
         })
@@ -433,7 +443,6 @@ describe('Result to response', () => {
           session: playerSession,
           success: false,
           request: RequestType.DeployMine,
-          // TODO use a proper error message
           reason: 'Some reason'
         }
 

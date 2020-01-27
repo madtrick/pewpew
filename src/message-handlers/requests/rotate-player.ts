@@ -3,6 +3,7 @@ import { GameState } from '../../game-state'
 import { Session } from '../../session'
 import { HandlerResult, RequestType } from '../index'
 
+export const ROTATION_COST_IN_TOKENS = 0
 // TODO unifiy the PlayerPosition (or Position) in just one place
 // instead of having the same structure used in different places
 // with different names
@@ -14,6 +15,8 @@ export type PlayerPosition = {
 export interface RotatePlayerResultDetails {
   id: string
   rotation: number
+  remainingTokens: number
+  requestCostInTokens: number
 }
 
 export default function rotatePlayer (session: Session, message: RotatePlayerMessage, state: GameState): HandlerResult {
@@ -67,7 +70,9 @@ export default function rotatePlayer (session: Session, message: RotatePlayerMes
       request: RequestType.RotatePlayer,
       details: {
         id: player.id,
-        rotation
+        rotation,
+        remainingTokens: player.tokens,
+        requestCostInTokens: ROTATION_COST_IN_TOKENS
       }
     },
     state
