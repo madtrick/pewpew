@@ -6,11 +6,14 @@ import { PLAYER_RADIUS } from '../../player'
 import { createMine, MINE_RADIUS } from '../../mine'
 import { Position } from '../../types'
 
+export const DEPLOY_MINE_COST_IN_TOKENS = 3
+
 export interface DeployMineResultDetails {
   playerId: string
   id: string
   position: Position
-  remainingMines: number
+  remainingTokens: number
+  requestCostInTokens: number
 }
 
 // TODO note that by not havign HandlerResult parameterized with the kind of request result that
@@ -56,13 +59,13 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
     }
   }
 
-  if (player.mines === 0) {
+  if (player.tokens < DEPLOY_MINE_COST_IN_TOKENS) {
     return {
       result: {
         session,
         success: false,
         request: RequestType.DeployMine,
-        reason: 'There are no mines left'
+        reason: 'Not enough tokens to deploy a mine'
       },
       state
     }
@@ -103,7 +106,7 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
 
 
   const mine = createMine({ position: { x, y } })
-  player.mines = player.mines - 1
+  player.tokens = player.tokens - DEPLOY_MINE_COST_IN_TOKENS
   state.arena.mines.push(mine)
 
   return {
@@ -114,7 +117,8 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
         playerId: player.id,
         id: mine.id,
         position: mine.position,
-        remainingMines: player.mines
+        remainingTokens: player.tokens,
+        requestCostInTokens: DEPLOY_MINE_COST_IN_TOKENS
       }
     },
     state

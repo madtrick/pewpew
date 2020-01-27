@@ -185,7 +185,14 @@ Missing
   id: 'Shoot',
   success: true,
   data: {
-    shots: <number>
+    component: {
+      details: {
+        tokens: <number>
+      }
+    },
+    request: {
+      cost: <number>
+    }
   }
 }
 ```
@@ -401,7 +408,14 @@ Missing
   id: 'DeployMine',
   success: true,
   data: {
-    mines: <number>
+    component: {
+      details: {
+        tokens: <number>
+      }
+    },
+    request: {
+      cost: <number>
+    }
   }
 }
 ```

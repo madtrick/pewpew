@@ -7,7 +7,7 @@ import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
-import handler from '../../../../src/message-handlers/requests/shoot'
+import handler, { SHOOT_COST_IN_TOKENS } from '../../../../src/message-handlers/requests/shoot'
 
 describe('Requests - Shoot', () => {
   let arena: Arena
@@ -33,7 +33,7 @@ describe('Requests - Shoot', () => {
     it('rejects the request', () => {
       const state: GameState = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })
-      const initialShots = player.shots
+      const initialPlayerTokens = player.tokens
       const message: ShootMessage = {
         type: 'Request',
         id: 'Shoot'
@@ -41,14 +41,13 @@ describe('Requests - Shoot', () => {
 
       const { result } = handler(session, message, state)
 
-      // TODO check that the player still has the initial number of shots
       expect(result).to.eql({
         session,
         success: false,
         reason: 'The game has not started',
         request: RequestType.Shoot
       })
-      expect(player.shots).to.eql(initialShots)
+      expect(player.tokens).to.eql(initialPlayerTokens)
       expect(arena.registerShot).to.not.have.been.called
     })
   })
@@ -98,7 +97,7 @@ describe('Requests - Shoot', () => {
       })
     })
 
-    it('does not take the shot if the player has no shots left', () => {
+    it('does not take the shot if the player has not enough tokens', () => {
       const state = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
@@ -107,7 +106,7 @@ describe('Requests - Shoot', () => {
         id: 'Shoot'
       }
 
-      registeredPlayer.shots = 0
+      registeredPlayer.tokens = SHOOT_COST_IN_TOKENS - 1
       session.playerId = registeredPlayer.id
       state.started = true
 
@@ -116,17 +115,17 @@ describe('Requests - Shoot', () => {
       expect(result).to.eql({
         session,
         success: false,
-        reason: 'There are no shots left',
+        reason: 'Not enough tokens to fire a shot',
         request: RequestType.Shoot
       })
       expect(arena.registerShot).to.not.have.been.called
     })
 
-    it('takes the shot if the player has remaining shots', () => {
+    it('takes the shot if the player has remaining tokens', () => {
       const state = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
-      const initialShots = registeredPlayer.shots
+      const initialPlayerTokens = registeredPlayer.tokens
       const message: ShootMessage = {
         type: 'Request',
         id: 'Shoot'
@@ -141,11 +140,12 @@ describe('Requests - Shoot', () => {
         success: true,
         request: RequestType.Shoot,
         details: {
-          id: 'player-1',
-          shots: registeredPlayer.shots
+          id: registeredPlayer.id,
+          requestCostInTokens: SHOOT_COST_IN_TOKENS,
+          remainingTokens: initialPlayerTokens - SHOOT_COST_IN_TOKENS
         }
       })
-      expect(registeredPlayer.shots).to.eql(initialShots - 1)
+      expect(registeredPlayer.tokens).to.eql(initialPlayerTokens - SHOOT_COST_IN_TOKENS)
       expect(arena.registerShot).to.have.been.calledOnce
     })
   })

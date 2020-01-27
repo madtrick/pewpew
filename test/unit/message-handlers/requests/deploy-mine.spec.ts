@@ -6,7 +6,7 @@ import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
-import handler from '../../../../src/message-handlers/requests/deploy-mine'
+import handler, { DEPLOY_MINE_COST_IN_TOKENS } from '../../../../src/message-handlers/requests/deploy-mine'
 
 describe('Requests - Deploy mine', () => {
   let arena: Arena
@@ -24,7 +24,7 @@ describe('Requests - Deploy mine', () => {
     it('rejects the request', () => {
       const state: GameState = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })
-      const initialMines = player.mines
+      const initialTokens = player.tokens
       const message: DeployMineMessage = {
         type: 'Request',
         id: 'DeployMine'
@@ -32,14 +32,13 @@ describe('Requests - Deploy mine', () => {
 
       const { result } = handler(session, message, state)
 
-      // TODO check that the player still has the initial number of shots
       expect(result).to.eql({
         session,
         success: false,
         reason: 'The game has not started',
         request: RequestType.DeployMine
       })
-      expect(player.mines).to.eql(initialMines)
+      expect(player.tokens).to.eql(initialTokens)
       expect(arena.mines).to.be.empty
     })
   })
@@ -90,7 +89,7 @@ describe('Requests - Deploy mine', () => {
       })
     })
 
-    it('does deploy the mine if the player has no mines left', () => {
+    it('does not deploy the mine if the player has not enough tokens', () => {
       const state = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
@@ -99,7 +98,7 @@ describe('Requests - Deploy mine', () => {
         id: 'DeployMine'
       }
 
-      registeredPlayer.mines = 0
+      registeredPlayer.tokens = 0
       session.playerId = registeredPlayer.id
       state.started = true
 
@@ -108,17 +107,17 @@ describe('Requests - Deploy mine', () => {
       expect(result).to.eql({
         session,
         success: false,
-        reason: 'There are no mines left',
+        reason: 'Not enough tokens to deploy a mine',
         request: RequestType.DeployMine
       })
       expect(arena.mines).to.be.empty
     })
 
-    it('deploys the mine if the player has remaining mines (rotation < 180)', () => {
+    it('deploys the mine if the player has enough tokens (rotation < 180)', () => {
       const state = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 100, y: 74 } }))
-      const initialMines = registeredPlayer.mines
+      const initialTokens = registeredPlayer.tokens
       const message: DeployMineMessage = {
         type: 'Request',
         id: 'DeployMine'
@@ -129,7 +128,7 @@ describe('Requests - Deploy mine', () => {
 
       const { result } = handler(session, message, state)
 
-      expect(registeredPlayer.mines).to.eql(initialMines - 1)
+      expect(registeredPlayer.tokens).to.eql(initialTokens - DEPLOY_MINE_COST_IN_TOKENS)
       expect(arena.mines).to.have.lengthOf(1)
       const [mine] = arena.mines
       expect(mine).to.deep.include({
@@ -142,16 +141,17 @@ describe('Requests - Deploy mine', () => {
           playerId: 'player-1',
           id: mine.id,
           position: mine.position,
-          remainingMines: registeredPlayer.mines
+          remainingTokens: initialTokens - DEPLOY_MINE_COST_IN_TOKENS,
+          requestCostInTokens: DEPLOY_MINE_COST_IN_TOKENS
         }
       })
     })
 
-    it('deploys the mine if the player has remaining mines (rotation >= 180)', () => {
+    it('deploys the mine if the player has enough tokens (rotation >= 180)', () => {
       const state = new GameState(gameStateOptions)
       const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 100, y: 74 } }))
-      const initialMines = registeredPlayer.mines
+      const initialTokens = registeredPlayer.tokens
       const message: DeployMineMessage = {
         type: 'Request',
         id: 'DeployMine'
@@ -163,7 +163,7 @@ describe('Requests - Deploy mine', () => {
 
       const { result } = handler(session, message, state)
 
-      expect(registeredPlayer.mines).to.eql(initialMines - 1)
+      expect(registeredPlayer.tokens).to.eql(initialTokens - DEPLOY_MINE_COST_IN_TOKENS)
       const [mine] = arena.mines
       expect(mine).to.deep.include({
         position: { x: 126, y: 74 }
@@ -175,7 +175,8 @@ describe('Requests - Deploy mine', () => {
           playerId: 'player-1',
           id: mine.id,
           position: mine.position,
-          remainingMines: registeredPlayer.mines
+          remainingTokens: initialTokens - DEPLOY_MINE_COST_IN_TOKENS,
+          requestCostInTokens: DEPLOY_MINE_COST_IN_TOKENS
         }
       })
     })
@@ -192,7 +193,7 @@ describe('Requests - Deploy mine', () => {
         }
       }
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, playerPosition))
-      const initiallyAvailablePlayerMines = registeredPlayer.mines
+      const initialTokens = registeredPlayer.tokens
       const initialArenaMines = arena.mines
       const message: DeployMineMessage = {
         type: 'Request',
@@ -210,7 +211,7 @@ describe('Requests - Deploy mine', () => {
         request: RequestType.DeployMine,
         reason: 'The mine can not be deployed'
       })
-      expect(registeredPlayer.mines).to.eql(initiallyAvailablePlayerMines)
+      expect(registeredPlayer.tokens).to.eql(initialTokens)
       expect(arena.mines).to.eql(initialArenaMines)
     })
   })

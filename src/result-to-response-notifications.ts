@@ -82,7 +82,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.DeployMine) {
-      const { details: { playerId, id, position, remainingMines } } = result
+      const { details: { playerId, id, position, remainingTokens, requestCostInTokens } } = result
       // TODO isn't the session alredy part of the result? why I'm finding it again here?
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
@@ -93,7 +93,14 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           id: RequestType.DeployMine,
           success: true,
           data: {
-            mines: remainingMines
+            component: {
+              details: {
+                tokens: remainingTokens
+              }
+            },
+            request: {
+              cost: requestCostInTokens
+            }
           }
         }
       },
@@ -245,7 +252,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.Shoot) {
-      const { details: { id: playerId, shots } } = result
+      const { details: { id: playerId, remainingTokens, requestCostInTokens } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
       return [{
@@ -255,8 +262,14 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           id: RequestType.Shoot,
           success: true,
           data: {
-            // TODO rename this to remainingShots
-            shots
+            component: {
+              details: {
+                tokens: remainingTokens
+              }
+            },
+            request: {
+              cost: requestCostInTokens
+            }
           }
         }
       }]

@@ -107,11 +107,9 @@ describe('Game loop', () => {
           details: {
             playerId: 'player-1',
             id: 'mine-1',
-            position: {
-              x: 1,
-              y: 1
-            },
-            remainingMines: 10
+            position: { x: 1, y: 1 },
+            remainingTokens: 5,
+            requestCostInTokens: 3
           }
         },
         state
@@ -174,8 +172,9 @@ describe('Game loop', () => {
           success: true,
           request: RequestType.Shoot,
           details: {
-            shots: 10,
-            id: 'player-1'
+            id: 'player-1',
+            remainingTokens: 3,
+            requestCostInTokens: 3
           }
         }, state
       } as const
