@@ -301,7 +301,15 @@ Missing
   id: 'RotatePlayer',
   success: true,
   data: {
-    rotation: <number>
+    component: {
+      details: {
+      	rotation: <number>,
+      	tokens: <number>
+    	}
+    },
+    request: {
+      cost: <number>
+    }
   }
 }
 ```

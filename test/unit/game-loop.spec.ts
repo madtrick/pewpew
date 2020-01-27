@@ -203,7 +203,9 @@ describe('Game loop', () => {
           request: RequestType.RotatePlayer,
           details: {
             id: 'player-1',
-            rotation: 300
+            rotation: 300,
+            remainingTokens: 3,
+            requestCostInTokens: 0
           }
         }, state
       } as const
