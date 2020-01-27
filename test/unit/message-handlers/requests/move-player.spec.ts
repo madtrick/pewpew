@@ -4,7 +4,7 @@ import { MovePlayerMessage } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
 import { createSession } from '../../../../src/session'
 import { createPlayer, PLAYER_RADIUS } from '../../../../src/player'
-import { Arena } from '../../../../src/components/arena'
+import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/move-player'
@@ -59,13 +59,19 @@ describe('Requests - Move player', () => {
       const otherPlayer = createPlayer({ id: 'another-player' })
       const session = createSession({ id: 'channel-1' })
       arena.registerPlayer(otherPlayer, { position: { x: ARENA_WIDTH - PLAYER_RADIUS, y: 400 } })
-      arena.registerPlayer(player, { position: { x: 50, y: 17 } })
-      player.rotation = 0
+      const registeredPlayer = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 17 } })).player
+      registeredPlayer.rotation = 0
       state.started = true
-      session.playerId = player.id
+      session.playerId = registeredPlayer.id
+      const initialPlayerTokens = registeredPlayer.tokens
       domainStub.returns({
         status: 'ok',
-        position: { x: 51, y: 17 }
+        turboApplied: false,
+        actionCostInTokens: 0,
+        player: {
+          tokens: initialPlayerTokens,
+          position: { x: 51, y: 17 }
+        }
       })
 
       const { result } = handler(session, message, state, domainStub)
@@ -76,6 +82,9 @@ describe('Requests - Move player', () => {
         success: true,
         details: {
           id: PLAYER_ID,
+          requestCostInTokens: 0,
+          remainingTokens: initialPlayerTokens,
+          turboApplied: false,
           position: {
             x: 51,
             y: 17

@@ -63,6 +63,23 @@ describe('Messages', () => {
       expect(result).to.be.true
     })
 
+    it('returns true for valid MovePlayer messages (with turbo)', () => {
+      const message: MovePlayerMessage = {
+        type: 'Request',
+        id: 'MovePlayer',
+        data: {
+          movement: {
+            direction: 'forward',
+            withTurbo: true
+          }
+        }
+      }
+
+      const result = validateMessage(message)
+
+      expect(result).to.be.true
+    })
+
     it('returns true for valid MovePlayer messages (backward direction)', () => {
       const message: MovePlayerMessage = {
         type: 'Request',

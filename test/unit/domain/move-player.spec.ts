@@ -1,39 +1,44 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
-import { Arena, Success, Result, asSuccess } from '../../../src/components/arena'
+import { Arena, asSuccess } from '../../../src/components/arena'
 import { createPlayer } from '../../../src/player'
-import movePlayer from '../../../src/domain/move-player'
+import movePlayer, { TURBO_COST_IN_TOKENS } from '../../../src/domain/move-player'
 import { scan } from '../../../src/components/radar'
 import { Position, Rotation } from '../../../src/types'
-
-function makeSuccess<T> (data: T): Success<T> {
-  return { ...data, status: 'ok' }
-}
 
 enum DisplacementDirection {
   FORWARD = 'forward',
   BACKWARD = 'backward'
 }
 
-type MovementTestOptions<T, F>= {
+type MovementTestOptions = {
   arena: () => Arena,
   initialRotation: Rotation,
   initialPosition: Position,
-  movements: { direction: DisplacementDirection }[],
-  expectedResponses: Result<T, F>[]
+  movements: { direction: DisplacementDirection, withTurbo?: boolean }[],
+  expectedResponses: { position: Position }[]
 }
-function movementTest<T, F> (options: MovementTestOptions<T, F>): () => Promise<void> {
+function movementTest (options: MovementTestOptions): () => Promise<void> {
   return async () => {
     const arena = options.arena()
     const player = createPlayer({ id: 'player-1' })
-    arena.registerPlayer(player, { position: options.initialPosition })
-    player.rotation = options.initialRotation
+    const movementSpeed = 1
+    const registeredPlayer = asSuccess(arena.registerPlayer(player, { position: options.initialPosition })).player
+    registeredPlayer.rotation = options.initialRotation
 
     const results = options.movements.map((movement) => {
-      return asSuccess(movePlayer(movement, player, arena.players(), { width: arena.width, height: arena.height }))
+      return asSuccess(
+        movePlayer(
+          movement,
+          movementSpeed,
+          registeredPlayer,
+          arena.players(),
+          { width: arena.width, height: arena.height }
+        )
+      ).player.position
     }).filter(Boolean)
 
-    results.forEach((result, index) => expect(result).to.eql(options.expectedResponses[index]))
+    results.forEach((position, index) => expect(position).to.eql(options.expectedResponses[index].position))
   }
 }
 
@@ -50,6 +55,31 @@ describe('Domain - Move player', () => {
     sandbox.restore()
   })
 
+  describe('when the turbo is not requested', () => {
+    it('consumes no tokens', () => {
+      const player = createPlayer({ id: 'player-1' })
+      const movementSpeed = 1
+      arena.registerPlayer(player, { position: { x: 50, y: 50 } })
+      player.rotation = 0
+      const initialPlayerTokens = player.tokens
+
+      const result = asSuccess(
+        movePlayer(
+          { direction: DisplacementDirection.FORWARD, withTurbo: false },
+          movementSpeed,
+          player,
+          arena.players(),
+          { width: arena.width, height: arena.height }
+        )
+      )
+
+      expect(result.player.position).to.eql({ x: 51, y: 50 })
+      expect(result.turboApplied).to.eql(false)
+      expect(result.actionCostInTokens).to.eql(0)
+      expect(result.player.tokens).to.eql(initialPlayerTokens)
+    })
+  })
+
   it('moves the player - horizontally', movementTest({
     movements: [
       { direction: DisplacementDirection.FORWARD },
@@ -59,10 +89,67 @@ describe('Domain - Move player', () => {
     initialRotation: 0,
     arena: () => arena,
     expectedResponses: [
-      makeSuccess({ position: { x: 51, y: 50 } }),
-      makeSuccess({ position: { x: 50, y: 50 } })
+      { position: { x: 51, y: 50 } },
+      { position: { x: 50, y: 50 } }
     ]
   }))
+
+  describe('when the turbo is requested', () => {
+    describe('when the player has enough tokens to use the turbo', () => {
+      it('moves the player - horizontally', () => {
+        const player = createPlayer({ id: 'player-1' })
+        const movementSpeed = 1
+        arena.registerPlayer(player, { position: { x: 50, y: 50 } })
+        player.rotation = 0
+        const initialPlayerTokens = player.tokens
+
+        const result = asSuccess(
+          movePlayer(
+            { direction: DisplacementDirection.FORWARD, withTurbo: true },
+            movementSpeed,
+            player,
+            arena.players(),
+            { width: arena.width, height: arena.height }
+          )
+        )
+
+        expect(result.player.position).to.eql({ x: 52, y: 50 })
+        expect(result.turboApplied).to.eql(true)
+        expect(result.actionCostInTokens).to.eql(TURBO_COST_IN_TOKENS)
+        expect(result.player.tokens).to.eql(initialPlayerTokens - TURBO_COST_IN_TOKENS)
+      })
+    })
+
+    describe('when the player does not have enough tokens to use the turbo', () => {
+      it('moves the player - horizontally', () => {
+        const player = createPlayer({ id: 'player-1' })
+        const movementSpeed = 1
+        const registeredPlayer = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } })).player
+        registeredPlayer.rotation = 0
+        registeredPlayer.tokens = 0
+
+        const result = asSuccess(
+          movePlayer(
+            { direction: DisplacementDirection.FORWARD, withTurbo: true },
+            movementSpeed,
+            player,
+            arena.players(),
+            { width: arena.width, height: arena.height }
+          )
+        )
+
+        expect(result.player.position).to.eql({ x: 51, y: 50 })
+        expect(result.turboApplied).to.eql(false)
+        expect(result.actionCostInTokens).to.eql(0)
+        expect(result.player.tokens).to.eql(0)
+        expect(result.errors).to.eql([
+          {
+            msg: 'The player does not have enough tokens to use the turbo'
+          }
+        ])
+      })
+    })
+  })
 
   it('moves the player - vertically', movementTest({
     movements: [
@@ -72,7 +159,7 @@ describe('Domain - Move player', () => {
     initialPosition: { x: 50, y: 50 },
     initialRotation: 90,
     expectedResponses: [
-      makeSuccess({ position: { x: 50, y: 49 } })
+      { position: { x: 50, y: 49 } }
     ]
   }))
 
@@ -84,7 +171,7 @@ describe('Domain - Move player', () => {
     initialPosition: { x: 50, y: 50 },
     initialRotation: 30,
     expectedResponses: [
-      makeSuccess({ position: { x: 50.86603, y: 50.5 } })
+      { position: { x: 50.86603, y: 50.5 } }
     ]
   }))
 
@@ -97,8 +184,8 @@ describe('Domain - Move player', () => {
     initialPosition: { x: 50, y: 50 },
     initialRotation: 30,
     expectedResponses: [
-      makeSuccess({ position: { x: 50.86603, y: 50.5 } }),
-      makeSuccess({ position: { x: 50, y: 50 } })
+      { position: { x: 50.86603, y: 50.5 } },
+      { position: { x: 50, y: 50 } }
     ]
   }))
 
@@ -116,7 +203,7 @@ describe('Domain - Move player', () => {
     initialPosition: { x: 50, y: 50 },
     initialRotation: 0,
     expectedResponses: [
-      makeSuccess({ position: { x: 51, y: 50 } })
+      { position: { x: 51, y: 50 } }
     ]
   }))
 
@@ -136,7 +223,7 @@ describe('Domain - Move player', () => {
     initialPosition: { x: 50, y: 50 },
     initialRotation: 0,
     expectedResponses: [
-      makeSuccess({ position: { x: 50, y: 50 } })
+      { position: { x: 50, y: 50 } }
     ]
   }))
 })

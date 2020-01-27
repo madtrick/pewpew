@@ -40,7 +40,7 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
   return function gameLoop (currentTick: number, state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[]): Promise<GameLoopResult> {
     let loopCycleRunResult: GameLoopResult = { state: state, results: [], updates: [] }
 
-    const updates = state.update({ shotRefillCadence: 3, shotRefillQuantity: 1, currentTick })
+    const updates = state.update({ shotRefillCadence: 3, shotRefillQuantity: 1, currentTick, tokenIncreaseQuantity: 1 })
     // TODO the updates should be returned without being transformed
     // const transformedUpdates = updates.map((update: any) => {
     //   if (update.player) {

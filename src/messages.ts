@@ -6,7 +6,7 @@ export type RegisterPlayerMessage = IncommingMessage<'Request'> & {
   }
 }
 
-export type Movement = { direction: 'forward' | 'backward' }
+export type Movement = { direction: 'forward' | 'backward', withTurbo?: boolean }
 export type MovePlayerMessage = IncommingMessage<'Request'> & {
   data: {
     movement: Movement
@@ -65,7 +65,8 @@ const MOVE_PLAYER_SCHEMA = Joi.object().keys({
   id: Joi.string().valid('MovePlayer').required(),
   data: Joi.object().keys({
     movement: Joi.object().keys({
-      direction: Joi.string().valid(['forward', 'backward']).required()
+      direction: Joi.string().valid(['forward', 'backward']).required(),
+      withTurbo: Joi.boolean().optional()
     }).required()
   })
 })

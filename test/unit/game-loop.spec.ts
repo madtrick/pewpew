@@ -143,6 +143,9 @@ describe('Game loop', () => {
           request: RequestType.MovePlayer,
           details: {
             id: 'player-1',
+            turboApplied: false,
+            remainingTokens: 100,
+            requestCostInTokens: 3,
             position: {
               x: 1,
               y: 1
