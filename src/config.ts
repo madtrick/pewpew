@@ -6,6 +6,7 @@ export default interface Config {
     shot: number
   }
   costs: {
+    movePlayer: number
     playerMovementTurbo: number
     playerShot: number
     playerDeployMine: number

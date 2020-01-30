@@ -42,12 +42,12 @@ module.exports = {
   autoStartGame: env('AUTO_START_GAME', { isBoolean: true, default: false }),
   turboMultiplierFactor: env('TURBO_MULTIPLIER_FACTOR', { isNumber: true }),
   movementSpeeds: {
-    player: env('MOVEMENT_SPEED_PLAYER', { isNumber: true, default: false }),
-    shot: env('MOVEMENT_SPEED_SHOT', { isNumber: true, default: false }),
+    player: env('MOVEMENT_SPEED_PLAYER', { isNumber: true }),
+    shot: env('MOVEMENT_SPEED_SHOT', { isNumber: true }),
   }
   costs: {
-    // movePlayer: env('COST_MOVE_PLAYER', { isNumber: true }),
-    // rotatePlayer: env('COST_ROTATE_PLAYER', { isNumber: true }),
+    movePlayer: env('COST_MOVE_PLAYER', { isNumber: true }),
+    rotatePlayer: env('COST_ROTATE_PLAYER', { isNumber: true }),
     playerMovementTurbo: env('COST_PLAYER_MOVEMENT_TURBO', { isNumber: true }),
     playerShot: env('COST_PLAYER_SHOT', { isNumber: true }),
     playerDeployMine: env('COST_PLAYER_DEPLOY_MINE', { isNumber: true })

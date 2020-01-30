@@ -58,9 +58,18 @@ export default function movePlayer (
   const movement = message.data.movement
   const arena = state.arena
   const playerSpeed = config.movementSpeeds.player
-  const turboCostInTokens = config.costs.playerMovementTurbo
+  const { playerMovementTurbo: turboCostInTokens, movePlayer: movePlayerCostInTokens } = config.costs
   const turboMultiplierFactor = config.turboMultiplierFactor
-  const domainResult = domain(movement, playerSpeed, turboCostInTokens, turboMultiplierFactor, player, arena.players(), { width: arena.width, height: arena.height })
+  const domainResult = domain(
+    movement,
+    playerSpeed,
+    movePlayerCostInTokens,
+    turboCostInTokens,
+    turboMultiplierFactor,
+    player,
+    arena.players(),
+    { width: arena.width, height: arena.height }
+  )
 
   const result: {
     success: true,

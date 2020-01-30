@@ -37,6 +37,7 @@ export type MovePlayer = typeof movePlayer
 export default function movePlayer (
   movement: Movement,
   speed: number,
+  movePlayerCostInTokens: number,
   turboCostInTokens: number,
   turboMultiplierFactor: number,
   player: Player,
@@ -84,6 +85,8 @@ export default function movePlayer (
     return Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) <= value && value <= Math.pow(PLAYER_RADIUS + PLAYER_RADIUS, 2)
   })
 
+  const actionCostInTokens = (turboApplied ? turboCostInTokens : 0) + movePlayerCostInTokens
+
   if (isPlayerPositionWithinBoundaries(newPosition, arenaDimensions) && collides === undefined) {
     arenaPlayer!.position = newPosition
 
@@ -91,7 +94,7 @@ export default function movePlayer (
       status: 'ok',
       player: arenaPlayer!,
       turboApplied,
-      actionCostInTokens: turboApplied ? turboCostInTokens : 0,
+      actionCostInTokens,
       errors: errors
     }
   } else {
@@ -99,7 +102,7 @@ export default function movePlayer (
       status: 'ok',
       player: arenaPlayer!,
       turboApplied,
-      actionCostInTokens: turboApplied ? turboCostInTokens : 0,
+      actionCostInTokens,
       errors: errors
     }
   }

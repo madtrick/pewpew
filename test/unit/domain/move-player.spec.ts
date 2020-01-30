@@ -9,7 +9,9 @@ import { config } from '../../config'
 
 const { turboMultiplierFactor, costs, movementSpeeds } = config
 const playerSpeed = movementSpeeds.player
+const movePlayerCostInTokens = costs.movePlayer
 const turboCostInTokens = costs.playerMovementTurbo
+
 enum DisplacementDirection {
   FORWARD = 'forward',
   BACKWARD = 'backward'
@@ -35,6 +37,7 @@ function movementTest (options: MovementTestOptions): () => Promise<void> {
         movePlayer(
           movement,
           playerSpeed,
+          movePlayerCostInTokens,
           turboCostInTokens,
           turboMultiplierFactor,
           registeredPlayer,
@@ -72,6 +75,7 @@ describe('Domain - Move player', () => {
         movePlayer(
           { direction: DisplacementDirection.FORWARD, withTurbo: false },
           playerSpeed,
+          movePlayerCostInTokens,
           turboCostInTokens,
           turboMultiplierFactor,
           player,
@@ -82,7 +86,7 @@ describe('Domain - Move player', () => {
 
       expect(result.player.position).to.eql({ x: 51, y: 50 })
       expect(result.turboApplied).to.eql(false)
-      expect(result.actionCostInTokens).to.eql(0)
+      expect(result.actionCostInTokens).to.eql(movePlayerCostInTokens)
       expect(result.player.tokens).to.eql(initialPlayerTokens)
     })
   })
@@ -113,6 +117,7 @@ describe('Domain - Move player', () => {
           movePlayer(
             { direction: DisplacementDirection.FORWARD, withTurbo: true },
             playerSpeed,
+            movePlayerCostInTokens,
             turboCostInTokens,
             turboMultiplierFactor,
             player,
@@ -123,7 +128,7 @@ describe('Domain - Move player', () => {
 
         expect(result.player.position).to.eql({ x: 52, y: 50 })
         expect(result.turboApplied).to.eql(true)
-        expect(result.actionCostInTokens).to.eql(turboCostInTokens)
+        expect(result.actionCostInTokens).to.eql(turboCostInTokens + movePlayerCostInTokens)
         expect(result.player.tokens).to.eql(initialPlayerTokens - turboCostInTokens)
       })
     })
@@ -139,6 +144,7 @@ describe('Domain - Move player', () => {
           movePlayer(
             { direction: DisplacementDirection.FORWARD, withTurbo: true },
             playerSpeed,
+            movePlayerCostInTokens,
             turboCostInTokens,
             turboMultiplierFactor,
             player,
@@ -149,7 +155,7 @@ describe('Domain - Move player', () => {
 
         expect(result.player.position).to.eql({ x: 51, y: 50 })
         expect(result.turboApplied).to.eql(false)
-        expect(result.actionCostInTokens).to.eql(0)
+        expect(result.actionCostInTokens).to.eql(movePlayerCostInTokens)
         expect(result.player.tokens).to.eql(0)
         expect(result.errors).to.eql([
           {
