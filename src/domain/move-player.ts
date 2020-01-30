@@ -4,10 +4,6 @@ import { Position } from '../types'
 import { round } from '../helpers'
 import { Result, ArenaPlayer } from '../components/arena'
 
-// TODO this should be taken as an argument
-const TURBO_FACTOR = 2
-export const TURBO_COST_IN_TOKENS = 2
-
 interface ActionResult {
   player: ArenaPlayer
   turboApplied: boolean
@@ -41,6 +37,8 @@ export type MovePlayer = typeof movePlayer
 export default function movePlayer (
   movement: Movement,
   speed: number,
+  turboCostInTokens: number,
+  turboMultiplierFactor: number,
   player: Player,
   players: ArenaPlayer[],
   arenaDimensions: { width: number, height: number }
@@ -53,10 +51,10 @@ export default function movePlayer (
   let turboApplied: boolean = false
 
   if (movement.withTurbo) {
-    if (arenaPlayer!.tokens >= TURBO_COST_IN_TOKENS) {
+    if (arenaPlayer!.tokens >= turboCostInTokens) {
       turboApplied = true
-      speedWithTurbo = speed * TURBO_FACTOR
-      arenaPlayer!.tokens = arenaPlayer!.tokens - TURBO_COST_IN_TOKENS
+      speedWithTurbo = speed * turboMultiplierFactor
+      arenaPlayer!.tokens = arenaPlayer!.tokens - turboCostInTokens
     } else {
       errors.push({ msg: 'The player does not have enough tokens to use the turbo' })
       speedWithTurbo = speed
@@ -93,7 +91,7 @@ export default function movePlayer (
       status: 'ok',
       player: arenaPlayer!,
       turboApplied,
-      actionCostInTokens: turboApplied ? TURBO_COST_IN_TOKENS : 0,
+      actionCostInTokens: turboApplied ? turboCostInTokens : 0,
       errors: errors
     }
   } else {
@@ -101,7 +99,7 @@ export default function movePlayer (
       status: 'ok',
       player: arenaPlayer!,
       turboApplied,
-      actionCostInTokens: turboApplied ? TURBO_COST_IN_TOKENS : 0,
+      actionCostInTokens: turboApplied ? turboCostInTokens : 0,
       errors: errors
     }
   }

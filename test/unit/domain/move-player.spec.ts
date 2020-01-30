@@ -2,10 +2,14 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { Arena, asSuccess } from '../../../src/components/arena'
 import { createPlayer } from '../../../src/player'
-import movePlayer, { TURBO_COST_IN_TOKENS } from '../../../src/domain/move-player'
+import movePlayer from '../../../src/domain/move-player'
 import { scan } from '../../../src/components/radar'
 import { Position, Rotation } from '../../../src/types'
+import { config } from '../../config'
 
+const { turboMultiplierFactor, costs, movementSpeeds } = config
+const playerSpeed = movementSpeeds.player
+const turboCostInTokens = costs.playerMovementTurbo
 enum DisplacementDirection {
   FORWARD = 'forward',
   BACKWARD = 'backward'
@@ -22,15 +26,17 @@ function movementTest (options: MovementTestOptions): () => Promise<void> {
   return async () => {
     const arena = options.arena()
     const player = createPlayer({ id: 'player-1' })
-    const movementSpeed = 1
     const registeredPlayer = asSuccess(arena.registerPlayer(player, { position: options.initialPosition })).player
     registeredPlayer.rotation = options.initialRotation
 
     const results = options.movements.map((movement) => {
+
       return asSuccess(
         movePlayer(
           movement,
-          movementSpeed,
+          playerSpeed,
+          turboCostInTokens,
+          turboMultiplierFactor,
           registeredPlayer,
           arena.players(),
           { width: arena.width, height: arena.height }
@@ -58,7 +64,6 @@ describe('Domain - Move player', () => {
   describe('when the turbo is not requested', () => {
     it('consumes no tokens', () => {
       const player = createPlayer({ id: 'player-1' })
-      const movementSpeed = 1
       arena.registerPlayer(player, { position: { x: 50, y: 50 } })
       player.rotation = 0
       const initialPlayerTokens = player.tokens
@@ -66,7 +71,9 @@ describe('Domain - Move player', () => {
       const result = asSuccess(
         movePlayer(
           { direction: DisplacementDirection.FORWARD, withTurbo: false },
-          movementSpeed,
+          playerSpeed,
+          turboCostInTokens,
+          turboMultiplierFactor,
           player,
           arena.players(),
           { width: arena.width, height: arena.height }
@@ -98,7 +105,6 @@ describe('Domain - Move player', () => {
     describe('when the player has enough tokens to use the turbo', () => {
       it('moves the player - horizontally', () => {
         const player = createPlayer({ id: 'player-1' })
-        const movementSpeed = 1
         arena.registerPlayer(player, { position: { x: 50, y: 50 } })
         player.rotation = 0
         const initialPlayerTokens = player.tokens
@@ -106,7 +112,9 @@ describe('Domain - Move player', () => {
         const result = asSuccess(
           movePlayer(
             { direction: DisplacementDirection.FORWARD, withTurbo: true },
-            movementSpeed,
+            playerSpeed,
+            turboCostInTokens,
+            turboMultiplierFactor,
             player,
             arena.players(),
             { width: arena.width, height: arena.height }
@@ -115,15 +123,14 @@ describe('Domain - Move player', () => {
 
         expect(result.player.position).to.eql({ x: 52, y: 50 })
         expect(result.turboApplied).to.eql(true)
-        expect(result.actionCostInTokens).to.eql(TURBO_COST_IN_TOKENS)
-        expect(result.player.tokens).to.eql(initialPlayerTokens - TURBO_COST_IN_TOKENS)
+        expect(result.actionCostInTokens).to.eql(turboCostInTokens)
+        expect(result.player.tokens).to.eql(initialPlayerTokens - turboCostInTokens)
       })
     })
 
     describe('when the player does not have enough tokens to use the turbo', () => {
       it('moves the player - horizontally', () => {
         const player = createPlayer({ id: 'player-1' })
-        const movementSpeed = 1
         const registeredPlayer = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } })).player
         registeredPlayer.rotation = 0
         registeredPlayer.tokens = 0
@@ -131,7 +138,9 @@ describe('Domain - Move player', () => {
         const result = asSuccess(
           movePlayer(
             { direction: DisplacementDirection.FORWARD, withTurbo: true },
-            movementSpeed,
+            playerSpeed,
+            turboCostInTokens,
+            turboMultiplierFactor,
             player,
             arena.players(),
             { width: arena.width, height: arena.height }

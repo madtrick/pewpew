@@ -13,6 +13,7 @@ import Config from './config'
 import * as Logger from 'bunyan'
 
 interface ServerContext {
+  config: Config
   logger: Logger
   ticker: Ticker
   engine: Engine
@@ -58,6 +59,7 @@ export function init ({ WS }: { WS: WebSocketServerConstructor }, config: Config
   }
 
   return {
+    config,
     logger,
     engineState,
     ticker,
@@ -78,7 +80,8 @@ export function start (context: ServerContext): Server {
     messaging,
     createControlSession,
     createSession,
-    logger
+    logger,
+    config
   } = context
 
   let events: Event[] = []
@@ -130,7 +133,7 @@ export function start (context: ServerContext): Server {
     const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
     const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
 
-    const { playerResultMessages, controlResultMessages } = await engine(tick, engineState, loop, controlMessages, playerMessages, events, { logger })
+    const { playerResultMessages, controlResultMessages } = await engine(tick, engineState, loop, controlMessages, playerMessages, events, { logger, config })
 
     for (const message of controlResultMessages) {
       // TODO handle exceptions thrown from send

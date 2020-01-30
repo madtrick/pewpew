@@ -6,6 +6,7 @@ import { ArenaPlayer, ArenaShot, UpdateType, ComponentType } from '../../../src/
 import { scan } from '../../../src/components/radar'
 import asyncStateUpdate from '../../../src/domain/async-state-update'
 import { createMine, Mine, MINE_HIT_COST } from '../../../src/mine'
+import { config } from '../../config'
 
 describe('Async update', () => {
   const tokenIncreasePerTick = 1
@@ -22,7 +23,7 @@ describe('Async update', () => {
     // collision with mines
     describe('when there is no collision', () => {
       it('does not remove the mine', () => {
-        const { mines } = asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+        const { mines } = asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
         expect(mines).to.eql([mine])
       })
@@ -32,7 +33,7 @@ describe('Async update', () => {
       it('removes the mine', () => {
         player.position = { x : 100, y: 100 }
         mine.position = { x: (player.position.x - PLAYER_RADIUS), y: 100 }
-        const { mines } = asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+        const { mines } = asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
         expect(mines).to.be.empty
       })
@@ -41,7 +42,7 @@ describe('Async update', () => {
         const initialLife = player.life
         player.position = { x : 100, y: 100 }
         mine.position = { x: (player.position.x - PLAYER_RADIUS), y: 100 }
-        asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+        asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
         expect(player.life).to.eql(initialLife - MINE_HIT_COST)
       })
@@ -51,7 +52,7 @@ describe('Async update', () => {
         player.life = initialLife
         player.position = { x : 100, y: 100 }
         mine.position = { x: (player.position.x - PLAYER_RADIUS), y: 100 }
-        const { players, updates } = asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+        const { players, updates } = asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
         expect(players).to.be.empty
         expect(updates).to.have.lengthOf(2)
@@ -69,7 +70,7 @@ describe('Async update', () => {
       it('returns the appropiate update', () => {
         player.position = { x : 100, y: 100 }
         mine.position = { x: (player.position.x - PLAYER_RADIUS), y: 100 }
-        const { updates } = asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+        const { updates } = asyncStateUpdate([], [mine], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
         // NOTE I'm accounting here for the radar scan, therefore 2 updates
         // although it feels wrong. If in the future I change how the radar works
@@ -97,7 +98,7 @@ describe('Async update', () => {
       const shot = { ...createShot({ player: shooter }), rotation: 0, position: { x: 90, y: 90 } }
       const initialLife = player.life
 
-      asyncStateUpdate([shot], [], [player, shooter], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+      asyncStateUpdate([shot], [], [player, shooter], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
       expect(player.life).to.eql(initialLife - shot.damage)
     })
@@ -113,7 +114,7 @@ describe('Async update', () => {
     it('increases the tokens', () => {
       const initialTokens = player.tokens
 
-      asyncStateUpdate([], [], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+      asyncStateUpdate([], [], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
       expect(player.tokens).to.eql(initialTokens + tokenIncreasePerTick)
     })
@@ -133,7 +134,7 @@ describe('Async update', () => {
         it('does not increase the counter', () => {
           const initialShots = player.shots
 
-          asyncStateUpdate([shot], [], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+          asyncStateUpdate([shot], [], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
           expect(player.shots).to.eql(initialShots)
         })
@@ -144,7 +145,7 @@ describe('Async update', () => {
           const initialShots = 1
           player.shots = initialShots
 
-          asyncStateUpdate([shot], [], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick)
+          asyncStateUpdate([shot], [], [player], { width: 500, height: 500 }, scan, 9, 3, 1, tokenIncreasePerTick, config)
 
           expect(player.shots).to.eql(initialShots + 1)
         })
@@ -153,7 +154,7 @@ describe('Async update', () => {
           const initialShots = 1
           player.shots = initialShots
 
-          asyncStateUpdate([shot], [], [player], { width: 500, height: 500 }, scan, 9, 3, PLAYER_MAX_SHOTS, tokenIncreasePerTick)
+          asyncStateUpdate([shot], [], [player], { width: 500, height: 500 }, scan, 9, 3, PLAYER_MAX_SHOTS, tokenIncreasePerTick, config)
 
           expect(player.shots).to.eql(PLAYER_MAX_SHOTS)
         })
@@ -167,7 +168,7 @@ describe('Async update', () => {
         const initialShots = 1
         player.shots = initialShots
 
-        asyncStateUpdate([shot], [], [player], { width: 500, height: 500 }, scan, 8, 3, 1, tokenIncreasePerTick)
+        asyncStateUpdate([shot], [], [player], { width: 500, height: 500 }, scan, 8, 3, 1, tokenIncreasePerTick, config)
 
         expect(player.shots).to.eql(initialShots)
       })

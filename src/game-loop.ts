@@ -18,6 +18,7 @@ import { GameState } from './game-state'
 import { Session } from './session'
 import { ComponentUpdate } from './update-to-notifications'
 import movePlayer from './domain/move-player'
+import Config from './config'
 
 interface GameLoopResult {
   state: GameState
@@ -32,15 +33,15 @@ interface GameLoopResult {
  */
 
  // TODO validate that only one message is processed per player, per loop tick
-export type GameLoop = (currentTick: number, state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[]) => Promise<GameLoopResult>
+export type GameLoop = (currentTick: number, state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[], config: Config) => Promise<GameLoopResult>
 
 // TODO rename this module to something like message dispatcher
 // TODO test the response from the loop function
 export default function createGameLopp (handlers: IncommingMessageHandlers): GameLoop {
-  return function gameLoop (currentTick: number, state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[]): Promise<GameLoopResult> {
+  return function gameLoop (currentTick: number, state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[], config: Config): Promise<GameLoopResult> {
     let loopCycleRunResult: GameLoopResult = { state: state, results: [], updates: [] }
 
-    const updates = state.update({ shotRefillCadence: 3, shotRefillQuantity: 1, currentTick, tokenIncreaseQuantity: 1 })
+    const updates = state.update(config, { shotRefillCadence: 3, shotRefillQuantity: 1, currentTick, tokenIncreaseQuantity: 1 })
     // TODO the updates should be returned without being transformed
     // const transformedUpdates = updates.map((update: any) => {
     //   if (update.player) {
@@ -58,27 +59,27 @@ export default function createGameLopp (handlers: IncommingMessageHandlers): Gam
         if (messageType === 'Request') {
           if (messageId === 'RegisterPlayer') {
             // TODO could I fix the types so I don't have to do the `as ...`
-            const result = handlers.Request.RegisterPlayer(session, message as RegisterPlayerMessage, state)
+            const result = handlers.Request.RegisterPlayer(session, message as RegisterPlayerMessage, state, config)
             loopCycleRunResult.results.push(result.result)
           }
 
           if (messageId === 'MovePlayer') {
-            const result = handlers.Request.MovePlayer(session, message as MovePlayerMessage, state, movePlayer)
+            const result = handlers.Request.MovePlayer(session, message as MovePlayerMessage, state, movePlayer, config)
             loopCycleRunResult.results.push(result.result)
           }
 
           if (messageId === 'Shoot') {
-            const result = handlers.Request.Shoot(session, message as ShootMessage, state)
+            const result = handlers.Request.Shoot(session, message as ShootMessage, state, config)
             loopCycleRunResult.results.push(result.result)
           }
 
           if (messageId === 'RotatePlayer') {
-            const result = handlers.Request.RotatePlayer(session, message as RotatePlayerMessage, state)
+            const result = handlers.Request.RotatePlayer(session, message as RotatePlayerMessage, state, config)
             loopCycleRunResult.results.push(result.result)
           }
 
           if (messageId === 'DeployMine') {
-            const result = handlers.Request.DeployMine(session, message as DeployMineMessage, state)
+            const result = handlers.Request.DeployMine(session, message as DeployMineMessage, state, config)
             loopCycleRunResult.results.push(result.result)
           }
         }

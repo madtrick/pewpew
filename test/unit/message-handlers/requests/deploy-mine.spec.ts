@@ -6,12 +6,14 @@ import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
-import handler, { DEPLOY_MINE_COST_IN_TOKENS } from '../../../../src/message-handlers/requests/deploy-mine'
+import handler from '../../../../src/message-handlers/requests/deploy-mine'
+import { config } from '../../../config'
 
 describe('Requests - Deploy mine', () => {
   let arena: Arena
   let gameStateOptions: { arena: Arena } // TODO maybe export the type for this options
   let session: Session
+  const playerDeployMineCostInTokens = config.costs.playerDeployMine
 
   beforeEach(() => {
     arena = new Arena({ width: 300, height: 300 }, { radar: scan })
@@ -30,7 +32,7 @@ describe('Requests - Deploy mine', () => {
         id: 'DeployMine'
       }
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         session,
@@ -53,7 +55,7 @@ describe('Requests - Deploy mine', () => {
 
       state.started = true
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         session,
@@ -77,7 +79,7 @@ describe('Requests - Deploy mine', () => {
         state.started = true
         session.playerId = 'some-player-id'
 
-        const { result } = handler(session, message, state)
+        const { result } = handler(session, message, state, config)
 
         expect(result).to.eql({
           session,
@@ -102,7 +104,7 @@ describe('Requests - Deploy mine', () => {
       session.playerId = registeredPlayer.id
       state.started = true
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         session,
@@ -126,9 +128,9 @@ describe('Requests - Deploy mine', () => {
       session.playerId = registeredPlayer.id
       state.started = true
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
-      expect(registeredPlayer.tokens).to.eql(initialTokens - DEPLOY_MINE_COST_IN_TOKENS)
+      expect(registeredPlayer.tokens).to.eql(initialTokens - playerDeployMineCostInTokens)
       expect(arena.mines).to.have.lengthOf(1)
       const [mine] = arena.mines
       expect(mine).to.deep.include({
@@ -141,8 +143,8 @@ describe('Requests - Deploy mine', () => {
           playerId: 'player-1',
           id: mine.id,
           position: mine.position,
-          remainingTokens: initialTokens - DEPLOY_MINE_COST_IN_TOKENS,
-          requestCostInTokens: DEPLOY_MINE_COST_IN_TOKENS
+          remainingTokens: initialTokens - playerDeployMineCostInTokens,
+          requestCostInTokens: playerDeployMineCostInTokens
         }
       })
     })
@@ -161,9 +163,9 @@ describe('Requests - Deploy mine', () => {
       session.playerId = registeredPlayer.id
       state.started = true
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
-      expect(registeredPlayer.tokens).to.eql(initialTokens - DEPLOY_MINE_COST_IN_TOKENS)
+      expect(registeredPlayer.tokens).to.eql(initialTokens - playerDeployMineCostInTokens)
       const [mine] = arena.mines
       expect(mine).to.deep.include({
         position: { x: 126, y: 74 }
@@ -175,8 +177,8 @@ describe('Requests - Deploy mine', () => {
           playerId: 'player-1',
           id: mine.id,
           position: mine.position,
-          remainingTokens: initialTokens - DEPLOY_MINE_COST_IN_TOKENS,
-          requestCostInTokens: DEPLOY_MINE_COST_IN_TOKENS
+          remainingTokens: initialTokens - playerDeployMineCostInTokens,
+          requestCostInTokens: playerDeployMineCostInTokens
         }
       })
     })
@@ -203,7 +205,7 @@ describe('Requests - Deploy mine', () => {
       session.playerId = registeredPlayer.id
       state.started = true
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         session,
