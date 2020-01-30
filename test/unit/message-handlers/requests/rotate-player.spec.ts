@@ -8,6 +8,7 @@ import { Arena, asSuccess } from '../../../../src/components/arena'
 import { RequestType } from '../../../../src/message-handlers'
 import { scan } from '../../../../src/components/radar'
 import handler, { ROTATION_COST_IN_TOKENS } from '../../../../src/message-handlers/requests/rotate-player'
+import { config } from '../../../config'
 
 // TODO: test the representation of the player in the arena
 // TODO: test with the game not started
@@ -40,7 +41,7 @@ describe('Requests - Rotate player', () => {
         state.started = true
         session.playerId = 'some-player-id'
 
-        const { result } = handler(session, message, state)
+        const { result } = handler(session, message, state, config)
 
         expect(result).to.eql({
           session,
@@ -66,7 +67,7 @@ describe('Requests - Rotate player', () => {
 
         state.started = true
 
-        const { result } = handler(session, message, state)
+        const { result } = handler(session, message, state, config)
 
         expect(result).to.eql({
           session,
@@ -97,7 +98,7 @@ describe('Requests - Rotate player', () => {
         state.started = true
         session.playerId = registeredPlayer.id
 
-        const { result } = handler(session, message, state)
+        const { result } = handler(session, message, state, config)
 
         expect(result).to.eql({
           success: true,
@@ -128,7 +129,7 @@ describe('Requests - Rotate player', () => {
       }
       sinon.spy(arena, 'rotatePlayer')
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         session,

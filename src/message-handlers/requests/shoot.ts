@@ -3,8 +3,7 @@ import { Session } from '../../session'
 import { HandlerResult, RequestType } from '../../message-handlers'
 import { ShootMessage } from '../../messages'
 import { createShot } from '../../shot'
-
-export const SHOOT_COST_IN_TOKENS = 3
+import Config from '../../config'
 
 export interface ShootPlayerResultDetails {
   id: string
@@ -14,7 +13,7 @@ export interface ShootPlayerResultDetails {
 
 // TODO note that by not havign HandlerResult parameterized with the kind of request result that
 // we are supposed to return from here, we could be returning
-export default function shoot (session: Session, _message: ShootMessage, state: GameState): HandlerResult {
+export default function shoot (session: Session, _message: ShootMessage, state: GameState, config: Config): HandlerResult {
   if (!state.started) {
     return {
       result: {
@@ -55,7 +54,9 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
     }
   }
 
-  if (player.tokens < SHOOT_COST_IN_TOKENS) {
+  const playerShotCostInToken = config.costs.playerShot
+
+  if (player.tokens < playerShotCostInToken) {
     return {
       result: {
         session,
@@ -68,7 +69,7 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
   }
 
   const shot = createShot({ player })
-  player.tokens = player.tokens - SHOOT_COST_IN_TOKENS
+  player.tokens = player.tokens - playerShotCostInToken
   state.arena.registerShot(shot)
 
   return {
@@ -76,7 +77,7 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
       success: true,
       request: RequestType.Shoot,
       details: {
-        requestCostInTokens: SHOOT_COST_IN_TOKENS,
+        requestCostInTokens: playerShotCostInToken,
         remainingTokens: player.tokens,
         id: player.id
       }

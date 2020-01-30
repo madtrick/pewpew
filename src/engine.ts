@@ -7,6 +7,7 @@ import { isFailure, asSuccess, failure, success, Result } from './success-failur
 import updateToNotifications, { ComponentUpdate } from './update-to-notifications'
 import resultToResponseAndNotifications from './result-to-response-notifications'
 import { ILogger, Event, EventType, Position, Rotation } from './types'
+import Config from './config'
 
 function asIncomingMessage (message: object): Result<IncommingMessages, any> {
   // let object: object
@@ -95,7 +96,7 @@ export default async function engine (
   controlMessages: InMessage[],
   messages: InMessage[],
   events: Event[],
-  context: { logger: ILogger }
+  context: { logger: ILogger, config: Config }
 ): Promise<EngineResult> {
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
   const controlResultMessages: OutMessage[] = []
@@ -234,7 +235,7 @@ export default async function engine (
     }
   }
 
-  const { updates, results } = await loop(currentTick, state.gameState, parsedMessages)
+  const { updates, results } = await loop(currentTick, state.gameState, parsedMessages, context.config)
   const dataForChannel = new Map()
 
   // TODO combine the notifications and responses

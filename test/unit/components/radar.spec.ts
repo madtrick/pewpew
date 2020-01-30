@@ -56,7 +56,7 @@ describe(' Radar', () => {
 
       describe('when the mines are more than X px away from the scanning player', () => {
         it('returns the match as "unknown"', () => {
-          const mine = { position: { x: 66, y: 40 } }
+          const mine = { position: { x: 106, y: 40 } }
           components.mines = [mine]
 
           const result = scan({ x: 30, y: 40 }, components)
@@ -67,7 +67,7 @@ describe(' Radar', () => {
               type: ComponentType.Radar,
               data: {
                 unknown: [
-                  { position: { x: 66, y: 40 } }
+                  { position: { x: 106, y: 40 } }
                 ],
                 players: [],
                 shots: [],
@@ -108,7 +108,7 @@ describe(' Radar', () => {
 
       describe('when the shots are more than X px away from the scanning player', () => {
         it('returns the match as "unknown"', () => {
-          const shot1 = { position: { x: 66, y: 40 }, rotation: 30 }
+          const shot1 = { position: { x: 106, y: 40 }, rotation: 30 }
           components.shots = [shot1]
 
           const result = scan({ x: 30, y: 40 }, components)
@@ -119,7 +119,7 @@ describe(' Radar', () => {
               type: ComponentType.Radar,
               data: {
                 unknown: [
-                  { position: { x: 66, y: 40 } }
+                  { position: { x: 106, y: 40 } }
                 ],
                 players: [],
                 shots: [],
@@ -160,7 +160,7 @@ describe(' Radar', () => {
         it('returns the match as "unknown"', () => {
           // https://www.geogebra.org/graphing/b9jcdtpa
           const player1 = { position: { x: 50, y: 40 }, rotation: 10, id: 'player-1' }
-          const player2 = { position: { x: 100, y: 40 }, rotation: 45, id: 'player-2' }
+          const player2 = { position: { x: 140, y: 40 }, rotation: 45, id: 'player-2' }
           components.players = [player1, player2]
 
           const result = scan(player1.position, components)
@@ -173,7 +173,7 @@ describe(' Radar', () => {
                 players: [],
                 unknown: [{
                   position: {
-                    x: 100,
+                    x: 140,
                     y: 40
                   }
                 }],

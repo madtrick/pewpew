@@ -5,8 +5,7 @@ import { DeployMineMessage } from '../../messages'
 import { PLAYER_RADIUS } from '../../player'
 import { createMine, MINE_RADIUS } from '../../mine'
 import { Position } from '../../types'
-
-export const DEPLOY_MINE_COST_IN_TOKENS = 3
+import Config from '../../config'
 
 export interface DeployMineResultDetails {
   playerId: string
@@ -18,7 +17,7 @@ export interface DeployMineResultDetails {
 
 // TODO note that by not havign HandlerResult parameterized with the kind of request result that
 // we are supposed to return from here, we could be returning
-export default function shoot (session: Session, _message: DeployMineMessage, state: GameState): HandlerResult {
+export default function shoot (session: Session, _message: DeployMineMessage, state: GameState, config: Config): HandlerResult {
   if (!state.started) {
     return {
       result: {
@@ -59,7 +58,9 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
     }
   }
 
-  if (player.tokens < DEPLOY_MINE_COST_IN_TOKENS) {
+  const playerDeployMineCostInTokens = config.costs.playerDeployMine
+
+  if (player.tokens < playerDeployMineCostInTokens) {
     return {
       result: {
         session,
@@ -106,7 +107,7 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
 
 
   const mine = createMine({ position: { x, y } })
-  player.tokens = player.tokens - DEPLOY_MINE_COST_IN_TOKENS
+  player.tokens = player.tokens - playerDeployMineCostInTokens
   state.arena.mines.push(mine)
 
   return {
@@ -118,7 +119,7 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
         id: mine.id,
         position: mine.position,
         remainingTokens: player.tokens,
-        requestCostInTokens: DEPLOY_MINE_COST_IN_TOKENS
+        requestCostInTokens: playerDeployMineCostInTokens
       }
     },
     state

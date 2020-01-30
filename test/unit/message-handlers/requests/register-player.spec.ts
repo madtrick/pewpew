@@ -7,6 +7,7 @@ import { Arena } from '../../../../src/components/arena'
 import { RequestType } from '../../../../src/message-handlers'
 import { scan } from '../../../../src/components/radar'
 import handler, { RegisterPlayerResultDetails } from '../../../../src/message-handlers/requests/register-player'
+import { config } from '../../../config'
 
 describe('Requests - Register player', () => {
   const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
@@ -30,7 +31,7 @@ describe('Requests - Register player', () => {
         id: 'RegisterPlayer'
       }
 
-      const { result, state: newState } = handler(session, message, state)
+      const { result, state: newState } = handler(session, message, state, config)
       const [player] = newState.players()
 
       expect(newState.players()).to.have.lengthOf(1)
@@ -77,7 +78,7 @@ describe('Requests - Register player', () => {
         id: 'RegisterPlayer'
       }
 
-      const { result, state: newState } = handler(session, message, state)
+      const { result, state: newState } = handler(session, message, state, config)
 
       expect(newState.players()).to.have.lengthOf(1)
       expect(result).to.eql({

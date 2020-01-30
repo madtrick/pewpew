@@ -1,5 +1,6 @@
 import { Player } from './player'
 import { Arena, Result, ArenaPlayer } from './components/arena'
+import Config from './config'
 
 export enum GameStateUpdateResult {
   Success,
@@ -36,11 +37,11 @@ export class GameState {
   }
 
   // TODO fix this type and use the type from the arena
-  update (options: { shotRefillCadence: number, shotRefillQuantity: number, currentTick: number, tokenIncreaseQuantity: number}): any {
+  update (config: Config, options: { shotRefillCadence: number, shotRefillQuantity: number, currentTick: number, tokenIncreaseQuantity: number}): any {
     if (!this.started) {
       return []
     }
 
-    return this.arena.update(options)
+    return this.arena.update(config, options)
   }
 }

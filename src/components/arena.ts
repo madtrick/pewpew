@@ -4,6 +4,7 @@ import { Mine } from '../mine'
 import { RadarScan, ScanResult } from './radar'
 import { Position } from '../types'
 import { round } from '../helpers'
+import Config from '../config'
 import asyncStateUpdate from '../domain/async-state-update'
 
 export type Success<T = {}> = { status: 'ok' } & T
@@ -222,6 +223,7 @@ export class Arena {
   }
 
   update (
+    config: Config,
     { currentTick, shotRefillCadence, shotRefillQuantity, tokenIncreaseQuantity }:
     { shotRefillCadence: number, shotRefillQuantity: number, currentTick: number, tokenIncreaseQuantity: number }
   ): {
@@ -238,7 +240,8 @@ export class Arena {
       currentTick,
       shotRefillCadence,
       shotRefillQuantity,
-      tokenIncreaseQuantity
+      tokenIncreaseQuantity,
+      config
     )
 
     this.arenaPlayers = update.players

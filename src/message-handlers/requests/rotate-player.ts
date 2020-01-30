@@ -2,6 +2,7 @@ import { RotatePlayerMessage } from '../../messages'
 import { GameState } from '../../game-state'
 import { Session } from '../../session'
 import { HandlerResult, RequestType } from '../index'
+import Config from '../../config'
 
 export const ROTATION_COST_IN_TOKENS = 0
 // TODO unifiy the PlayerPosition (or Position) in just one place
@@ -19,7 +20,7 @@ export interface RotatePlayerResultDetails {
   requestCostInTokens: number
 }
 
-export default function rotatePlayer (session: Session, message: RotatePlayerMessage, state: GameState): HandlerResult {
+export default function rotatePlayer (session: Session, message: RotatePlayerMessage, state: GameState, _config: Config): HandlerResult {
   if (!state.started) {
     return {
       result: {

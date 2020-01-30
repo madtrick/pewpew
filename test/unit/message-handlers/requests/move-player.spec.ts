@@ -8,6 +8,7 @@ import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/move-player'
+import { config } from '../../../config'
 
 // TODO: test the representation of the player in the arena
 // TODO: test with the game not started
@@ -41,7 +42,7 @@ describe('Requests - Move player', () => {
         state.started = true
         session.playerId = 'some-player-id'
 
-        const { result } = handler(session, message, state, domainStub)
+        const { result } = handler(session, message, state, domainStub, config)
 
         expect(result).to.eql({
           session,
@@ -74,7 +75,7 @@ describe('Requests - Move player', () => {
         }
       })
 
-      const { result } = handler(session, message, state, domainStub)
+      const { result } = handler(session, message, state, domainStub, config)
 
       expect(domainStub).to.have.been.calledWith()
       expect(result).to.eql({
@@ -99,7 +100,7 @@ describe('Requests - Move player', () => {
       const state: GameState = new GameState({ arena })
       const session = createSession({ id: 'channel-1' })
 
-      const { result } = handler(session, message, state, domainStub)
+      const { result } = handler(session, message, state, domainStub, config)
 
       expect(result).to.eql({
         session,

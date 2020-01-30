@@ -7,13 +7,15 @@ import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
-import handler, { SHOOT_COST_IN_TOKENS } from '../../../../src/message-handlers/requests/shoot'
+import handler from '../../../../src/message-handlers/requests/shoot'
+import { config } from '../../../config'
 
 describe('Requests - Shoot', () => {
   let arena: Arena
   let gameStateOptions: { arena: Arena } // TODO maybe export the type for this options
   let sandbox: sinon.SinonSandbox
   let session: Session
+  const playerShotCostInTokens = config.costs.playerShot
 
   beforeEach(() => {
     arena = new Arena({ width: 100, height: 100 }, { radar: scan })
@@ -39,7 +41,7 @@ describe('Requests - Shoot', () => {
         id: 'Shoot'
       }
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         session,
@@ -62,7 +64,7 @@ describe('Requests - Shoot', () => {
 
       state.started = true
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         session,
@@ -85,7 +87,7 @@ describe('Requests - Shoot', () => {
         state.started = true
         session.playerId = 'some-player-id'
 
-        const { result } = handler(session, message, state)
+        const { result } = handler(session, message, state, config)
 
         expect(result).to.eql({
           session,
@@ -106,11 +108,11 @@ describe('Requests - Shoot', () => {
         id: 'Shoot'
       }
 
-      registeredPlayer.tokens = SHOOT_COST_IN_TOKENS - 1
+      registeredPlayer.tokens = playerShotCostInTokens - 1
       session.playerId = registeredPlayer.id
       state.started = true
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         session,
@@ -134,18 +136,18 @@ describe('Requests - Shoot', () => {
       session.playerId = registeredPlayer.id
       state.started = true
 
-      const { result } = handler(session, message, state)
+      const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
         success: true,
         request: RequestType.Shoot,
         details: {
           id: registeredPlayer.id,
-          requestCostInTokens: SHOOT_COST_IN_TOKENS,
-          remainingTokens: initialPlayerTokens - SHOOT_COST_IN_TOKENS
+          requestCostInTokens: playerShotCostInTokens,
+          remainingTokens: initialPlayerTokens - playerShotCostInTokens
         }
       })
-      expect(registeredPlayer.tokens).to.eql(initialPlayerTokens - SHOOT_COST_IN_TOKENS)
+      expect(registeredPlayer.tokens).to.eql(initialPlayerTokens - playerShotCostInTokens)
       expect(arena.registerShot).to.have.been.calledOnce
     })
   })

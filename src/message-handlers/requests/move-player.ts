@@ -3,8 +3,7 @@ import { GameState } from '../../game-state'
 import { Session } from '../../session'
 import { HandlerResult, RequestType } from '../index'
 import { MovePlayer } from '../../domain/move-player'
-
-const MOVEMENT_SPEED = process.env.PLAYER_MOVEMENT_SPEED ? Number(process.env.PLAYER_MOVEMENT_SPEED) : 1
+import Config from '../../config'
 
 // TODO unifiy the PlayerPosition (or Position) in just one place
 // instead of having the same structure used in different places
@@ -27,7 +26,8 @@ export default function movePlayer (
   session: Session,
   message: MovePlayerMessage,
   state: GameState,
-  domain: MovePlayer
+  domain: MovePlayer,
+  config: Config
 ): HandlerResult {
   if (!state.started) {
     return {
@@ -57,7 +57,10 @@ export default function movePlayer (
 
   const movement = message.data.movement
   const arena = state.arena
-  const domainResult = domain(movement, MOVEMENT_SPEED, player, arena.players(), { width: arena.width, height: arena.height })
+  const playerSpeed = config.movementSpeeds.player
+  const turboCostInTokens = config.costs.playerMovementTurbo
+  const turboMultiplierFactor = config.turboMultiplierFactor
+  const domainResult = domain(movement, playerSpeed, turboCostInTokens, turboMultiplierFactor, player, arena.players(), { width: arena.width, height: arena.height })
 
   const result: {
     success: true,

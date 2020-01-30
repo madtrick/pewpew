@@ -4,6 +4,7 @@ import asyncMoveShots from './async-move-shot'
 import { shotHisWalls, shotHitsPlayer } from './async-determine-shot-hits'
 import { PLAYER_MAX_SHOTS, PLAYER_RADIUS } from '../player'
 import { Mine, MINE_RADIUS, MINE_HIT_COST } from '../mine'
+import Config from '../config'
 
 interface Update {
   updates: { type: UpdateType, component: Foo }[]
@@ -21,9 +22,10 @@ export default function updateState (
   tick: number,
   shotUpdateCadence: number,
   shotIncrease: number,
-  tokenIncrease: number
+  tokenIncrease: number,
+  config: Config
 ): Update {
-  const movedShots = asyncMoveShots(shots, parseInt(process.env.SHOT_MOVEMENT_SPEED || '1', 10))
+  const movedShots = asyncMoveShots(shots, config.movementSpeeds.shot)
   const remainingShots: ArenaShot[] = []
   const updates: { type: UpdateType, component: Foo }[] = movedShots.map((shot) => {
     const hit = shotHisWalls(shot, { width: arenaDimensions.width, height: arenaDimensions.height })
