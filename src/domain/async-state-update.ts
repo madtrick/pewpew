@@ -23,7 +23,7 @@ export default function updateState (
   shotIncrease: number,
   tokenIncrease: number
 ): Update {
-  const movedShots = asyncMoveShots(shots, 1)
+  const movedShots = asyncMoveShots(shots, parseInt(process.env.SHOT_MOVEMENT_SPEED || '1', 10))
   const remainingShots: ArenaShot[] = []
   const updates: { type: UpdateType, component: Foo }[] = movedShots.map((shot) => {
     const hit = shotHisWalls(shot, { width: arenaDimensions.width, height: arenaDimensions.height })

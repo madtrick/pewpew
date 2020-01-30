@@ -18,7 +18,7 @@ spec:
           env:
             - name: AUTO_START_GAME
               value: 'true'
-            - name: MOVEMENT_SPEED
+            - name: PLAYER_MOVEMENT_SPEED
               value: '5'
           ports:
             - name: ws-control

@@ -4,7 +4,7 @@ import { Session } from '../../session'
 import { HandlerResult, RequestType } from '../index'
 import { MovePlayer } from '../../domain/move-player'
 
-const MOVEMENT_SPEED = process.env.MOVEMENT_SPEED ? Number(process.env.MOVEMENT_SPEED) : 1
+const MOVEMENT_SPEED = process.env.PLAYER_MOVEMENT_SPEED ? Number(process.env.PLAYER_MOVEMENT_SPEED) : 1
 
 // TODO unifiy the PlayerPosition (or Position) in just one place
 // instead of having the same structure used in different places
