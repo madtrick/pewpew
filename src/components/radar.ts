@@ -45,7 +45,7 @@ export function scan (
   const players = components.players.filter(({ position: playerPosition }) => {
     return playerPosition.x !== position.x || playerPosition.y !== position.y
   })
-  const scanRadius = 40
+  const scanRadius = 80
   const shotIdentifyRadius = scanRadius - 5
   const mineIdentifyRadius = scanRadius - 5
   const detectedComponents: ScanResult['component']['data'] = { players: [], shots: [], mines: [], unknown: [] }
