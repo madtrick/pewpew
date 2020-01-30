@@ -8,6 +8,7 @@ export const config: Config = {
     shot: 1
   },
   costs: {
+    rotatePlayer: 1,
     movePlayer: 1,
     playerMovementTurbo: 2,
     playerShot: 3,

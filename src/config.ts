@@ -6,6 +6,7 @@ export default interface Config {
     shot: number
   }
   costs: {
+    rotatePlayer: number
     movePlayer: number
     playerMovementTurbo: number
     playerShot: number

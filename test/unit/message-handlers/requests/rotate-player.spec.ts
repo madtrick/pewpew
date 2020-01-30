@@ -7,7 +7,7 @@ import { createPlayer } from '../../../../src/player'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { RequestType } from '../../../../src/message-handlers'
 import { scan } from '../../../../src/components/radar'
-import handler, { ROTATION_COST_IN_TOKENS } from '../../../../src/message-handlers/requests/rotate-player'
+import handler from '../../../../src/message-handlers/requests/rotate-player'
 import { config } from '../../../config'
 
 // TODO: test the representation of the player in the arena
@@ -19,6 +19,7 @@ const PLAYER_ID = 'player-1'
 describe('Requests - Rotate player', () => {
   let arena: Arena
   let session: Session
+  const rotatePlayerCostInTokens = config.costs.rotatePlayer
 
   beforeEach(() => {
     arena = new Arena({ width: 100, height: 100 }, { radar: scan })
@@ -107,11 +108,11 @@ describe('Requests - Rotate player', () => {
             id: PLAYER_ID,
             rotation,
             remainingTokens: registeredPlayer.tokens,
-            requestCostInTokens: ROTATION_COST_IN_TOKENS
+            requestCostInTokens: rotatePlayerCostInTokens
           }
         })
         expect(registeredPlayer.rotation).to.eql(rotation)
-        expect(registeredPlayer.tokens).to.eql(initialTokens - ROTATION_COST_IN_TOKENS)
+        expect(registeredPlayer.tokens).to.eql(initialTokens - rotatePlayerCostInTokens)
         expect(arena.rotatePlayer).to.have.been.calledOnceWith(rotation, registeredPlayer)
       })
     })
