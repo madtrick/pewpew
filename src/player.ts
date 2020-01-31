@@ -12,7 +12,6 @@ export interface Player {
 export type PlayerId = string
 export const PLAYER_RADIUS = 16 // px
 export const PLAYER_MAX_LIFE = 100
-export const INITIAL_PLAYER_TOKENS = 100
 
 // TODO Right no the `Player` represents both the human who registerd to play and the bot in the game
 // I think I should split that into a:
@@ -23,14 +22,14 @@ export const INITIAL_PLAYER_TOKENS = 100
 // during a game (e.g. if the player is killed but has more lives and comes back to life)
 //
 // The type in this file should represent the bot
-export function createPlayer (options: { id: string }): Player {
+export function createPlayer (options: { id: string, initialTokens: number }): Player {
   return {
     id: options.id,
     // TODO randomize the rotation. Also consider the `rotation` of a player part of the ArenaPlayer
     // type and not the base Player
     rotation: 0,
     life: PLAYER_MAX_LIFE,
-    tokens: INITIAL_PLAYER_TOKENS,
+    tokens: options.initialTokens,
     type: ComponentType.Player
   }
 }

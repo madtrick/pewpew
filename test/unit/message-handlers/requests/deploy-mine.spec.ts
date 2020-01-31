@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { DeployMineMessage } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
-import { createPlayer, PLAYER_RADIUS } from '../../../../src/player'
+import { createPlayer, PLAYER_RADIUS, Player } from '../../../../src/player'
 import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
@@ -13,10 +13,12 @@ describe('Requests - Deploy mine', () => {
   let arena: Arena
   let gameStateOptions: { arena: Arena } // TODO maybe export the type for this options
   let session: Session
+  let player: Player
   const playerDeployMineCostInTokens = config.costs.playerDeployMine
 
   beforeEach(() => {
     arena = new Arena({ width: 300, height: 300 }, { radar: scan })
+    player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
     gameStateOptions = { arena }
 
     session = createSession({ id: 'channel-1' })
@@ -25,7 +27,6 @@ describe('Requests - Deploy mine', () => {
   describe('when the game has not started', () => {
     it('rejects the request', () => {
       const state: GameState = new GameState(gameStateOptions)
-      const player = createPlayer({ id: 'player-1' })
       const initialTokens = player.tokens
       const message: DeployMineMessage = {
         type: 'Request',
@@ -93,7 +94,6 @@ describe('Requests - Deploy mine', () => {
 
     it('does not deploy the mine if the player has not enough tokens', () => {
       const state = new GameState(gameStateOptions)
-      const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
       const message: DeployMineMessage = {
         type: 'Request',
@@ -117,7 +117,6 @@ describe('Requests - Deploy mine', () => {
 
     it('deploys the mine if the player has enough tokens (rotation < 180)', () => {
       const state = new GameState(gameStateOptions)
-      const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 100, y: 74 } }))
       const initialTokens = registeredPlayer.tokens
       const message: DeployMineMessage = {
@@ -151,7 +150,6 @@ describe('Requests - Deploy mine', () => {
 
     it('deploys the mine if the player has enough tokens (rotation >= 180)', () => {
       const state = new GameState(gameStateOptions)
-      const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 100, y: 74 } }))
       const initialTokens = registeredPlayer.tokens
       const message: DeployMineMessage = {
@@ -185,7 +183,6 @@ describe('Requests - Deploy mine', () => {
 
     it('does not deploy the mine if the mine would be outside of the arena', () => {
       const state = new GameState(gameStateOptions)
-      const player = createPlayer({ id: 'player-1' })
       // Position the player besides the left vertical edge of the
       // arena so that there's no place to deploy a mine
       const playerPosition = {

@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { ShootMessage } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
-import { createPlayer } from '../../../../src/player'
+import { createPlayer, Player } from '../../../../src/player'
 import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
@@ -15,10 +15,12 @@ describe('Requests - Shoot', () => {
   let gameStateOptions: { arena: Arena } // TODO maybe export the type for this options
   let sandbox: sinon.SinonSandbox
   let session: Session
+  let player: Player
   const playerShotCostInTokens = config.costs.playerShot
 
   beforeEach(() => {
     arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+    player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
 
     sandbox = sinon.createSandbox()
     sandbox.stub(arena, 'registerShot')
@@ -34,7 +36,6 @@ describe('Requests - Shoot', () => {
   describe('when the game has not started', () => {
     it('rejects the request', () => {
       const state: GameState = new GameState(gameStateOptions)
-      const player = createPlayer({ id: 'player-1' })
       const initialPlayerTokens = player.tokens
       const message: ShootMessage = {
         type: 'Request',
@@ -101,7 +102,6 @@ describe('Requests - Shoot', () => {
 
     it('does not take the shot if the player has not enough tokens', () => {
       const state = new GameState(gameStateOptions)
-      const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
       const message: ShootMessage = {
         type: 'Request',
@@ -125,7 +125,6 @@ describe('Requests - Shoot', () => {
 
     it('takes the shot if the player has remaining tokens', () => {
       const state = new GameState(gameStateOptions)
-      const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player))
       const initialPlayerTokens = registeredPlayer.tokens
       const message: ShootMessage = {

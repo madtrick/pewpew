@@ -44,6 +44,9 @@ function isDevelopment () {
 module.exports = {
   autoStartGame: env('AUTO_START_GAME', { isBoolean: true, default: false }),
   turboMultiplierFactor: env('TURBO_MULTIPLIER_FACTOR', { isNumber: true }),
+  maxTokensPerPlayer: env('MAX_TOKENS_PER_PLAYER', { isNumber: true }),
+  initialTokensPerPlayer: env('INITIAL_TOKENS_PER_PLAYER', { isNumber: true }),
+  tokensIncreaseFactor: env('TOKENS_INCREASE_FACTOR', { isNumber: true }),
   movementSpeeds: {
     player: env('MOVEMENT_SPEED_PLAYER', { isNumber: true, default: false }),
     shot: env('MOVEMENT_SPEED_SHOT', { isNumber: true, default: false }),

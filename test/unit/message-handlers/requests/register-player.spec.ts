@@ -67,7 +67,7 @@ describe('Requests - Register player', () => {
     })
 
     it('does not register player in game if duplicated id', () => {
-      const player = createPlayer({ id: 'player-1' })
+      const player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
       const state: GameState = new GameState(gameStateOptions)
       state.registerPlayer(player)
       const message: RegisterPlayerMessage = {

@@ -37,11 +37,11 @@ export class GameState {
   }
 
   // TODO fix this type and use the type from the arena
-  update (config: Config, options: { tokenIncreaseQuantity: number}): any {
+  update (config: Config): any {
     if (!this.started) {
       return []
     }
 
-    return this.arena.update(config, options)
+    return this.arena.update(config)
   }
 }

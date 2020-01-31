@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { Arena, asSuccess } from '../../../src/components/arena'
-import { createPlayer } from '../../../src/player'
+import { createPlayer, Player } from '../../../src/player'
 import movePlayer from '../../../src/domain/move-player'
 import { scan } from '../../../src/components/radar'
 import { Position, Rotation } from '../../../src/types'
@@ -25,7 +25,7 @@ type MovementTestOptions = {
 function movementTest (options: MovementTestOptions): () => Promise<void> {
   return async () => {
     const arena = options.arena()
-    const player = createPlayer({ id: 'player-1' })
+    const player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
     const registeredPlayer = asSuccess(arena.registerPlayer(player, { position: options.initialPosition })).player
     registeredPlayer.rotation = options.initialRotation
 
@@ -51,10 +51,12 @@ function movementTest (options: MovementTestOptions): () => Promise<void> {
 describe('Domain - Move player', () => {
   let sandbox: sinon.SinonSandbox
   let arena: Arena
+  let player: Player
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
     arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+    player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
   })
 
   afterEach(() => {
@@ -63,10 +65,9 @@ describe('Domain - Move player', () => {
 
   describe('when the turbo is not requested', () => {
     it('consumes no tokens', () => {
-      const player = createPlayer({ id: 'player-1' })
-      arena.registerPlayer(player, { position: { x: 50, y: 50 } })
-      player.rotation = 0
-      const initialPlayerTokens = player.tokens
+      const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
+      registeredPlayer.rotation = 0
+      const initialPlayerTokens = registeredPlayer.tokens
 
       const result = asSuccess(
         movePlayer(
@@ -74,7 +75,7 @@ describe('Domain - Move player', () => {
           playerSpeed,
           turboCostInTokens,
           turboMultiplierFactor,
-          player,
+          registeredPlayer,
           arena.players(),
           { width: arena.width, height: arena.height }
         )
@@ -104,10 +105,9 @@ describe('Domain - Move player', () => {
   describe('when the turbo is requested', () => {
     describe('when the player has enough tokens to use the turbo', () => {
       it('moves the player - horizontally', () => {
-        const player = createPlayer({ id: 'player-1' })
-        arena.registerPlayer(player, { position: { x: 50, y: 50 } })
-        player.rotation = 0
-        const initialPlayerTokens = player.tokens
+        const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
+        registeredPlayer.rotation = 0
+        const initialPlayerTokens = registeredPlayer.tokens
 
         const result = asSuccess(
           movePlayer(
@@ -115,7 +115,7 @@ describe('Domain - Move player', () => {
             playerSpeed,
             turboCostInTokens,
             turboMultiplierFactor,
-            player,
+            registeredPlayer,
             arena.players(),
             { width: arena.width, height: arena.height }
           )
@@ -130,8 +130,7 @@ describe('Domain - Move player', () => {
 
     describe('when the player does not have enough tokens to use the turbo', () => {
       it('moves the player - horizontally', () => {
-        const player = createPlayer({ id: 'player-1' })
-        const registeredPlayer = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } })).player
+        const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
         registeredPlayer.rotation = 0
         registeredPlayer.tokens = 0
 
@@ -203,7 +202,7 @@ describe('Domain - Move player', () => {
       { direction: DisplacementDirection.FORWARD }
     ],
     arena: () => {
-      const player = createPlayer({ id: 'player-2' })
+      const player = createPlayer({ id: 'player-2', initialTokens: config.initialTokensPerPlayer })
 
       arena.registerPlayer(player, { position: { x: 84, y: 50 } })
 
@@ -221,7 +220,7 @@ describe('Domain - Move player', () => {
       { direction: DisplacementDirection.FORWARD }
     ],
     arena: () => {
-      const player = createPlayer({ id: 'player-2' })
+      const player = createPlayer({ id: 'player-2', initialTokens: config.initialTokensPerPlayer })
 
       // 50 + 16 = 66
       // 83 - 16 = 67

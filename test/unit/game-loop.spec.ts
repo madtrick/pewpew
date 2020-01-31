@@ -231,7 +231,7 @@ describe('Game loop', () => {
   describe.skip('when the game is started', () => {
     describe('players', () => {
       it('returns "GameUpdate"s', async () => {
-        const player = createPlayer({ id: 'player-1' })
+        const player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
         const state: GameState = new GameState({ arena })
         state.registerPlayer(player)
         state.started = true
