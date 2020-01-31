@@ -6,17 +6,12 @@ export interface Player {
   rotation: number
   tokens: number
   life: number
-  // TODO rename this to shot tokens
-  shots: number
-  mines: number
   type: ComponentType.Player
 }
 
 export type PlayerId = string
 export const PLAYER_RADIUS = 16 // px
 export const PLAYER_MAX_LIFE = 100
-export const PLAYER_MAX_SHOTS = 50
-export const PLAYER_MINES = 3
 export const INITIAL_PLAYER_TOKENS = 100
 
 // TODO Right no the `Player` represents both the human who registerd to play and the bot in the game
@@ -36,8 +31,6 @@ export function createPlayer (options: { id: string }): Player {
     rotation: 0,
     life: PLAYER_MAX_LIFE,
     tokens: INITIAL_PLAYER_TOKENS,
-    shots: PLAYER_MAX_SHOTS,
-    mines: PLAYER_MINES,
     type: ComponentType.Player
   }
 }

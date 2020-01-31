@@ -170,8 +170,6 @@ describe('Arena', () => {
 
   describe('update', () => {
     // TODO missing test which tests that update result includes scan and shot movement
-    const shotRefillQuantity = 1
-    const shotRefillCadence = 2
     const tokenIncreaseQuantity = 1
     let currentTick = 1
 
@@ -202,7 +200,7 @@ describe('Arena', () => {
         })
         const scannableComponents = { players: arena.players(), shots: arena.shots(), mines: [] }
 
-        arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+        arena.update(config, { tokenIncreaseQuantity })
 
         expect(scanStub).to.have.been.calledTwice
         expect(scanStub).to.have.been.calledWith(registeredPlayer1.position, scannableComponents)
@@ -233,7 +231,7 @@ describe('Arena', () => {
         }
         scanStub.returns(scanResult)
 
-        const result = arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+        const result = arena.update(config, { tokenIncreaseQuantity })
         expect(result).to.deep.include(scanResult)
       })
     })
@@ -288,7 +286,7 @@ describe('Arena', () => {
         const { x: initialX, y: initialY } = registerShotResult.shot.position
 
         for (let i = 1; i < 5; i++) {
-          arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+          arena.update(config, { tokenIncreaseQuantity })
           currentTick = currentTick + 1
 
           const [shot] = arena.shots()
@@ -308,7 +306,7 @@ describe('Arena', () => {
         registeredPlayer.rotation = 45
         asSuccess(arena.registerShot(shot))
 
-        arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+        arena.update(config, { tokenIncreaseQuantity })
 
         const [arenaShot] = arena.shots()
         const { x, y } = arenaShot.position
@@ -332,7 +330,7 @@ describe('Arena', () => {
           // TODO no need to use a loop here. We are already testing that the shot is movered
           // in another test. Remove this an instead place the shot next to the wall
           for (let i = 1; i < 6; i++) {
-            arena.update(config, { shotRefillQuantity, shotRefillCadence, currentTick, tokenIncreaseQuantity })
+            arena.update(config, { tokenIncreaseQuantity })
             currentTick = currentTick + 1
           }
 
@@ -360,7 +358,7 @@ describe('Arena', () => {
           // TODO no need to use a loop here. We are already testing that the shot is movered
           // in another test. Remove this an instead place the shot next to the wall
           for (let i = 1; i < 5; i++) {
-            arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+            arena.update(config, { tokenIncreaseQuantity })
             currentTick = currentTick + 1
 
             const shots = arena.shots()
@@ -370,7 +368,7 @@ describe('Arena', () => {
           // After the loop the shot is at x=47. One movement more and the
           // player will be tangential to the player which is considered a hit
 
-          arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+          arena.update(config, { tokenIncreaseQuantity })
           const shots = arena.shots()
           expect(shots).to.be.empty
           const targetPlayer = arena.findPlayer('player-2')
@@ -393,7 +391,7 @@ describe('Arena', () => {
             // After the loop the shot is at x=47. One movement more and the
             // player will be tangential to the player which is considered a hit
 
-            arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+            arena.update(config, { tokenIncreaseQuantity })
             const targetPlayer = arena.findPlayer('player-2')
             expect(targetPlayer).to.be.undefined
           })
@@ -413,7 +411,7 @@ describe('Arena', () => {
           const shot1 = createShot({ player: shooter })
           arena.registerShot(shot1)
 
-          const updates = arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+          const updates = arena.update(config, { tokenIncreaseQuantity })
 
           expect(updates).to.have.lengthOf(3)
           expect(updates).to.have.deep.members([
@@ -447,7 +445,7 @@ describe('Arena', () => {
           const shot1 = createShot({ player: shooter })
           arena.registerShot(shot1)
 
-          const updates = arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+          const updates = arena.update(config, { tokenIncreaseQuantity })
 
           expect(updates).to.have.lengthOf(3)
           expect(updates).to.have.deep.members([
@@ -484,7 +482,7 @@ describe('Arena', () => {
           const shot = createShot({ player: shooter })
           arena.registerShot(shot)
 
-          const updates = arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+          const updates = arena.update(config, { tokenIncreaseQuantity })
 
           expect(updates).to.have.lengthOf(2)
           expect(updates).to.have.deep.members([
@@ -513,7 +511,7 @@ describe('Arena', () => {
           const shot = createShot({ player: shooter1 })
           arena.registerShot(shot)
 
-          const updates = arena.update(config, { shotRefillCadence, shotRefillQuantity, currentTick, tokenIncreaseQuantity })
+          const updates = arena.update(config, { tokenIncreaseQuantity })
 
 
           expect(updates).to.have.lengthOf(2)

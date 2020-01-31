@@ -33,15 +33,15 @@ interface GameLoopResult {
  */
 
  // TODO validate that only one message is processed per player, per loop tick
-export type GameLoop = (currentTick: number, state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[], config: Config) => Promise<GameLoopResult>
+export type GameLoop = (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[], config: Config) => Promise<GameLoopResult>
 
 // TODO rename this module to something like message dispatcher
 // TODO test the response from the loop function
 export default function createGameLopp (handlers: IncommingMessageHandlers): GameLoop {
-  return function gameLoop (currentTick: number, state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[], config: Config): Promise<GameLoopResult> {
+  return function gameLoop (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[], config: Config): Promise<GameLoopResult> {
     let loopCycleRunResult: GameLoopResult = { state: state, results: [], updates: [] }
 
-    const updates = state.update(config, { shotRefillCadence: 3, shotRefillQuantity: 1, currentTick, tokenIncreaseQuantity: 1 })
+    const updates = state.update(config, { tokenIncreaseQuantity: 2 })
     // TODO the updates should be returned without being transformed
     // const transformedUpdates = updates.map((update: any) => {
     //   if (update.player) {

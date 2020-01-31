@@ -13,7 +13,6 @@ describe('Engine - Integration', () => {
   let arena: Arena
   let gameState: GameState
   const logger = createLogger()
-  const currentTick = 1
 
   beforeEach(() => {
     arena = new Arena({ width: 500, height: 500 }, { radar: scan })
@@ -45,7 +44,7 @@ describe('Engine - Integration', () => {
       engineState.channelSession.set('channel-2', session)
       engineState.channelSession.set('channel-1', controlSession)
 
-      const { playerResultMessages } = await engine(currentTick, engineState, gameLoop, [], playerMessages, [], { logger, config })
+      const { playerResultMessages } = await engine(engineState, gameLoop, [], playerMessages, [], { logger, config })
 
       expect(playerResultMessages).to.have.lengthOf(1)
       expect(playerResultMessages[0].data).to.include({
@@ -75,7 +74,7 @@ describe('Engine - Integration', () => {
 
       engineState.channelSession.set('channel-1', controlSession)
 
-      const { controlResultMessages } = await engine(currentTick, engineState, gameLoop, controlMessages, [], [], { logger, config })
+      const { controlResultMessages } = await engine(engineState, gameLoop, controlMessages, [], [], { logger, config })
 
       // TODO once chaijs is bumped to version 5 we might be able to write
       // loose matchers and then be able to combine these two expectations in one
@@ -128,7 +127,7 @@ describe('Engine - Integration', () => {
       engineState.channelSession.set('channel-2', session1)
       engineState.channelSession.set('channel-3', session2)
 
-      await engine(currentTick, engineState, gameLoop, [], playerMessages, [], { logger, config })
+      await engine(engineState, gameLoop, [], playerMessages, [], { logger, config })
 
       const controlMessages = [
         {
@@ -140,7 +139,7 @@ describe('Engine - Integration', () => {
         }
       ]
 
-      const { playerResultMessages, controlResultMessages } = await engine(currentTick, engineState, gameLoop, controlMessages, [], [], { logger, config })
+      const { playerResultMessages, controlResultMessages } = await engine(engineState, gameLoop, controlMessages, [], [], { logger, config })
       expect(controlResultMessages).to.have.lengthOf(1)
       expect(controlResultMessages[0].data).to.eql({
         type: 'Notification',

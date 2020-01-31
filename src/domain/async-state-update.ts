@@ -2,7 +2,7 @@ import { ArenaShot, ArenaPlayer, ArenaRadarScanResult, Foo, UpdateType, Componen
 import { RadarScan } from '../components/radar'
 import asyncMoveShots from './async-move-shot'
 import { shotHisWalls, shotHitsPlayer } from './async-determine-shot-hits'
-import { PLAYER_MAX_SHOTS, PLAYER_RADIUS } from '../player'
+import { PLAYER_RADIUS } from '../player'
 import { Mine, MINE_RADIUS, MINE_HIT_COST } from '../mine'
 import Config from '../config'
 
@@ -19,9 +19,6 @@ export default function updateState (
   players: ArenaPlayer[],
   arenaDimensions: { width: number, height: number },
   radar: RadarScan,
-  tick: number,
-  shotUpdateCadence: number,
-  shotIncrease: number,
   tokenIncrease: number,
   config: Config
 ): Update {
@@ -170,18 +167,7 @@ export default function updateState (
   })
 
   finalPlayers.forEach((player) => {
-    // TODO set an upper limit to the max number of tokens a player can have
     player.tokens = player.tokens + tokenIncrease
-
-    if (tick % shotUpdateCadence === 0) {
-      if (player.shots < PLAYER_MAX_SHOTS) {
-        if (player.shots + shotIncrease > PLAYER_MAX_SHOTS) {
-          player.shots = PLAYER_MAX_SHOTS
-        } else {
-          player.shots = player.shots + shotIncrease
-        }
-      }
-    }
   })
 
   return {

@@ -225,8 +225,8 @@ export class Arena {
 
   update (
     config: Config,
-    { currentTick, shotRefillCadence, shotRefillQuantity, tokenIncreaseQuantity }:
-    { shotRefillCadence: number, shotRefillQuantity: number, currentTick: number, tokenIncreaseQuantity: number }
+    { tokenIncreaseQuantity }:
+    { tokenIncreaseQuantity: number }
   ): {
     type: UpdateType,
     component: Foo
@@ -238,9 +238,6 @@ export class Arena {
       this.arenaPlayers,
       dimensions,
       this.radar,
-      currentTick,
-      shotRefillCadence,
-      shotRefillQuantity,
       tokenIncreaseQuantity,
       config
     )
