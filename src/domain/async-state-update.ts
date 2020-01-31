@@ -19,7 +19,6 @@ export default function updateState (
   players: ArenaPlayer[],
   arenaDimensions: { width: number, height: number },
   radar: RadarScan,
-  tokenIncrease: number,
   config: Config
 ): Update {
   const movedShots = asyncMoveShots(shots, config.movementSpeeds.shot)
@@ -167,7 +166,11 @@ export default function updateState (
   })
 
   finalPlayers.forEach((player) => {
-    player.tokens = player.tokens + tokenIncrease
+    const updatedTokensValue = player.tokens + config.tokenIncreaseFactor
+
+    if (updatedTokensValue < config.maxTokensPerPlayer) {
+      player.tokens = updatedTokensValue
+    }
   })
 
   return {

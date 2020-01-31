@@ -21,7 +21,7 @@ describe('Arena', () => {
 
   describe('removePlayer', () => {
     it('removes the player from the arena', () => {
-      const player = createPlayer({ id: 'player-1' })
+      const player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
       arena.registerPlayer(player)
       arena.removePlayer(player)
 
@@ -33,7 +33,7 @@ describe('Arena', () => {
     let player: Player
 
     beforeEach(() => {
-      player = createPlayer({ id: 'player-1' })
+      player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
     })
 
     describe('avoids positions on the arena edges', () => {
@@ -106,7 +106,7 @@ describe('Arena', () => {
       randomStub.onCall(2).returns(0)
       randomStub.onCall(3).returns(0)
 
-      const newPlayer = createPlayer({ id: 'player-2' })
+      const newPlayer = createPlayer({ id: 'player-2', initialTokens: config.initialTokensPerPlayer })
       const result = asSuccess(arena.registerPlayer(newPlayer))
 
       const { x, y } = result.player.position
@@ -131,7 +131,7 @@ describe('Arena', () => {
         })
 
         it('rejects the registration if the position collides with another player', () => {
-          const secondPlayer = createPlayer({ id: 'player-2' })
+          const secondPlayer = createPlayer({ id: 'player-2', initialTokens: config.initialTokensPerPlayer })
           arena.registerPlayer(secondPlayer, { position: { x: 50, y: 50 } })
           const { status } = arena.registerPlayer(player, { position: { x: 60, y: 50 } })
 
@@ -142,8 +142,13 @@ describe('Arena', () => {
   })
 
   describe('registerShot', () => {
+    let player: Player
+
+    beforeEach(() => {
+      player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
+    })
+
     it('creates the shot relative to the player position', () => {
-      const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
       const shot = createShot({ player: registeredPlayer })
       registeredPlayer.rotation = 0
@@ -156,7 +161,6 @@ describe('Arena', () => {
     })
 
     it('creates the shot relative to the player position (player rotation different than 0)', () => {
-      const player = createPlayer({ id: 'player-1' })
       const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
       const shot = createShot({ player: registeredPlayer })
       registeredPlayer.rotation = 45
@@ -170,8 +174,8 @@ describe('Arena', () => {
 
   describe('update', () => {
     // TODO missing test which tests that update result includes scan and shot movement
-    const tokenIncreaseQuantity = 1
-    let currentTick = 1
+    const player1 = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
+    const player2 = createPlayer({ id: 'player-2', initialTokens: config.initialTokensPerPlayer })
 
     describe('radar', () => {
       let arena: Arena
@@ -184,8 +188,6 @@ describe('Arena', () => {
 
 
       it('calls the radar for each player', () => {
-        const player1 = createPlayer({ id: 'player-1' })
-        const player2 = createPlayer({ id: 'player-2' })
         const registeredPlayer1 = asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
         const registeredPlayer2 = asSuccess(arena.registerPlayer(player2, { position: { x: 83, y: 20 } })).player
         scanStub.returns({
@@ -200,7 +202,7 @@ describe('Arena', () => {
         })
         const scannableComponents = { players: arena.players(), shots: arena.shots(), mines: [] }
 
-        arena.update(config, { tokenIncreaseQuantity })
+        arena.update(config)
 
         expect(scanStub).to.have.been.calledTwice
         expect(scanStub).to.have.been.calledWith(registeredPlayer1.position, scannableComponents)
@@ -208,7 +210,6 @@ describe('Arena', () => {
       })
 
       it('includes the results from the radar scan in the update result', () => {
-        const player1 = createPlayer({ id: 'player-1' })
         // tslint:disable-next-line
         asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
         const scanResult = {
@@ -231,7 +232,7 @@ describe('Arena', () => {
         }
         scanStub.returns(scanResult)
 
-        const result = arena.update(config, { tokenIncreaseQuantity })
+        const result = arena.update(config)
         expect(result).to.deep.include(scanResult)
       })
     })
@@ -275,19 +276,15 @@ describe('Arena', () => {
       // TODO the shot logic should be moved to a separate module so we can test separately
       // and also stub that module for easier tests
       it('moves the shots', () => {
-        const player = createPlayer({ id: 'player-1' })
-        const result = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
-        const shot = createShot({ player: result.player })
-        // TODO this rotation should be set on the registered player, or passed as an optional value
-        // to registerPlayer
-        player.rotation = 0
+        const registeredPlayer = asSuccess(arena.registerPlayer(player1, { position: { x: 50, y: 50 } })).player
+        const shot = createShot({ player: registeredPlayer })
+        registeredPlayer.rotation = 0
 
         const registerShotResult = asSuccess(arena.registerShot(shot))
         const { x: initialX, y: initialY } = registerShotResult.shot.position
 
         for (let i = 1; i < 5; i++) {
-          arena.update(config, { tokenIncreaseQuantity })
-          currentTick = currentTick + 1
+          arena.update(config)
 
           const [shot] = arena.shots()
           const { x, y } = shot.position
@@ -298,15 +295,12 @@ describe('Arena', () => {
       })
 
       it('moves the shots with rotation different than 0', () => {
-        const player = createPlayer({ id: 'player-1' })
-        const { player: registeredPlayer } = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 50 } }))
+        const registeredPlayer = asSuccess(arena.registerPlayer(player1, { position: { x: 50, y: 50 } })).player
         const shot = createShot({ player: registeredPlayer })
-        // TODO this rotation should be set on the registered player, or passed as an optional value
-        // to registerPlayer
         registeredPlayer.rotation = 45
         asSuccess(arena.registerShot(shot))
 
-        arena.update(config, { tokenIncreaseQuantity })
+        arena.update(config)
 
         const [arenaShot] = arena.shots()
         const { x, y } = arenaShot.position
@@ -319,10 +313,9 @@ describe('Arena', () => {
 
       describe('when the shot hits a wall', () => {
         it('destroys the shot', () => {
-          const player = createPlayer({ id: 'player-1' })
-          const result = asSuccess(arena.registerPlayer(player, { position: { x: 79, y: 50 } }))
-          const shot = createShot({ player: result.player })
-          player.rotation = 0
+          const registeredPlayer = asSuccess(arena.registerPlayer(player1, { position: { x: 79, y: 50 } })).player
+          const shot = createShot({ player: registeredPlayer })
+          registeredPlayer.rotation = 0
           arena.registerShot(shot)
 
           // In five movements the shot should have crossed the right wall of
@@ -330,8 +323,7 @@ describe('Arena', () => {
           // TODO no need to use a loop here. We are already testing that the shot is movered
           // in another test. Remove this an instead place the shot next to the wall
           for (let i = 1; i < 6; i++) {
-            arena.update(config, { tokenIncreaseQuantity })
-            currentTick = currentTick + 1
+            arena.update(config)
           }
 
           const shots = arena.shots()
@@ -341,8 +333,6 @@ describe('Arena', () => {
 
       describe('when the shot hits a player', () => {
         it('destroys the shot and reduces the life of the player', () => {
-          const player1 = createPlayer({ id: 'player-1' })
-          const player2 = createPlayer({ id: 'player-2' })
           const shooter = asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
           const otherPlayer = asSuccess(arena.registerPlayer(player2, { position: { x: 65, y: 50 } })).player
           const initialOtherPlayerLife = otherPlayer.life
@@ -358,8 +348,7 @@ describe('Arena', () => {
           // TODO no need to use a loop here. We are already testing that the shot is movered
           // in another test. Remove this an instead place the shot next to the wall
           for (let i = 1; i < 5; i++) {
-            arena.update(config, { tokenIncreaseQuantity })
-            currentTick = currentTick + 1
+            arena.update(config)
 
             const shots = arena.shots()
             expect(shots).to.not.be.empty
@@ -368,7 +357,7 @@ describe('Arena', () => {
           // After the loop the shot is at x=47. One movement more and the
           // player will be tangential to the player which is considered a hit
 
-          arena.update(config, { tokenIncreaseQuantity })
+          arena.update(config)
           const shots = arena.shots()
           expect(shots).to.be.empty
           const targetPlayer = arena.findPlayer('player-2')
@@ -377,8 +366,6 @@ describe('Arena', () => {
 
         describe('when the shot hits and destroys a player', () => {
           it('foo', () => {
-            const player1 = createPlayer({ id: 'player-1' })
-            const player2 = createPlayer({ id: 'player-2' })
             const shooter = asSuccess(arena.registerPlayer(player1, { position: { x: 31, y: 50 } })).player
             const otherPlayer = asSuccess(arena.registerPlayer(player2, { position: { x: 65, y: 50 } })).player
 
@@ -391,7 +378,7 @@ describe('Arena', () => {
             // After the loop the shot is at x=47. One movement more and the
             // player will be tangential to the player which is considered a hit
 
-            arena.update(config, { tokenIncreaseQuantity })
+            arena.update(config)
             const targetPlayer = arena.findPlayer('player-2')
             expect(targetPlayer).to.be.undefined
           })
@@ -400,8 +387,6 @@ describe('Arena', () => {
 
       describe('update results', () => {
         it('reflects the hit on a player', () => {
-          const player1 = createPlayer({ id: 'player-1' })
-          const player2 = createPlayer({ id: 'player-2' })
           // A shot from this shooter will hit otherPlayer
           const shooter = asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
           const otherPlayer = asSuccess(arena.registerPlayer(player2, { position: { x: 59, y: 50 } })).player
@@ -411,7 +396,7 @@ describe('Arena', () => {
           const shot1 = createShot({ player: shooter })
           arena.registerShot(shot1)
 
-          const updates = arena.update(config, { tokenIncreaseQuantity })
+          const updates = arena.update(config)
 
           expect(updates).to.have.lengthOf(3)
           expect(updates).to.have.deep.members([
@@ -433,8 +418,6 @@ describe('Arena', () => {
         })
 
         it('reflects the a player destroyed', () => {
-          const player1 = createPlayer({ id: 'player-1' })
-          const player2 = createPlayer({ id: 'player-2' })
           // A shot from this shooter will hit otherPlayer
           const shooter = asSuccess(arena.registerPlayer(player1, { position: { x: 26, y: 50 } })).player
           const otherPlayer = asSuccess(arena.registerPlayer(player2, { position: { x: 59, y: 50 } })).player
@@ -445,7 +428,7 @@ describe('Arena', () => {
           const shot1 = createShot({ player: shooter })
           arena.registerShot(shot1)
 
-          const updates = arena.update(config, { tokenIncreaseQuantity })
+          const updates = arena.update(config)
 
           expect(updates).to.have.lengthOf(3)
           expect(updates).to.have.deep.members([
@@ -475,14 +458,13 @@ describe('Arena', () => {
         })
 
         it('reflects the hit on a wall', () => {
-          const player = createPlayer({ id: 'player-1' })
           // A shot from this shooter will hit the wall
-          const shooter = asSuccess(arena.registerPlayer(player, { position: { x: 83, y: 20 } })).player
+          const shooter = asSuccess(arena.registerPlayer(player1, { position: { x: 83, y: 20 } })).player
           shooter.rotation = 0
           const shot = createShot({ player: shooter })
           arena.registerShot(shot)
 
-          const updates = arena.update(config, { tokenIncreaseQuantity })
+          const updates = arena.update(config)
 
           expect(updates).to.have.lengthOf(2)
           expect(updates).to.have.deep.members([
@@ -504,14 +486,13 @@ describe('Arena', () => {
         })
 
         it('reflects a shot movement', () => {
-          const player1 = createPlayer({ id: 'player-1' })
           // A shot from this shooter will not hit anything
           const shooter1 = asSuccess(arena.registerPlayer(player1, { position: { x: 40, y: 80 } })).player
           shooter1.rotation = 0
           const shot = createShot({ player: shooter1 })
           arena.registerShot(shot)
 
-          const updates = arena.update(config, { tokenIncreaseQuantity })
+          const updates = arena.update(config)
 
 
           expect(updates).to.have.lengthOf(2)

@@ -13,8 +13,8 @@ export interface RegisterPlayerResultDetails {
   isGameStarted: boolean
 }
 
-export default function registerPlayer (session: Session, message: RegisterPlayerMessage, state: GameState, _config: Config): HandlerResult {
-  const player = createPlayer(message.data)
+export default function registerPlayer (session: Session, message: RegisterPlayerMessage, state: GameState, config: Config): HandlerResult {
+  const player = createPlayer({ ...message.data, initialTokens: config.initialTokensPerPlayer })
   // TODO, maybe check if session.player is already set and reject
   const result = state.registerPlayer(player)
 

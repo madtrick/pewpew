@@ -224,9 +224,7 @@ export class Arena {
   }
 
   update (
-    config: Config,
-    { tokenIncreaseQuantity }:
-    { tokenIncreaseQuantity: number }
+    config: Config
   ): {
     type: UpdateType,
     component: Foo
@@ -238,7 +236,6 @@ export class Arena {
       this.arenaPlayers,
       dimensions,
       this.radar,
-      tokenIncreaseQuantity,
       config
     )
 

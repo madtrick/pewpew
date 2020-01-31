@@ -3,7 +3,7 @@ import sinon from 'sinon'
 import { ILogger, EventType } from '../../src/types'
 import { createSession, createControlSession, Session } from '../../src/session'
 import { CommandType } from '../../src/message-handlers'
-import { createPlayer } from '../../src/player'
+import { createPlayer, Player } from '../../src/player'
 import engine, { EngineState } from '../../src/engine'
 import { UpdateType, ComponentType, Arena, asSuccess } from '../../src/components/arena'
 import { GameState } from '../../src/game-state'
@@ -19,8 +19,10 @@ describe('Engine', () => {
     let loopStub: sinon.SinonStub
     let logger: ILogger
     let arena: Arena
+    let player: Player
 
     beforeEach(() => {
+      player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
       arena = new Arena({ width: 100, height: 100 }, { radar: scan })
       const gameState = new GameState({ arena })
       engineState = { arena, gameState, channelSession: new Map(), sessionChannel: new Map() }
@@ -58,7 +60,7 @@ describe('Engine', () => {
       describe('when the game has already been started', () => {
         it('sends a message to notify the control channel of the initial game state', async () => {
           engineState.gameState = new GameState({ arena, started: true })
-          const { player } = asSuccess(engineState.gameState.registerPlayer(createPlayer({ id: 'player-1' })))
+          const { player: registeredPlayer } = asSuccess(engineState.gameState.registerPlayer(player))
 
           const event = {
             type: EventType.SessionOpen,
@@ -78,8 +80,8 @@ describe('Engine', () => {
                 players: [
                   {
                     id: 'player-1',
-                    position: player.position,
-                    rotation: player.rotation,
+                    position: registeredPlayer.position,
+                    rotation: registeredPlayer.rotation,
                     life: player.life
                   }
                 ],
@@ -111,8 +113,7 @@ describe('Engine', () => {
       })
 
       it('calls the arena to remove the player', async () => {
-        const player = createPlayer({ id: 'player-1' })
-        const { player: arenaPlayer } = asSuccess(engineState.gameState.registerPlayer(player))
+        const { player: registeredPlayer } = asSuccess(engineState.gameState.registerPlayer(player))
 
         sandbox.spy(engineState.arena, 'removePlayer')
 
@@ -124,11 +125,10 @@ describe('Engine', () => {
         }
         await engine(engineState, loopStub, [], [], [event], { logger, config })
 
-        expect(engineState.arena.removePlayer).to.have.been.calledOnceWith(arenaPlayer)
+        expect(engineState.arena.removePlayer).to.have.been.calledOnceWith(registeredPlayer)
       })
 
       it('sends a message to notify that the corresponding player was removed', async () => {
-        const player = createPlayer({ id: 'player-1' })
         engineState.gameState.registerPlayer(player)
 
         const event = {

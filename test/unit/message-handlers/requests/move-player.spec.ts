@@ -3,7 +3,7 @@ import * as sinon from 'sinon'
 import { MovePlayerMessage } from '../../../../src/messages'
 import { GameState } from '../../../../src/game-state'
 import { createSession } from '../../../../src/session'
-import { createPlayer, PLAYER_RADIUS } from '../../../../src/player'
+import { createPlayer, PLAYER_RADIUS, Player } from '../../../../src/player'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
@@ -20,6 +20,9 @@ const ARENA_WIDTH = 400
 describe('Requests - Move player', () => {
   let arena: Arena
   let domainStub: sinon.SinonStub
+  let player: Player
+  let otherPlayer: Player
+
   const message: MovePlayerMessage = {
     type: 'Request',
     id: 'MovePlayer',
@@ -30,6 +33,8 @@ describe('Requests - Move player', () => {
 
   beforeEach(() => {
     arena = new Arena({ width: ARENA_WIDTH, height: 500 }, { radar: scan })
+    player = createPlayer({ id: PLAYER_ID, initialTokens: config.initialTokensPerPlayer })
+    otherPlayer = createPlayer({ id: 'another-player', initialTokens: config.initialTokensPerPlayer })
     domainStub = sinon.stub()
   })
 
@@ -56,8 +61,6 @@ describe('Requests - Move player', () => {
 
     it('calls the domain logic', () => {
       const state: GameState = new GameState({ arena })
-      const player = createPlayer({ id: PLAYER_ID })
-      const otherPlayer = createPlayer({ id: 'another-player' })
       const session = createSession({ id: 'channel-1' })
       arena.registerPlayer(otherPlayer, { position: { x: ARENA_WIDTH - PLAYER_RADIUS, y: 400 } })
       const registeredPlayer = asSuccess(arena.registerPlayer(player, { position: { x: 50, y: 17 } })).player
