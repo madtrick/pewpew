@@ -37,7 +37,7 @@ export class GameState {
   }
 
   // TODO fix this type and use the type from the arena
-  update (config: Config, options: { shotRefillCadence: number, shotRefillQuantity: number, currentTick: number, tokenIncreaseQuantity: number}): any {
+  update (config: Config, options: { tokenIncreaseQuantity: number}): any {
     if (!this.started) {
       return []
     }

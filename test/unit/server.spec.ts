@@ -52,7 +52,6 @@ describe('Server', () => {
     await callback(currentTick)
 
     expect(context.engine).to.have.been.calledWith(
-      currentTick,
       context.engineState,
       context.loop,
       [{ channel: { id: 'ch-1' }, data: {} }],

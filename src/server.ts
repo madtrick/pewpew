@@ -129,11 +129,11 @@ export function start (context: ServerContext): Server {
     })
   })
 
-  ticker.atLeastEvery(100, async (tick) => {
+  ticker.atLeastEvery(100, async () => {
     const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
     const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
 
-    const { playerResultMessages, controlResultMessages } = await engine(tick, engineState, loop, controlMessages, playerMessages, events, { logger, config })
+    const { playerResultMessages, controlResultMessages } = await engine(engineState, loop, controlMessages, playerMessages, events, { logger, config })
 
     for (const message of controlResultMessages) {
       // TODO handle exceptions thrown from send

@@ -90,7 +90,6 @@ export function createEngineState (arena: Arena, gameState: GameState): EngineSt
 // TODO rather than reimplementing the type here use `typeof engine`
 export type Engine = typeof engine
 export default async function engine (
-  currentTick: number,
   state: EngineState,
   loop: GameLoop,
   controlMessages: InMessage[],
@@ -235,7 +234,7 @@ export default async function engine (
     }
   }
 
-  const { updates, results } = await loop(currentTick, state.gameState, parsedMessages, context.config)
+  const { updates, results } = await loop(state.gameState, parsedMessages, context.config)
   const dataForChannel = new Map()
 
   // TODO combine the notifications and responses

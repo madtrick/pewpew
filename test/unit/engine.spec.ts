@@ -13,7 +13,6 @@ import { config } from '../config'
 
 describe('Engine', () => {
   describe('on each game tick', () => {
-    const currentTick = 1
 
     let sandbox: sinon.SinonSandbox
     let engineState: EngineState
@@ -35,7 +34,7 @@ describe('Engine', () => {
     })
 
     it('calls the game loop', async () => {
-      await engine(currentTick, engineState, loopStub, [], [], [], { logger, config })
+      await engine(engineState, loopStub, [], [], [], { logger, config })
 
       expect(loopStub).to.have.been.calledOnce
     })
@@ -66,7 +65,7 @@ describe('Engine', () => {
             data: controlSession
 
           }
-          const { controlResultMessages, playerResultMessages } = await engine(currentTick, engineState, loopStub, [], [], [event], { logger, config })
+          const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], [event], { logger, config })
 
           expect(playerResultMessages).to.eql([])
           expect(controlResultMessages).to.eql([{
@@ -123,7 +122,7 @@ describe('Engine', () => {
             playerId: player.id
           }
         }
-        await engine(currentTick, engineState, loopStub, [], [], [event], { logger, config })
+        await engine(engineState, loopStub, [], [], [event], { logger, config })
 
         expect(engineState.arena.removePlayer).to.have.been.calledOnceWith(arenaPlayer)
       })
@@ -138,7 +137,7 @@ describe('Engine', () => {
             playerId: player.id
           }
         }
-        const { controlResultMessages, playerResultMessages } = await engine(currentTick, engineState, loopStub, [], [], [event], { logger, config })
+        const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], [event], { logger, config })
 
         console.dir(controlResultMessages, { depth: null, colors: true })
         expect(playerResultMessages).to.eql([])
@@ -177,9 +176,9 @@ describe('Engine', () => {
       engineState.channelSession.set('channel-1', sessionChannel1)
       engineState.channelSession.set('channel-2', sessionChannel2)
 
-      await engine(currentTick, engineState, loopStub, [], messages, [], { logger, config })
+      await engine(engineState, loopStub, [], messages, [], { logger, config })
 
-      expect(loopStub).to.have.been.calledOnceWith(currentTick, engineState.gameState, [
+      expect(loopStub).to.have.been.calledOnceWith(engineState.gameState, [
         {
           session: sessionChannel1,
           message: shootMessage
@@ -207,7 +206,7 @@ describe('Engine', () => {
       ]
       engineState.channelSession.set('channel-1', session)
 
-      await engine(currentTick, engineState, loopStub, [], messages, [], { logger, config })
+      await engine(engineState, loopStub, [], messages, [], { logger, config })
 
       expect(engineState.channelSession.get('channel-1')).to.have.eql(session)
     })
@@ -217,7 +216,7 @@ describe('Engine', () => {
         { channel: { id: 'channel-1' }, data: { foo: 'bar' } }
       ]
 
-      const { playerResultMessages, controlResultMessages } = await engine(currentTick, engineState, loopStub, [], messages, [], { logger, config })
+      const { playerResultMessages, controlResultMessages } = await engine(engineState, loopStub, [], messages, [], { logger, config })
 
       expect(controlResultMessages).to.be.empty
       expect(playerResultMessages).to.eql([{
@@ -252,7 +251,7 @@ describe('Engine', () => {
         [playerSession, 'channel-2']
       ])
 
-      const { controlResultMessages, playerResultMessages } = await engine(currentTick, engineState, loopStub, [], [], [], { logger, config })
+      const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
 
       expect(playerResultMessages).to.eql([{
         channel: { id: 'channel-2' },
@@ -302,7 +301,7 @@ describe('Engine', () => {
         [playerSession, 'channel-2']
       ])
 
-      const { controlResultMessages, playerResultMessages } = await engine(currentTick, engineState, loopStub, [], [], [], { logger, config })
+      const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
 
       expect(playerResultMessages).to.be.empty
       expect(controlResultMessages).to.eql([{

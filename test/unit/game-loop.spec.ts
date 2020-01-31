@@ -20,7 +20,6 @@ import { config } from '../config'
 describe('Game loop', () => {
   const loop = createGameLopp(handlers)
   const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
-  const currentTick = 1
 
   let sandbox: sinon.SinonSandbox
   let session: Session
@@ -50,7 +49,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Command, 'StartGame').returns(result)
 
-      const { results } = await loop(currentTick, state, [{ session, message }], config)
+      const { results } = await loop(state, [{ session, message }], config)
 
       expect(handlers.Command.StartGame).to.have.been.calledOnceWith(message, state)
       expect(results).to.eql([result.result])
@@ -86,7 +85,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'RegisterPlayer').returns(result)
 
-      const { results } = await loop(currentTick, state, [{ session, message }], config)
+      const { results } = await loop(state, [{ session, message }], config)
 
       expect(handlers.Request.RegisterPlayer).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -117,7 +116,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'DeployMine').returns(result)
 
-      const { results } = await loop(currentTick, state, [{ session, message }], config)
+      const { results } = await loop(state, [{ session, message }], config)
 
       expect(handlers.Request.DeployMine).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -154,7 +153,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'MovePlayer').returns(result)
 
-      const { results } = await loop(currentTick, state, [{ session, message }], config)
+      const { results } = await loop(state, [{ session, message }], config)
 
       expect(handlers.Request.MovePlayer).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -181,7 +180,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'Shoot').returns(result)
 
-      const { results } = await loop(currentTick, state, [{ session, message }], config)
+      const { results } = await loop(state, [{ session, message }], config)
 
       expect(handlers.Request.Shoot).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -212,7 +211,7 @@ describe('Game loop', () => {
       } as const
       sandbox.stub(handlers.Request, 'RotatePlayer').returns(result)
 
-      const { results } = await loop(currentTick, state, [{ session, message }], config)
+      const { results } = await loop(state, [{ session, message }], config)
 
       expect(handlers.Request.RotatePlayer).to.have.been.calledOnceWith(session, message, state)
       expect(results).to.eql([result.result])
@@ -223,7 +222,7 @@ describe('Game loop', () => {
   describe('when the game is not started', () => {
     it('does not send update notifications', async () => {
       const state: GameState = new GameState({ arena })
-      const { updates } = await loop(currentTick, state, [], config)
+      const { updates } = await loop(state, [], config)
 
       expect(updates).to.be.empty
     })
@@ -237,7 +236,7 @@ describe('Game loop', () => {
         state.registerPlayer(player)
         state.started = true
 
-        const { updates } = await loop(currentTick, state, [], config)
+        const { updates } = await loop(state, [], config)
 
         expect(updates).to.have.lengthOf(1)
         expect(updates[0]).to.eql({
