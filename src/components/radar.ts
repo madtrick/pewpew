@@ -6,10 +6,10 @@ import { PLAYER_RADIUS } from '../player'
 // TODO since this is an update, this type should be named
 // something like ScanUpdate. Or maybe keep the result and rename the
 // updatetype prop :shrug:
-type ScannedUnknown = { position: Position }
-type ScannedPlayer = { id: string, rotation: Rotation, position: Position }
-type ScannedShot = { rotation: Rotation, position: Position }
-type ScannedMine = { position: Position }
+export type ScannedUnknown = { position: Position }
+export type ScannedPlayer = { id: string, rotation: Rotation, position: Position }
+export type ScannedShot = { rotation: Rotation, position: Position }
+export type ScannedMine = { position: Position }
 export interface ScanResult {
   type: UpdateType.Scan,
   component: {
@@ -23,9 +23,9 @@ export interface ScanResult {
   }
 }
 
-export type ScannablePlayer = Pick<ArenaPlayer, 'id' | 'position' | 'rotation'>
-export type ScannableShot = Pick<ArenaShot, 'position' | 'rotation'>
-export type ScannableMine = Pick<Mine, 'position'>
+type ScannablePlayer = Pick<ArenaPlayer, 'id' | 'position' | 'rotation'>
+type ScannableShot = Pick<ArenaShot, 'position' | 'rotation'>
+type ScannableMine = Pick<Mine, 'position'>
 export type ScannableComponents = { players: ScannablePlayer[], shots: ScannableShot[], mines: ScannableMine[] }
 
 function calculateDistanceBetweenPositions (positionA: Position, positionB: Position): number {

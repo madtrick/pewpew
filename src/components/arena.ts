@@ -1,7 +1,7 @@
 import { Player, PLAYER_RADIUS } from '../player'
 import { Shot } from '../shot'
 import { Mine } from '../mine'
-import { RadarScan, ScanResult } from './radar'
+import { RadarScan, ScanResult, ScannedPlayer, ScannedShot, ScannedMine, ScannedUnknown } from './radar'
 import { Position } from '../types'
 import { round } from '../helpers'
 import Config from '../config'
@@ -75,9 +75,10 @@ export type Foo = (
       // ScannedPlayer, ScannedUnknown and ScannedShot.
       // TODO add mines to this type
       playerId: string,
-      players: { position: Position }[],
-      unknown: { position: Position }[],
-      shots: { position: Position }[]
+      players: ScannedPlayer[],
+      unknown: ScannedUnknown[],
+      shots: ScannedShot[],
+      mines: ScannedMine[]
     }
   } |
   { type: ComponentType.DestroyedPlayer, data: { id: string } }
