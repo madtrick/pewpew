@@ -265,7 +265,8 @@ describe('Update to notification', () => {
           data: {
             players: [scannedPlayer],
             unknown: [scannedUnknown],
-            shots: [scannedShot]
+            shots: [scannedShot],
+            mines: [scannedMine]
           }
         }
       })
