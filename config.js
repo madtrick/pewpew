@@ -12,6 +12,9 @@ function env (variable, options) {
 
   if (options.isNumber) {
     value = parseFloat(raw);
+    if (isNaN(value)) {
+      throw new Error(`Invalid number value "${raw}" for variable ${variable}`)
+    }
   } else if (options.isBoolean) {
     if (raw !== undefined && !['true', 'false'].includes(raw)) {
       throw new Error(`Invalid boolean value "${raw}" for variable ${variable}`)
@@ -44,7 +47,7 @@ module.exports = {
   movementSpeeds: {
     player: env('MOVEMENT_SPEED_PLAYER', { isNumber: true, default: false }),
     shot: env('MOVEMENT_SPEED_SHOT', { isNumber: true, default: false }),
-  }
+  },
   costs: {
     // movePlayer: env('COST_MOVE_PLAYER', { isNumber: true }),
     // rotatePlayer: env('COST_ROTATE_PLAYER', { isNumber: true }),
