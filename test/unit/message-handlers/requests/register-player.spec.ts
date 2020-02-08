@@ -89,6 +89,32 @@ describe('Requests - Register player', () => {
       })
       expect(session.playerId).to.be.undefined
     })
+
+    it('does not register player in game if the max number of players has already been reached', () => {
+      const player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
+      const state: GameState = new GameState(gameStateOptions)
+      state.registerPlayer(player)
+      const message: RegisterPlayerMessage = {
+        data: {
+          id: 'player-2'
+        },
+        type: 'Request',
+        id: 'RegisterPlayer'
+      }
+
+      config.maxPlayersPerGame = 1
+
+      const { result, state: newState } = handler(session, message, state, config)
+
+      expect(newState.players()).to.have.lengthOf(1)
+      expect(result).to.eql({
+        session,
+        success: false,
+        reason: 'The maximum number of players in the game has been reached. Please try again later',
+        request: RequestType.RegisterPlayer
+      })
+      expect(session.playerId).to.be.undefined
+    })
   })
 })
 

@@ -1,6 +1,7 @@
 export default interface Config {
   autoStartGame: boolean
   turboMultiplierFactor: number
+  maxPlayersPerGame: number
   maxTokensPerPlayer: number
   initialTokensPerPlayer: number
   tokensIncreaseFactor: number
