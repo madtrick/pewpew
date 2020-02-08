@@ -13,8 +13,24 @@ export interface RegisterPlayerResultDetails {
   isGameStarted: boolean
 }
 
+// TODO split this module into controller and domain
+
 export default function registerPlayer (session: Session, message: RegisterPlayerMessage, state: GameState, config: Config): HandlerResult {
+
+  if (state.players().length >= config.maxPlayersPerGame) {
+    return {
+      result: {
+        session,
+        success: false,
+        request: RequestType.RegisterPlayer,
+        reason: 'The maximum number of players in the game has been reached. Please try again later'
+      },
+      state
+    }
+  }
+
   const player = createPlayer({ ...message.data, initialTokens: config.initialTokensPerPlayer })
+
   // TODO, maybe check if session.player is already set and reject
   const result = state.registerPlayer(player)
 
