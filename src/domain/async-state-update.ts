@@ -166,7 +166,7 @@ export default function updateState (
   })
 
   finalPlayers.forEach((player) => {
-    const updatedTokensValue = player.tokens + config.tokenIncreaseFactor
+    const updatedTokensValue = player.tokens + config.tokensIncreaseFactor
 
     if (updatedTokensValue < config.maxTokensPerPlayer) {
       player.tokens = updatedTokensValue
