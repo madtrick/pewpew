@@ -118,6 +118,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
               data: {
                 shotId,
                 id: playerId,
+                // TODO include the remaining life
                 damage
               }
             }

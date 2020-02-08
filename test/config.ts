@@ -5,7 +5,7 @@ export const config: Config = {
   turboMultiplierFactor: 2,
   maxTokensPerPlayer: 200,
   initialTokensPerPlayer: 100,
-  tokenIncreaseFactor: 1,
+  tokensIncreaseFactor: 1,
   movementSpeeds: {
     player: 1,
     shot: 1

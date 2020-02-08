@@ -3,7 +3,7 @@ export default interface Config {
   turboMultiplierFactor: number
   maxTokensPerPlayer: number
   initialTokensPerPlayer: number
-  tokenIncreaseFactor: number
+  tokensIncreaseFactor: number
   movementSpeeds: {
     player: number
     shot: number
