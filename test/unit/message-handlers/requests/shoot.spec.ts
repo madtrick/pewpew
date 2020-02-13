@@ -5,7 +5,6 @@ import { GameState } from '../../../../src/game-state'
 import { createPlayer, Player } from '../../../../src/player'
 import { Session, createSession } from '../../../../src/session'
 import { Arena, asSuccess } from '../../../../src/components/arena'
-import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/shoot'
 import { config } from '../../../config'
@@ -19,7 +18,7 @@ describe('Requests - Shoot', () => {
   const playerShotCostInTokens = config.costs.playerShot
 
   beforeEach(() => {
-    arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+    arena = new Arena({ width: 100, height: 100 })
     player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
 
     sandbox = sinon.createSandbox()

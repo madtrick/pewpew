@@ -8,14 +8,29 @@ import createGameLoop from '../../src/game-loop'
 import { createSession, createControlSession } from '../../src/session'
 import createLogger from '../utils/create-logger'
 import { config } from '../config'
+import { createProcessor as createMoveShotPipelineProcessor } from '../../src/domain/state-processors/move-shot'
+import { createProcessor as createMineHitPipelineProcessor } from '../../src/domain/state-processors/mine-hit'
+import { createProcessor as createShotHitPipelineProcessor } from '../../src/domain/state-processors/shot-hits'
+import { createProcessor as createRadarScanPipelineProcessor } from '../../src/domain/state-processors/radar-scan'
+import { process } from '../../src/domain/state-update-pipeline'
 
 describe('Engine - Integration', () => {
   let arena: Arena
   let gameState: GameState
+  const arenaWidth = 500
+  const arenaHeight = 500
   const logger = createLogger()
+  const statePipeline = [
+    createMoveShotPipelineProcessor(config.movementSpeeds.shot),
+    createShotHitPipelineProcessor({ width: arenaWidth, height: arenaHeight }),
+    createMineHitPipelineProcessor(),
+    createRadarScanPipelineProcessor(scan)
+  ]
+  const statePipelineProcessor = (state: GameState) => process(statePipeline, state)
+  const gameLoop = createGameLoop(handlers, statePipelineProcessor)
 
   beforeEach(() => {
-    arena = new Arena({ width: 500, height: 500 }, { radar: scan })
+    arena = new Arena({ width: arenaWidth, height: arenaHeight })
     gameState = new GameState({ arena })
   })
 
@@ -27,7 +42,6 @@ describe('Engine - Integration', () => {
       // a player can register before a control session is created
       const controlSession = createControlSession({ id: 'channel-1' })
       const engineState = createEngineState(arena, gameState)
-      const gameLoop = createGameLoop(handlers)
       const playerMessages = [
         {
           channel: { id: 'channel-2' },
@@ -61,7 +75,7 @@ describe('Engine - Integration', () => {
     it('responds as expected', async () => {
       const controlSession = createControlSession({ id: 'channel-1' })
       const engineState = createEngineState(arena, gameState)
-      const gameLoop = createGameLoop(handlers)
+      const gameLoop = createGameLoop(handlers, statePipelineProcessor)
       const controlMessages = [
         {
           channel: { id: 'channel-1' },
@@ -99,7 +113,6 @@ describe('Engine - Integration', () => {
       const session1 = createSession({ id: 'channel-2' })
       const session2 = createSession({ id: 'channel-3' })
       const engineState = createEngineState(arena, gameState)
-      const gameLoop = createGameLoop(handlers)
       const playerMessages = [
         {
           channel: { id: 'channel-2' },

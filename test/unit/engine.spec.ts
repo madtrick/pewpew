@@ -1,13 +1,12 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { ILogger, EventType } from '../../src/types'
+import { UpdateType, ComponentType, ILogger, EventType } from '../../src/types'
 import { createSession, createControlSession, Session } from '../../src/session'
 import { CommandType } from '../../src/message-handlers'
 import { createPlayer, Player } from '../../src/player'
 import engine, { EngineState } from '../../src/engine'
-import { UpdateType, ComponentType, Arena, asSuccess } from '../../src/components/arena'
+import { Arena, asSuccess } from '../../src/components/arena'
 import { GameState } from '../../src/game-state'
-import { scan } from '../../src/components/radar'
 import createLogger from '../utils/create-logger'
 import { config } from '../config'
 
@@ -23,7 +22,7 @@ describe('Engine', () => {
 
     beforeEach(() => {
       player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
-      arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+      arena = new Arena({ width: 100, height: 100 })
       const gameState = new GameState({ arena })
       engineState = { arena, gameState, channelSession: new Map(), sessionChannel: new Map() }
       sandbox = sinon.createSandbox()

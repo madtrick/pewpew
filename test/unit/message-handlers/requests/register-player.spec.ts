@@ -5,12 +5,11 @@ import { createPlayer } from '../../../../src/player'
 import { createSession, Session } from '../../../../src/session'
 import { Arena } from '../../../../src/components/arena'
 import { RequestType } from '../../../../src/message-handlers'
-import { scan } from '../../../../src/components/radar'
 import handler, { RegisterPlayerResultDetails } from '../../../../src/message-handlers/requests/register-player'
 import { config } from '../../../config'
 
 describe('Requests - Register player', () => {
-  const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+  const arena = new Arena({ width: 100, height: 100 })
   const gameStateOptions = { arena }
 
   let session: Session

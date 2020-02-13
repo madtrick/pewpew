@@ -3,7 +3,6 @@ import * as sinon from 'sinon'
 import { Arena, asSuccess } from '../../../src/components/arena'
 import { createPlayer, Player } from '../../../src/player'
 import movePlayer from '../../../src/domain/move-player'
-import { scan } from '../../../src/components/radar'
 import { Position, Rotation } from '../../../src/types'
 import { config } from '../../config'
 
@@ -55,7 +54,7 @@ describe('Domain - Move player', () => {
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
-    arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+    arena = new Arena({ width: 100, height: 100 })
     player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
   })
 

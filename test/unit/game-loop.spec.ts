@@ -11,22 +11,23 @@ import {
 import { GameState } from '../../src/game-state'
 import { handlers, RequestType, CommandType } from '../../src/message-handlers'
 import { Arena } from '../../src/components/arena'
-import { createPlayer } from '../../src/player'
 import { Session, createSession } from '../../src/session'
-import createGameLopp from '../../src/game-loop'
-import { scan } from '../../src/components/radar'
+import createGameLopp, { GameLoop } from '../../src/game-loop'
 import { config } from '../config'
 
 describe('Game loop', () => {
-  const loop = createGameLopp(handlers)
-  const arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+  const arena = new Arena({ width: 100, height: 100 })
 
   let sandbox: sinon.SinonSandbox
   let session: Session
+  let stateUpdatePipeline: sinon.SinonStub
+  let loop: GameLoop
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
     session = createSession({ id: 'channel-1' })
+    stateUpdatePipeline = sinon.stub().callsFake((state: GameState) => Promise.resolve({ state, updates: [] }))
+    loop = createGameLopp(handlers, stateUpdatePipeline)
   })
 
   afterEach(() => {
@@ -226,29 +227,51 @@ describe('Game loop', () => {
 
       expect(updates).to.be.empty
     })
+
+    it('does not call the state update pipeline', async () => {
+      const state: GameState = new GameState({ arena })
+      await loop(state, [], config)
+
+      expect(stateUpdatePipeline).to.not.have.been.called
+    })
   })
 
-  describe.skip('when the game is started', () => {
-    describe('players', () => {
-      it('returns "GameUpdate"s', async () => {
-        const player = createPlayer({ id: 'player-1', initialTokens: config.initialTokensPerPlayer })
-        const state: GameState = new GameState({ arena })
-        state.registerPlayer(player)
-        state.started = true
+  describe('when the game is started', () => {
+    it('calls the state update pipeline', async () => {
+      const state: GameState = new GameState({ arena, started: true })
+      await loop(state, [], config)
 
-        const { updates } = await loop(state, [], config)
+      expect(stateUpdatePipeline).to.have.been.calledOnceWith(state)
+    })
 
-        expect(updates).to.have.lengthOf(1)
-        expect(updates[0]).to.eql({
-          player,
-          payload: {
-            sys: 'GameUpdate',
-            data: {
-              life: 100
-            }
+    it('calls the message handlers with the updated state', async () => {
+      const state: GameState = new GameState({ arena, started: true })
+      const newState: GameState = new GameState({ arena, started: true })
+      const message: RotatePlayerMessage = {
+        data: {
+          rotation: 300
+        },
+        type: 'Request',
+        id: 'RotatePlayer'
+      }
+      const result = {
+        result: {
+          success: true,
+          request: RequestType.RotatePlayer,
+          details: {
+            id: 'player-1',
+            rotation: 300,
+            remainingTokens: 3,
+            requestCostInTokens: 0
           }
-        })
-      })
+        }, state
+      } as const
+      stateUpdatePipeline.resolves({ state: newState, updates: [] })
+      sandbox.stub(handlers.Request, 'RotatePlayer').returns(result)
+
+      await loop(state, [{ session, message }], config)
+
+      expect(handlers.Request.RotatePlayer).to.have.been.calledOnceWith(session, message, newState)
     })
   })
 })

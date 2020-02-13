@@ -1,4 +1,4 @@
-import { ComponentType } from './components/arena'
+import { ComponentType } from './types'
 
 export interface Player {
   // TODO make some of these properties readonly

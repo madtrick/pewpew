@@ -131,6 +131,7 @@ Also remember to update the certs in [Netlify](https://app.netlify.com/sites/lau
 ```bash
 gcloud --project $PROJECT_ID compute ssl-certificates list
 ```
+
 #### Logs
 
 ```bash

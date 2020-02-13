@@ -5,13 +5,18 @@ import { Arena } from './components/arena'
 import { scan } from './components/radar'
 import { GameState } from './game-state'
 import { handlers } from './message-handlers'
-import createGameLopp, { GameLoop } from './game-loop'
+import createGameLoop, { GameLoop } from './game-loop'
 import engine, { Engine, EngineState, createEngineState } from './engine'
 import { createSession, CreateSessionFn, createControlSession, CreateControlSessionFn } from './session'
+import { createProcessor as createMoveShotPipelineProcessor } from './domain/state-processors/move-shot'
+import { createProcessor as createMineHitPipelineProcessor } from './domain/state-processors/mine-hit'
+import { createProcessor as createShotHitPipelineProcessor } from './domain/state-processors/shot-hits'
+import { createProcessor as createRadarScanPipelineProcessor } from './domain/state-processors/radar-scan'
 import { createTicker, Ticker } from './ticker'
 import { EventType, Event } from './types'
 import Config from './config'
 import * as Logger from 'bunyan'
+import { process } from './domain/state-update-pipeline'
 
 interface ServerContext {
   config: Config
@@ -44,11 +49,18 @@ function parse (message: Message): { channel: ChannelRef, route: RouteRef, data:
 }
 
 export function init ({ WS }: { WS: WebSocketConnectionHandler }, config: Config): ServerContext {
-  const arena = new Arena({ width: 500, height: 500 }, { radar: scan })
+  const arena = new Arena({ width: 500, height: 500 })
   const gameState = new GameState({ arena, started: config.autoStartGame })
   const engineState = createEngineState(arena, gameState)
   const ticker = createTicker()
-  const loop = createGameLopp(handlers)
+  const statePipeline = [
+    createMoveShotPipelineProcessor(config.movementSpeeds.shot),
+    createShotHitPipelineProcessor({ width: arena.width, height: arena.height }),
+    createMineHitPipelineProcessor(),
+    createRadarScanPipelineProcessor(scan)
+  ]
+  const statePipelineProcessor = (state: GameState) => process(statePipeline, state)
+  const loop = createGameLoop(handlers, statePipelineProcessor)
   const logger = Logger.createLogger({ name: 'pewpew', level: 'info' })
   const messagingRoutes = {
     '/ws/player': { id: 'player' },

@@ -4,17 +4,12 @@ import {
   isPlayerSession,
   isControlSession
 } from './session'
-import { UpdateType, ComponentType, Foo } from './components/arena'
-
-// TODO move this type out of this file
-export interface ComponentUpdate {
-  type: UpdateType,
-  component: Foo
-}
+import { UpdateType, ComponentType } from './types'
+import { Update } from './domain/state-update-pipeline'
 
 // TODO fix the return types
 // @ts-ignore TODO remove this ignore
-export default function updateToNotifications (update: ComponentUpdate, sessions: (Session | ControlSession)[]): any[] {
+export default function updateToNotifications (update: Update, sessions: (Session | ControlSession)[]): any[] {
   const controlSessions = sessions.filter(isControlSession)
   const playerSessions = sessions.filter(isPlayerSession)
 
