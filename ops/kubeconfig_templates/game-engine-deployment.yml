@@ -20,6 +20,24 @@ spec:
           value: "true"
         - name: MOVEMENT_SPEED
           value: "5"
+        - name: TURBO_MULTIPLIER_FACTOR
+          value: "2"
+        - name: MOVEMENT_SPEED_PLAYER
+          value: "6"
+        - name: MOVEMENT_SPEED_SHOT
+          value: "9"
+        - name: COST_PLAYER_MOVEMENT_TURBO
+          value: "10"
+        - name: COST_PLAYER_SHOT
+          value: "10"
+        - name: COST_PLAYER_DEPLOY_MINE
+          value: "30"
+        - name: MAX_TOKENS_PER_PLAYER
+          value: "200"
+        - name: INITIAL_TOKENS_PER_PLAYER
+          value: "100"
+        - name: TOKENS_INCREASE_FACTOR
+          value: "2"
         ports:
           - name: ws-control
             containerPort: 8888
