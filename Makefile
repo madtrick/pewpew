@@ -9,7 +9,7 @@ tag-image:
 push-image:
 	docker push gcr.io/$(PROJECT_ID)/game-engine:$(CURRENT_GIT_HEAD)
 
-build-and-push-image: build-image tag-image push-image
+build-tag-and-push-image: build-image tag-image push-image
 
 template-kubeconfigs:
 	ops/bin/template-kubeconfigs -t ops/kubeconfig_templates/game-engine-deployment.yml -p $(PROJECT_ID) -h $(CURRENT_GIT_HEAD)
