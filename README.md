@@ -16,6 +16,12 @@ gcloud container images list-tags --project $PROJECT_ID gcr.io/nth-segment-26471
 
 The game is deployed to [GKE](https://console.cloud.google.com/kubernetes/list?project=nth-segment-264718)
 
+#### Get public IP address
+
+```bash
+gcloud compute addresses describe game-engine --project $PROJECT_ID --region=europe-west3
+```
+
 #### Generate kubeconfigs
 
 ```bash
@@ -125,7 +131,6 @@ Also remember to update the certs in [Netlify](https://app.netlify.com/sites/lau
 ```bash
 gcloud --project $PROJECT_ID compute ssl-certificates list
 ```
-
 #### Logs
 
 ```bash
