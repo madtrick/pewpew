@@ -1,5 +1,6 @@
 // TODO make MessagingHub, Arena and GameState default exports
-import { IMessagingHub, MessagingHub, Message, ChannelRef, WebSocketServerConstructor } from './messaging-hub'
+import uuid from 'uuid/v4'
+import { IMessagingHub, MessagingHub, Message, ChannelRef, RouteRef, WebSocketServerConstructor } from './messaging-hub'
 import { Arena } from './components/arena'
 import { scan } from './components/radar'
 import { GameState } from './game-state'
@@ -19,10 +20,7 @@ interface ServerContext {
   engine: Engine
   loop: GameLoop
   engineState: EngineState,
-  messaging: {
-    control: IMessagingHub
-    players: IMessagingHub
-  }
+  messagingHub: IMessagingHub
   createSession: CreateSessionFn
   createControlSession: CreateControlSessionFn
 }
@@ -33,13 +31,13 @@ interface Server {
 
 // TODO replace the type returned in this function with InMessage or
 // its replacement
-function parse (message: Message): { channel: ChannelRef, data: object } | undefined {
+function parse (message: Message): { channel: ChannelRef, route: RouteRef, data: object } | undefined {
   if (!message.data) {
     return
   }
 
   try {
-    return { channel: message.channel, data: JSON.parse(message.data) }
+    return { channel: message.channel, route: message.route, data: JSON.parse(message.data) }
   } catch (_) {
     return
   }
@@ -52,11 +50,11 @@ export function init ({ WS }: { WS: WebSocketServerConstructor }, config: Config
   const ticker = createTicker()
   const loop = createGameLopp(handlers)
   const logger = Logger.createLogger({ name: 'pewpew' })
-  const messaging = {
-    // TODO grab the ports from configuration
-    control: new MessagingHub(new WS({ port: 8888 })),
-    players:  new MessagingHub(new WS({ port: 8889 }))
+  const messagingRoutes = {
+    '/player': { id: 'player' },
+    '/control': { id: 'control' }
   }
+  const messagingHub = new MessagingHub(new WS({ port: 8888 }), uuid, { routes: messagingRoutes })
 
   return {
     config,
@@ -65,7 +63,7 @@ export function init ({ WS }: { WS: WebSocketServerConstructor }, config: Config
     ticker,
     engine,
     loop,
-    messaging,
+    messagingHub,
     createSession,
     createControlSession
   }
@@ -77,7 +75,7 @@ export function start (context: ServerContext): Server {
     engine,
     engineState,
     loop,
-    messaging,
+    messagingHub,
     createControlSession,
     createSession,
     logger,
@@ -86,7 +84,7 @@ export function start (context: ServerContext): Server {
 
   let events: Event[] = []
 
-  function isMessage (a: any): a is { channel: ChannelRef, data: object } {
+  function isMessage (a: any): a is { channel: ChannelRef, route: RouteRef, data: object } {
     return a !== undefined
   }
 
@@ -95,31 +93,23 @@ export function start (context: ServerContext): Server {
   // the control channel and if that's already handled by the 'autoStartGame'
   // config option, we should limit what can be sent through the channel if
   // it's not needed
-  messaging.control.on('channelOpen', (channel: ChannelRef) => {
-    const session = createControlSession(channel)
-    engineState.channelSession.set(channel.id, session)
-    events.push({
-      type: EventType.SessionOpen,
-      data: session
-    })
+  messagingHub.on('channelOpen', (channel: ChannelRef, context: { route: RouteRef }) => {
+    if (context.route.id === 'control') {
+      const session = createControlSession(channel)
+      engineState.channelSession.set(channel.id, session)
+      events.push({
+        type: EventType.SessionOpen,
+        data: session
+      })
+    }
+
+    if (context.route.id === 'player') {
+      const session = createSession(channel)
+      engineState.channelSession.set(channel.id, session)
+    }
   })
 
-  messaging.players.on('channelOpen', (channel: ChannelRef) => {
-    const session = createSession(channel)
-    engineState.channelSession.set(channel.id, session)
-  })
-
-  messaging.players.on('channelClose', (channel: ChannelRef) => {
-    const session = engineState.channelSession.get(channel.id)
-
-    engineState.channelSession.delete(channel.id)
-    events.push({
-      type: EventType.SessionClose,
-      data: session
-    })
-  })
-
-  messaging.control.on('channelClose', (channel: ChannelRef) => {
+  messagingHub.on('channelClose', (channel: ChannelRef) => {
     const session = engineState.channelSession.get(channel.id)
 
     engineState.channelSession.delete(channel.id)
@@ -130,23 +120,17 @@ export function start (context: ServerContext): Server {
   })
 
   ticker.atLeastEvery(100, async () => {
-    const controlMessages = messaging.control.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
-    const playerMessages = messaging.players.pull().map(parse).filter<{channel: ChannelRef, data: object}>(isMessage)
+    const messages = messagingHub.pull().map(parse).filter<{channel: ChannelRef, route: RouteRef, data: object}>(isMessage)
+    const controlMessages = messages.filter((message) => message.route.id === 'control')
+    const playerMessages = messages.filter((message) => message.route.id === 'player')
 
     const { playerResultMessages, controlResultMessages } = await engine(engineState, loop, controlMessages, playerMessages, events, { logger, config })
 
-    for (const message of controlResultMessages) {
+    for (const message of [...controlResultMessages, ...playerResultMessages]) {
       // TODO handle exceptions thrown from send
       // TODO group all the promises and do Promise.all instead
       // of await on each one individually
-      await messaging.control.send({ ...message, data: JSON.stringify(message.data) })
-    }
-
-    for (const message of playerResultMessages) {
-      // TODO handle exceptions thrown from send
-      // TODO group all the promises and do Promise.all
-      // of await on each one individually
-      await messaging.players.send({ ...message, data: JSON.stringify(message.data) })
+      await messagingHub.send({ ...message, data: JSON.stringify(message.data) })
     }
 
     // TODO could we use the events to also pass messages down to the engine. I mean
