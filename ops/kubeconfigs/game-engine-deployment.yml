@@ -14,7 +14,14 @@ spec:
     spec:
       containers:
         - name: game-engine
-          image: 'gcr.io/nth-segment-264718/game-engine:8503c46'
+          image: 'gcr.io/nth-segment-264718/game-engine:884c755'
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8888
+            failureThreshold: 1
+            initialDelaySeconds: 5
+            periodSeconds: 10
           env:
             - name: AUTO_START_GAME
               value: 'true'
@@ -41,7 +48,5 @@ spec:
             - name: TOKENS_INCREASE_FACTOR
               value: '2'
           ports:
-            - name: ws-control
+            - name: ws-port
               containerPort: 8888
-            - name: ws-player
-              containerPort: 8889
