@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: game-engine
-          image: 'gcr.io/nth-segment-264718/game-engine:7e06c2e'
+          image: 'gcr.io/nth-segment-264718/game-engine:8503c46'
           env:
             - name: AUTO_START_GAME
               value: 'true'
@@ -22,6 +22,8 @@ spec:
               value: '5'
             - name: TURBO_MULTIPLIER_FACTOR
               value: '2'
+            - name: MAX_PLAYERS_PER_GAME
+              value: '5'
             - name: MOVEMENT_SPEED_PLAYER
               value: '6'
             - name: MOVEMENT_SPEED_SHOT
