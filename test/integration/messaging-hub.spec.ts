@@ -1,4 +1,5 @@
 import { expect } from 'chai'
+import uuid from 'uuid/v4'
 import WS from 'ws'
 import { MessagingHub } from '../../src/messaging-hub'
 
@@ -18,13 +19,13 @@ describe('Messaging Hub - Integration', () => {
   beforeEach(async () => {
     await P((r) => server = new WS.Server({ port: 8888 }, r))
 
-    hub = new MessagingHub(server)
+    hub = new MessagingHub(server, uuid, { routes: { '/player': { id: 'player' } } })
 
     // NOTE the client has to be created after the hub is initalized
     // or otherwise the 'connection' event from the server
     // will be lost
     await P((resolve) => {
-      client = new WS('ws://localhost:8888')
+      client = new WS('ws://localhost:8888/player')
       client.on('open', resolve)
     })
   })

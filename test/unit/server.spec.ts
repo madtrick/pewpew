@@ -22,31 +22,25 @@ describe('Server', () => {
       controlResultMessages: [{ channel: { id: 'ch-1' }, data: responseToControl }]
     })
     context.loop = sinon.stub()
-    const controlMessages = [{ channel: { id: 'ch-1' }, data: JSON.stringify({}) }]
-    const playerMessages = [{ channel: { id: 'ch-2' }, data: JSON.stringify({}) }]
+    const messages = [
+      { channel: { id: 'ch-1' }, route: { id: 'control' }, data: JSON.stringify({}) },
+      { channel: { id: 'ch-2' }, route: { id: 'player' }, data: JSON.stringify({}) }
+    ]
 
-    let onOpenControlChannel: (ch: ChannelRef) => void
-    let onOpenPlayerChannel: (ch: ChannelRef) => void
+    let onOpenChannel: (ch: ChannelRef) => void
 
-    context.messaging = {
-      control: {
-        pull: sinon.stub().returns(controlMessages),
-        send: sinon.stub(),
-        on: ((_: string, listener: any) => onOpenControlChannel = listener)
-      },
-      players: {
-        pull: sinon.stub().returns(playerMessages),
-        send: sinon.stub(),
-        on: ((_: string, listener: any) => onOpenPlayerChannel = listener)
-      }
+    context.messagingHub = {
+      pull: sinon.stub().returns(messages),
+      send: sinon.stub(),
+      on: ((_: string, listener: any) => onOpenChannel = listener)
     }
 
     startServer(context)
 
     // @ts-ignore: TODO remove this ignore
-    onOpenControlChannel({ id: 'ch-1' })
+    onOpenChannel({ id: 'ch-1' }, { route: { id: 'control' } })
     // @ts-ignore: TODO remove this ignore
-    onOpenPlayerChannel({ id: 'ch-2' })
+    onOpenChannel({ id: 'ch-2' }, { route: { id: 'player' } })
 
     // @ts-ignore: TODO remove this ignore
     await callback(currentTick)
@@ -54,14 +48,14 @@ describe('Server', () => {
     expect(context.engine).to.have.been.calledWith(
       context.engineState,
       context.loop,
-      [{ channel: { id: 'ch-1' }, data: {} }],
-      [{ channel: { id: 'ch-2' }, data: {} }]
+      [{ channel: { id: 'ch-1' }, route: { id: 'control' }, data: {} }],
+      [{ channel: { id: 'ch-2' }, route: { id: 'player' }, data: {} }]
     )
-    expect(context.messaging.control.send).to.have.been.calledWith({
+    expect(context.messagingHub.send).to.have.been.calledWith({
       channel: { id: 'ch-1' },
       data: JSON.stringify(responseToControl)
     })
-    expect(context.messaging.players.send).to.have.been.calledWith({
+    expect(context.messagingHub.send).to.have.been.calledWith({
       channel: { id: 'ch-2' },
       data: JSON.stringify(responseToPlayer)
     })
