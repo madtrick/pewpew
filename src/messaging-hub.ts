@@ -26,10 +26,7 @@ export interface Message {
   data?: string
 }
 
-export interface WebSocketServerConstructor {
-  new (options: { port: number }): WebSocketServer
-}
-export interface WebSocketServer {
+export interface WebSocketConnectionHandler {
   on (event: 'connection', cb: (socket: WebSocket, request: IncomingMessage) => void): void
 }
 
@@ -55,13 +52,13 @@ export interface IMessagingHub {
 type UUIDFn = () => string
 
 export class MessagingHub extends EventEmitter implements IMessagingHub {
-  private connection: WebSocketServer
+  private connection: WebSocketConnectionHandler
   private channels: Map<string, Channel>
   private messages: [Channel, any][] // TODO replace that any
   private routes: { [path: string]: { id: string } }
   private uuidFn: UUIDFn
 
-  constructor (wss: WebSocketServer, uuid: UUIDFn, options: { routes: { [path: string]: RouteDef } }) {
+  constructor (wss: WebSocketConnectionHandler, uuid: UUIDFn, options: { routes: { [path: string]: RouteDef } }) {
     super()
     this.connection = wss
     this.connection.on('connection', this.createChannel.bind(this))
