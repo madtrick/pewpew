@@ -4,7 +4,7 @@ import * as yaml from 'js-yaml'
 import traverse from 'traverse'
 import * as mustache from 'mustache'
 
-interface Context {
+export interface Context {
   ImageTag: string
   ProjectId: string
 }
@@ -21,8 +21,6 @@ export default function (options: { templatedFile: string, context: Context }): 
     { schema: yaml.DEFAULT_SAFE_SCHEMA }
   )
 
-  console.dir(templateYaml, { depth: null, colors: true })
-
   // Note: can't use fat arrow functions because the traverse library
   // exposes its functionality through `this` in the callback function
   const templated = traverse(templateYaml).map(function (node: string | object): string | object {
@@ -33,7 +31,6 @@ export default function (options: { templatedFile: string, context: Context }): 
     const templatedValue = mustache.render(node, context)
     return templatedValue
   })
-  console.dir(templated, { colors: true, depth: null })
 
   const templatedFileName = path.basename(templatedFile)
   const templatedFilePath = path.resolve(process.cwd(), 'ops/kubeconfigs', templatedFileName)
