@@ -12,5 +12,4 @@ push-image:
 build-tag-and-push-image: build-image tag-image push-image
 
 template-kubeconfigs:
-	ops/bin/template-kubeconfigs -t ops/kubeconfig_templates/game-engine-deployment.yml -p $(PROJECT_ID) -h $(CURRENT_GIT_HEAD)
-	ops/bin/template-kubeconfigs -t ops/kubeconfig_templates/game-engine-service.yml -p $(PROJECT_ID) -h $(CURRENT_GIT_HEAD)
+	ops/bin/template-kubeconfigs -d ops/kubeconfig_templates
