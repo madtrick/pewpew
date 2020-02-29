@@ -150,7 +150,9 @@ export default async function engine (
       if (player) {
         const result = state.gameState.removePlayer(player)
 
-        if (result.status === 'ok') {
+        const sessions = Array.from(state.channelSession.values())
+        const existControlSessions = sessions.find(isControlSession)
+        if (result.status === 'ok' && existControlSessions) {
           const update: ComponentUpdate = {
             type: UpdateType.RemovePlayer,
             component: {

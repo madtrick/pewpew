@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { EventEmitter } from 'events'
-import { MessagingHub, ChannelRef } from '../../src/messaging-hub'
+import { MessagingHub, ChannelRef, RouteRef } from '../../src/messaging-hub'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -21,7 +21,7 @@ describe('Messaging Hub', () => {
     wss = new EventEmitter()
   })
 
-  describe('when request path exists in the hub', () => {
+  describe('when the request path exists in the hub', () => {
     it('assigns correct route to incoming messages', () => {
       const routes = { '/player': { id: 'player' }, '/control': { id: 'control' } }
       const hub = new MessagingHub(wss, uuidFn, { routes })
@@ -186,6 +186,18 @@ describe('Messaging Hub', () => {
     const { channels } = hub.status()
 
     expect(channels[0]).to.eql(channel)
+  })
+
+  it('calls the listener when a new channel is created including the respective route', () => {
+    const routes = { '/player': { id: 'player' } }
+    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const request = { url: '/player', headers: { host: 'localhost:8888' } }
+    let route: RouteRef | undefined
+
+    hub.on('channelOpen', (_ch: ChannelRef, context: { route: RouteRef }) => route = context.route)
+
+    wss.emit('connection', socket1, request)
+    expect(route!.id).to.eql('player')
   })
 
   // TODO don't send messages to a socket that just closed

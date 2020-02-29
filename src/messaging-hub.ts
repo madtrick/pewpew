@@ -146,7 +146,7 @@ export class MessagingHub extends EventEmitter implements IMessagingHub {
     })
     // TODO handle closed channels. How to communicate that to the engine
     this.channels.set(id, channel)
-    this.emit('channelOpen', { id: channel.id }, { route: route.id })
+    this.emit('channelOpen', { id: channel.id }, { route: { id: route.id } })
   }
 }
 
