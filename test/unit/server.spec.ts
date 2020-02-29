@@ -8,7 +8,8 @@ import { config } from '../config'
 describe('Server', () => {
   it('calls the engine on each tick', async () => {
     let callback: Function
-    const context = init({ WS: EventEmitter }, config)
+    const emitter = new EventEmitter()
+    const context = init({ WS: emitter }, config)
     const currentTick = 1
     context.ticker = {
       atLeastEvery: (_, fn) => callback = fn,

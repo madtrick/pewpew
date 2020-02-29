@@ -7,10 +7,15 @@ const { Server } = require('ws');
 const config = require('../config');
 
 const { init, start } = require('../src/server');
+const { default: createServer } = require('../src/http-server')
 
 const run = async () => {
-  const context = init({ WS: Server }, config);
+  const websocketsHandler = new Server({ noServer: true })
+  const httpServer = createServer(websocketsHandler)
+  const context = init({ WS: websocketsHandler }, config);
+
   const server = await start(context);
+  await httpServer.start()
 
   console.log('Server started');
 }

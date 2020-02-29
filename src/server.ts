@@ -1,6 +1,6 @@
 // TODO make MessagingHub, Arena and GameState default exports
 import uuid from 'uuid/v4'
-import { IMessagingHub, MessagingHub, Message, ChannelRef, RouteRef, WebSocketServerConstructor } from './messaging-hub'
+import { IMessagingHub, MessagingHub, Message, ChannelRef, RouteRef, WebSocketConnectionHandler } from './messaging-hub'
 import { Arena } from './components/arena'
 import { scan } from './components/radar'
 import { GameState } from './game-state'
@@ -43,7 +43,7 @@ function parse (message: Message): { channel: ChannelRef, route: RouteRef, data:
   }
 }
 
-export function init ({ WS }: { WS: WebSocketServerConstructor }, config: Config): ServerContext {
+export function init ({ WS }: { WS: WebSocketConnectionHandler }, config: Config): ServerContext {
   const arena = new Arena({ width: 500, height: 500 }, { radar: scan })
   const gameState = new GameState({ arena, started: config.autoStartGame })
   const engineState = createEngineState(arena, gameState)
@@ -51,10 +51,10 @@ export function init ({ WS }: { WS: WebSocketServerConstructor }, config: Config
   const loop = createGameLopp(handlers)
   const logger = Logger.createLogger({ name: 'pewpew' })
   const messagingRoutes = {
-    '/player': { id: 'player' },
-    '/control': { id: 'control' }
+    '/ws/player': { id: 'player' },
+    '/ws/control': { id: 'control' }
   }
-  const messagingHub = new MessagingHub(new WS({ port: 8888 }), uuid, { routes: messagingRoutes })
+  const messagingHub = new MessagingHub(WS, uuid, { routes: messagingRoutes })
 
   return {
     config,
