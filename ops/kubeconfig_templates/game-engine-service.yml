@@ -3,13 +3,10 @@ kind: Service
 metadata:
   name: game-engine
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: game-engine
   ports:
-    - name: ws-control
+    - name: ws-port
       port: 8888
-      targetPort: ws-control
-    - name: ws-player
-      port: 8889
-      targetPort: ws-player
+      targetPort: ws-port

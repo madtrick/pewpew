@@ -1,0 +1,12 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: game-engine-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "game-engine"
+spec:
+  tls:
+    - secretName: game-engine-tls
+  backend:
+    serviceName: game-engine
+    servicePort: 8888
