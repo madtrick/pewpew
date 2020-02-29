@@ -25,7 +25,7 @@ interface ServerContext {
   createControlSession: CreateControlSessionFn
 }
 
-interface Server {
+export interface Server {
   ticker: Ticker
 }
 
@@ -144,6 +144,6 @@ export function start (context: ServerContext): Server {
   }
 }
 
-// function stop (server: Server): void {
-
-// }
+export async function stop (server: Server): Promise<void> {
+  server.ticker.cancel()
+}
