@@ -16,24 +16,30 @@ export default function (options: { templatedFile: string, context: Context }): 
   } = options
 
   const pathToTemplateFile = path.resolve(process.cwd(), templatedFile)
-  const templateYaml: object = yaml.safeLoad(
-    fs.readFileSync(pathToTemplateFile, 'utf-8'),
-    { schema: yaml.DEFAULT_SAFE_SCHEMA }
+  const templateYamls: object[] = yaml.safeLoadAll(
+    fs.readFileSync(pathToTemplateFile, 'utf-8')
   )
+
 
   // Note: can't use fat arrow functions because the traverse library
   // exposes its functionality through `this` in the callback function
-  const templated = traverse(templateYaml).map(function (node: string | object): string | object {
-    if (typeof node !== 'string') {
-      return node
-    }
+  const templated = templateYamls.map((templateYaml) => {
+    return traverse(templateYaml).map(function (node: string | object): string | object {
+      if (typeof node !== 'string') {
+        return node
+      }
 
-    const templatedValue = mustache.render(node, context)
-    return templatedValue
+      const templatedValue = mustache.render(node, context)
+      return templatedValue
+    })
   })
+
+  const yamlStrings = templated.map((templatedYaml) => {
+    return yaml.safeDump(templatedYaml)
+  }).join('---\n')
 
   const templatedFileName = path.basename(templatedFile)
   const templatedFilePath = path.resolve(process.cwd(), 'ops/kubeconfigs', templatedFileName)
 
-  fs.writeFileSync(templatedFilePath, yaml.safeDump(templated))
+  fs.writeFileSync(templatedFilePath, yamlStrings)
 }
