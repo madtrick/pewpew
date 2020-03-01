@@ -1,7 +1,21 @@
+# Use a custome BackendConfig resource
+# to modify the default 30s timeout that the
+# ingress sets on connections. Wihtout this
+# the ingress kills each WS connection after
+# that time
+apiVersion: cloud.google.com/v1beta1
+kind: BackendConfig
+metadata:
+  name: game-engine-backend-config
+spec:
+  timeoutSec: 86400
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: game-engine
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"8888":"game-engine-backend-config"}}'
 spec:
   type: NodePort
   selector:
