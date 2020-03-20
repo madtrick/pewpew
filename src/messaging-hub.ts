@@ -109,11 +109,14 @@ export class MessagingHub extends EventEmitter implements IMessagingHub {
       const channel = this.channels.get(options.channel.id)
 
       if (channel) {
-        channel.socket.send(options.data, undefined, () => resolve())
+        return channel.socket.send(options.data, undefined, () => resolve())
+      } else {
+        // TODO replace this console.log with proper loggin
+        console.log('Channel not found')
+        // TODO throw on invalid/not-found channel?
+        resolve()
       }
 
-      // TODO throw on invalid/not-found channel?
-      resolve()
     })
   }
 
