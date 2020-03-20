@@ -49,7 +49,7 @@ export function init ({ WS }: { WS: WebSocketConnectionHandler }, config: Config
   const engineState = createEngineState(arena, gameState)
   const ticker = createTicker()
   const loop = createGameLopp(handlers)
-  const logger = Logger.createLogger({ name: 'pewpew' })
+  const logger = Logger.createLogger({ name: 'pewpew', level: 'info' })
   const messagingRoutes = {
     '/ws/player': { id: 'player' },
     '/ws/control': { id: 'control' }
@@ -95,6 +95,7 @@ export function start (context: ServerContext): Server {
   // it's not needed
   messagingHub.on('channelOpen', (channel: ChannelRef, context: { route: RouteRef }) => {
     if (context.route.id === 'control') {
+      logger.info('Create control session')
       const session = createControlSession(channel)
       engineState.channelSession.set(channel.id, session)
       events.push({
@@ -104,6 +105,7 @@ export function start (context: ServerContext): Server {
     }
 
     if (context.route.id === 'player') {
+      logger.info('Create player session')
       const session = createSession(channel)
       engineState.channelSession.set(channel.id, session)
     }
@@ -111,6 +113,12 @@ export function start (context: ServerContext): Server {
 
   messagingHub.on('channelClose', (channel: ChannelRef) => {
     const session = engineState.channelSession.get(channel.id)
+
+    if (!session) {
+      return
+    }
+
+    logger.info(`Close session (${session.type})`)
 
     engineState.channelSession.delete(channel.id)
     events.push({
