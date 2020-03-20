@@ -17,6 +17,7 @@ export interface SessionCloseEvent extends Event {
 
 export interface ILogger {
   info: (data: object) => void
+  debug: (data: object) => void
 }
 
 export type Rotation = number

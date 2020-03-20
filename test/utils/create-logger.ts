@@ -10,6 +10,11 @@ export default function createLogger (options?: { enabled: boolean }): ILogger {
       if (enabled) {
         logger.info(args)
       }
+    },
+    debug: (...args: any[]): void => {
+      if (enabled) {
+        logger.debug(args)
+      }
     }
   }
 }
