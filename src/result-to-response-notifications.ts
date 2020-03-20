@@ -22,7 +22,7 @@ function isRequestResult (result: SuccessRequestResult | SuccessCommandResult | 
 
 // @ts-ignore TODO remove this ignore
 export default function resultToResponseAndNotifications (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult, sessions: Session[]): any[] {
-  const controlSession = sessions.find(isControlSession)
+  const controlSessions = sessions.filter(isControlSession)
   const playerSessions = sessions.filter(isPlayerSession)
 
   // TODO missing transformation for failed requests or commands
@@ -31,7 +31,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     if (result.success === false && result.command === CommandType.StartGame) {
       const { reason } = result
 
-      return [{
+      return controlSessions.map((controlSession) => ({
         session: controlSession,
         response: {
           type: 'Response',
@@ -41,18 +41,18 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
             msg: reason
           }
         }
-      }]
+      }))
     }
     if (result.success === true && result.command === CommandType.StartGame) {
       return [
-        {
+        ...controlSessions.map((controlSession) => ({
           session: controlSession,
           response: {
             type: 'Response',
             id: CommandType.StartGame,
             success: true
           }
-        },
+        })),
         ...playerSessions.map((playerSession) => ({
           session: playerSession,
           notification: {
@@ -86,39 +86,41 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       // TODO isn't the session alredy part of the result? why I'm finding it again here?
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
-      return [{
-        session: playerSession,
-        response: {
-          type: 'Response',
-          id: RequestType.DeployMine,
-          success: true,
-          data: {
-            component: {
-              details: {
-                tokens: remainingTokens
-              }
-            },
-            request: {
-              cost: requestCostInTokens
-            }
-          }
-        }
-      },
-      {
-        session: controlSession,
-        response: {
-          type: 'Notification',
-          id: RequestType.DeployMine,
-          component: {
-            type: 'Mine',
+      return [
+        {
+          session: playerSession,
+          response: {
+            type: 'Response',
+            id: RequestType.DeployMine,
+            success: true,
             data: {
-              playerId,
-              id,
-              position
+              component: {
+                details: {
+                  tokens: remainingTokens
+                }
+              },
+              request: {
+                cost: requestCostInTokens
+              }
             }
           }
-        }
-      }]
+        },
+        ...controlSessions.map((controlSession) => ({
+          session: controlSession,
+          response: {
+            type: 'Notification',
+            id: RequestType.DeployMine,
+            component: {
+              type: 'Mine',
+              data: {
+                playerId,
+                id,
+                position
+              }
+            }
+          }
+        }))
+      ]
     }
 
     if (result.success === false && result.request === RequestType.RegisterPlayer) {
@@ -147,7 +149,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       // because it's shape won't match that of the elements already in the
       // array
       const messages: any = [
-        {
+        ...controlSessions.map((controlSession) => ({
           session: controlSession,
           notification: {
             type: 'Notification',
@@ -162,7 +164,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
               }
             }
           }
-        },
+        })),
         {
           session: playerSession,
           response: {
@@ -218,7 +220,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
             }
           }
         },
-        {
+        ...controlSessions.map((controlSession) => ({
           session: controlSession,
           response: {
             type: 'Notification',
@@ -231,7 +233,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
               }
             }
           }
-        }
+        }))
       ]
     }
 
@@ -315,7 +317,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
             }
           }
         },
-        {
+        ...controlSessions.map((controlSession) => ({
           session: controlSession,
           response: {
             type: 'Notification',
@@ -330,7 +332,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
             }
           }
 
-        }
+        }))
       ]
     }
 
