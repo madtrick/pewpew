@@ -17,7 +17,6 @@ const create = (wss: WebSocketHandler) => {
        * Handle WS requests
        */
       server.on('upgrade', function upgrade (request: IncomingMessage, socket: Socket, head: Buffer): void {
-        console.log('[UPGRADE]', request.url)
         if (request.url === undefined) {
           // TODO log the error
           return socket.destroy()
@@ -38,7 +37,6 @@ const create = (wss: WebSocketHandler) => {
        * Handle non WS requests
        */
       server.on('request', (request, response) => {
-        console.log('[PLAIN HTTP]', request.url)
         const pathname = url.parse(request.url).pathname
 
         /*
