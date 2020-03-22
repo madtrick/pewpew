@@ -15,13 +15,12 @@ export interface ComponentUpdate {
 // TODO fix the return types
 // @ts-ignore TODO remove this ignore
 export default function updateToNotifications (update: ComponentUpdate, sessions: (Session | ControlSession)[]): any[] {
-  // NOTE I'm assuming here that there's only one control session
-  const controlSession = sessions.find(isControlSession)
+  const controlSessions = sessions.filter(isControlSession)
   const playerSessions = sessions.filter(isPlayerSession)
 
   if (update.type === UpdateType.RemovePlayer) {
     if (update.component.type === ComponentType.Player) {
-      return [{
+      return controlSessions.map((controlSession) => ({
         session: controlSession,
         notification: {
           type: 'Notification',
@@ -29,17 +28,18 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
           component: {
             type: 'Player',
             data: {
+              // @ts-ignore TODO remove this ignore
               id: update.component.data.id
             }
           }
         }
-      }]
+      }))
     }
   }
 
   if (update.type === UpdateType.Movement) {
     if (update.component.type === ComponentType.Shot) {
-      return [{
+      return controlSessions.map((controlSession) => ({
         session: controlSession,
         notification: {
           type: 'Notification',
@@ -49,7 +49,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
             data: update.component.data
           }
         }
-      }]
+      }))
     }
   }
 
@@ -57,7 +57,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
     const { component: { data: { playerId, damage, id } } } = update
     const playerSession = playerSessions.find((s) => s.playerId === playerId)
     return [
-      {
+      ...controlSessions.map((controlSession) => ({
         session: controlSession,
         notification: {
           type: 'Notification',
@@ -71,7 +71,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
             }
           }
         }
-      },
+      })),
       {
         session: playerSession,
         notification: {
@@ -87,28 +87,29 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
 
   if (update.type === UpdateType.Hit) {
     if (update.component.type === ComponentType.Wall) {
-      return [
-        {
-          session: controlSession,
-          notification: {
-            type: 'Notification',
-            id: 'Hit',
-            component: {
-              type: 'Wall',
-              data: {
-                shotId: update.component.data.shotId
-              }
+      return controlSessions.map((controlSession) => ({
+        session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'Hit',
+          component: {
+            type: 'Wall',
+            data: {
+              // @ts-ignore TODO remove this ignore
+              shotId: update.component.data.shotId
             }
           }
         }
-      ]
+      }))
     }
+
     if (update.component.type === ComponentType.Player) {
       // @ts-ignore TODO remove this ignore
       const { component: { data: { id: playerId, damage, shotId } } } = update
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
+
       return [
-        {
+        ...controlSessions.map((controlSession) => ({
           session: controlSession,
           notification: {
             type: 'Notification',
@@ -123,7 +124,7 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
               }
             }
           }
-        },
+        })),
         {
           session: playerSession,
           notification: {
@@ -168,26 +169,28 @@ export default function updateToNotifications (update: ComponentUpdate, sessions
       const { component: { data: { id: playerId } } } = update
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
 
-      return [{
-        session: playerSession,
-        notification: {
-          type: 'Notification',
-          id: 'Destroyed'
-        }
-      },
-      {
-        session: controlSession,
-        notification: {
-          type: 'Notification',
-          id: 'PlayerDestroyed',
-          component: {
-            type: 'Player',
-            data: {
-              id: playerId
+      return [
+        {
+          session: playerSession,
+          notification: {
+            type: 'Notification',
+            id: 'Destroyed'
+          }
+        },
+        ...controlSessions.map((controlSession) => ({
+          session: controlSession,
+          notification: {
+            type: 'Notification',
+            id: 'PlayerDestroyed',
+            component: {
+              type: 'Player',
+              data: {
+                id: playerId
+              }
             }
           }
-        }
-      }]
+        }))
+      ]
     }
   }
 }

@@ -19,13 +19,27 @@ describe('Update to notification', () => {
       // TODO pull the channel ref generation to an utility function
       const playerSession = createSession({ id: 'channel-1' })
       const controlSession = createControlSession({ id: 'channel-2' })
-      const sessions = [playerSession, controlSession]
+      const anotherControlSession = createControlSession({ id: 'channel-3' })
+      const sessions = [playerSession, controlSession, anotherControlSession]
 
       const result = updateToNotifications(update, sessions)
 
-      expect(result).to.have.lengthOf(1)
+      expect(result).to.have.lengthOf(2)
       expect(result[0]).to.eql({
         session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'RemovePlayer',
+          component: {
+            type: 'Player',
+            data: {
+              id: 'player-1'
+            }
+          }
+        }
+      })
+      expect(result[1]).to.eql({
+        session: anotherControlSession,
         notification: {
           type: 'Notification',
           id: 'RemovePlayer',
@@ -56,13 +70,32 @@ describe('Update to notification', () => {
       // TODO pull the channel ref generation to an utility function
       const playerSession = createSession({ id: 'channel-1' })
       const controlSession = createControlSession({ id: 'channel-2' })
-      const sessions = [playerSession, controlSession]
+      const anotherControlSession = createControlSession({ id: 'channel-3' })
+      const sessions = [playerSession, controlSession, anotherControlSession]
 
       const result = updateToNotifications(update, sessions)
 
-      expect(result).to.have.lengthOf(1)
+      expect(result).to.have.lengthOf(2)
       expect(result[0]).to.eql({
         session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'Movement',
+          component: {
+            type: 'Shot',
+            data: {
+              id: 'shot-1',
+              position: {
+                x: 100,
+                y: 100
+              }
+            }
+          }
+        }
+      })
+
+      expect(result[1]).to.eql({
+        session: anotherControlSession,
         notification: {
           type: 'Notification',
           id: 'Movement',
@@ -103,11 +136,12 @@ describe('Update to notification', () => {
       otherPlayerSession.playerId = 'player-2'
 
       const controlSession = createControlSession({ id: 'channel-3' })
-      const sessions = [hitPlayerSession, otherPlayerSession, controlSession]
+      const anotherControlSession = createControlSession({ id: 'channel-4' })
+      const sessions = [hitPlayerSession, otherPlayerSession, controlSession, anotherControlSession]
 
       const result = updateToNotifications(update, sessions)
 
-      expect(result).to.have.lengthOf(2)
+      expect(result).to.have.lengthOf(3)
       expect(result[0]).to.eql({
         session: controlSession,
         notification: {
@@ -124,6 +158,21 @@ describe('Update to notification', () => {
         }
       })
       expect(result[1]).to.eql({
+        session: anotherControlSession,
+        notification: {
+          type: 'Notification',
+          id: 'MineHit',
+          component: {
+            type: 'Mine',
+            data: {
+              id: mine.id,
+              playerId: 'player-1',
+              damage: 20
+            }
+          }
+        }
+      })
+      expect(result[2]).to.eql({
         session: hitPlayerSession,
         notification: {
           type: 'Notification',
@@ -153,13 +202,27 @@ describe('Update to notification', () => {
 
         const playerSession = createSession({ id: 'channel-1' })
         const controlSession = createControlSession({ id: 'channel-2' })
-        const sessions = [playerSession, controlSession]
+        const anotherControlSession = createControlSession({ id: 'channel-3' })
+        const sessions = [playerSession, controlSession, anotherControlSession]
 
         const result = updateToNotifications(update, sessions)
 
-        expect(result).to.have.lengthOf(1)
+        expect(result).to.have.lengthOf(2)
         expect(result[0]).to.eql({
           session: controlSession,
+          notification: {
+            type: 'Notification',
+            id: 'Hit',
+            component: {
+              type: 'Wall',
+              data: {
+                shotId: shot.id
+              }
+            }
+          }
+        })
+        expect(result[1]).to.eql({
+          session: anotherControlSession,
           notification: {
             type: 'Notification',
             id: 'Hit',
@@ -195,11 +258,12 @@ describe('Update to notification', () => {
       otherPlayerSession.playerId = 'player-2'
 
       const controlSession = createControlSession({ id: 'channel-3' })
-      const sessions = [hitPlayerSession, otherPlayerSession, controlSession]
+      const anotherControlSession = createControlSession({ id: 'channel-4' })
+      const sessions = [hitPlayerSession, otherPlayerSession, controlSession, anotherControlSession]
 
       const result = updateToNotifications(update, sessions)
 
-      expect(result).to.have.lengthOf(2)
+      expect(result).to.have.lengthOf(3)
       expect(result[0]).to.eql({
         session: controlSession,
         notification: {
@@ -216,6 +280,21 @@ describe('Update to notification', () => {
         }
       })
       expect(result[1]).to.eql({
+        session: anotherControlSession,
+        notification: {
+          type: 'Notification',
+          id: 'Hit',
+          component: {
+            type: 'Player',
+            data: {
+              shotId: shot.id,
+              id: 'player-1',
+              damage: 1
+            }
+          }
+        }
+      })
+      expect(result[2]).to.eql({
         session: hitPlayerSession,
         notification: {
           type: 'Notification',
@@ -290,11 +369,12 @@ describe('Update to notification', () => {
       const playerTwoSession = createSession({ id: 'channel-2' })
       playerTwoSession.playerId = 'player-2'
       const controlSession = createControlSession({ id: 'channel-3' })
-      const sessions = [playerOneSession, playerTwoSession, controlSession]
+      const anotherControlSession = createControlSession({ id: 'channel-4' })
+      const sessions = [playerOneSession, playerTwoSession, controlSession, anotherControlSession]
 
       const result = updateToNotifications(update, sessions)
 
-      expect(result).to.have.lengthOf(2)
+      expect(result).to.have.lengthOf(3)
       expect(result[0]).to.eql({
         session: playerOneSession,
         notification: {
@@ -304,6 +384,19 @@ describe('Update to notification', () => {
       })
       expect(result[1]).to.eql({
         session: controlSession,
+        notification: {
+          type: 'Notification',
+          id: 'PlayerDestroyed',
+          component: {
+            type: 'Player',
+            data: {
+              id: 'player-1'
+            }
+          }
+        }
+      })
+      expect(result[2]).to.eql({
+        session: anotherControlSession,
         notification: {
           type: 'Notification',
           id: 'PlayerDestroyed',
