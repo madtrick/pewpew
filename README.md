@@ -91,16 +91,34 @@ The developer key and secret for Goddady are in 1Password.
 ###### To store the certificate and key as a k8s secret
 
 ```bash
-kubectl create secret tls game-engine-tls --key out/piwpew.com/piwpew.com.key --cert out/piwpew.com/fullchain.cer
+kubectl create secret tls game-engine-tls --key ssl-certs/piwpew.com/piwpew.com.key --cert ssl-certs/piwpew.com/fullchain.cer
 ```
 
 The path to the certificate and the key might have to be adjusted.
 
 ###### To update the certificate
 
+Launch the `acme.sh` container with:
+
 ```bash
-PENDING but should be doable with acme.sh as well
+docker run --rm  -it -v "$(pwd)/out":/acme.sh --name=acme.sh -e GD_Key=$GODADDY_KEY -e GD_Secret=$GODADDY_SECRET neilpang/acme
+.sh sh
 ```
+
+Inside the container
+
+```bash
+acme.sh --renew -d 'piwpew.com' --home "/acme.sh/" --debug --force
+```
+
+Store the updated cert in the kubernetes cluster with:
+
+```bash
+kubectl create secret tls game-engine-tls --key=ssl-certs/piwpew.com/piwpew.com.key --cert=ssl-certs/piwpew.com/fullchain.cer --dry-run -o yaml | kubectl apply -f -
+
+```
+
+Also remember to update the certs in [Netlify](https://app.netlify.com/sites/laughing-shannon-7271b8/settings/domain).
 
 ###### List the certificates
 
