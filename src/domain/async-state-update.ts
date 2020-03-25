@@ -111,7 +111,7 @@ export default function updateState (
       } else {
         player.life = player.life - MINE_HIT_COST
         updates.push({
-          type: UpdateType.MineHit,
+          type: UpdateType.Hit,
           // @ts-ignore TODO remove this ignore
           component: {
             type: ComponentType.Mine,

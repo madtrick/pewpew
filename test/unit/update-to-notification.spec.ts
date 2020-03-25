@@ -114,109 +114,97 @@ describe('Update to notification', () => {
     })
   })
 
-  describe('UpdateType.MineHit', () => {
-    it('generates a Hit notification for the controllers and the affected player', () => {
-      const playerId = 'player-1'
-      const mine = { id: 'mine-1' }
-      const update: ComponentUpdate = {
-        type: UpdateType.MineHit,
-        component: {
-          type: ComponentType.Mine,
-          data: {
-            id: 'mine-1',
-            playerId,
-            damage: 20
-          }
-        }
-      }
-
-      const hitPlayerSession = createSession({ id: 'channel-1' })
-      hitPlayerSession.playerId = playerId
-      const otherPlayerSession = createSession({ id: 'channel-2' })
-      otherPlayerSession.playerId = 'player-2'
-
-      const controlSession = createControlSession({ id: 'channel-3' })
-      const anotherControlSession = createControlSession({ id: 'channel-4' })
-      const sessions = [hitPlayerSession, otherPlayerSession, controlSession, anotherControlSession]
-
-      const result = updateToNotifications(update, sessions)
-
-      expect(result).to.have.lengthOf(3)
-      expect(result[0]).to.eql({
-        session: controlSession,
-        notification: {
-          type: 'Notification',
-          id: 'MineHit',
-          component: {
-            type: 'Mine',
-            data: {
-              id: mine.id,
-              playerId: 'player-1',
-              damage: 20
-            }
-          }
-        }
-      })
-      expect(result[1]).to.eql({
-        session: anotherControlSession,
-        notification: {
-          type: 'Notification',
-          id: 'MineHit',
-          component: {
-            type: 'Mine',
-            data: {
-              id: mine.id,
-              playerId: 'player-1',
-              damage: 20
-            }
-          }
-        }
-      })
-      expect(result[2]).to.eql({
-        session: hitPlayerSession,
-        notification: {
-          type: 'Notification',
-          id: 'MineHit',
-          data: {
-            damage: 20
-          }
-        }
-      })
-    })
-  })
-
   describe('UpdateType.Hit', () => {
-    describe('when the shot hit a wall', () => {
-      it('generates a Hit notification for the controllers', () => {
+    describe('shot hits', () => {
+      describe('when the shot hits a wall', () => {
+        it('generates a Hit notification for the controllers', () => {
+          const shot = { id: 'shot-1' }
+          const update: ComponentUpdate = {
+            type: UpdateType.Hit,
+            component: {
+              type: ComponentType.Wall,
+              data: {
+                shotId: shot.id,
+                position: { x: 100, y: 100 }
+              }
+            }
+          }
+
+          const playerSession = createSession({ id: 'channel-1' })
+          const controlSession = createControlSession({ id: 'channel-2' })
+          const anotherControlSession = createControlSession({ id: 'channel-3' })
+          const sessions = [playerSession, controlSession, anotherControlSession]
+
+          const result = updateToNotifications(update, sessions)
+
+          expect(result).to.have.lengthOf(2)
+          expect(result[0]).to.eql({
+            session: controlSession,
+            notification: {
+              type: 'Notification',
+              id: 'Hit',
+              component: {
+                type: 'Wall',
+                data: {
+                  shotId: shot.id
+                }
+              }
+            }
+          })
+          expect(result[1]).to.eql({
+            session: anotherControlSession,
+            notification: {
+              type: 'Notification',
+              id: 'Hit',
+              component: {
+                type: 'Wall',
+                data: {
+                  shotId: shot.id
+                }
+              }
+            }
+          })
+        })
+      })
+
+      it('generates a Hit notification for the controllers and the affected player', () => {
         const shot = { id: 'shot-1' }
         const update: ComponentUpdate = {
           type: UpdateType.Hit,
           component: {
-            type: ComponentType.Wall,
+            type: ComponentType.Player,
             data: {
               shotId: shot.id,
-              position: { x: 100, y: 100 }
+              id: 'player-1',
+              life: 99,
+              damage: 1
             }
           }
         }
 
-        const playerSession = createSession({ id: 'channel-1' })
-        const controlSession = createControlSession({ id: 'channel-2' })
-        const anotherControlSession = createControlSession({ id: 'channel-3' })
-        const sessions = [playerSession, controlSession, anotherControlSession]
+        const hitPlayerSession = createSession({ id: 'channel-1' })
+        hitPlayerSession.playerId = 'player-1'
+        const otherPlayerSession = createSession({ id: 'channel-2' })
+        otherPlayerSession.playerId = 'player-2'
+
+        const controlSession = createControlSession({ id: 'channel-3' })
+        const anotherControlSession = createControlSession({ id: 'channel-4' })
+        const sessions = [hitPlayerSession, otherPlayerSession, controlSession, anotherControlSession]
 
         const result = updateToNotifications(update, sessions)
 
-        expect(result).to.have.lengthOf(2)
+        expect(result).to.have.lengthOf(3)
         expect(result[0]).to.eql({
           session: controlSession,
           notification: {
             type: 'Notification',
             id: 'Hit',
             component: {
-              type: 'Wall',
+              type: 'Player',
               data: {
-                shotId: shot.id
+                shotId: shot.id,
+                id: 'player-1',
+                damage: 1
               }
             }
           }
@@ -227,83 +215,98 @@ describe('Update to notification', () => {
             type: 'Notification',
             id: 'Hit',
             component: {
-              type: 'Wall',
+              type: 'Player',
               data: {
-                shotId: shot.id
+                shotId: shot.id,
+                id: 'player-1',
+                damage: 1
               }
+            }
+          }
+        })
+        expect(result[2]).to.eql({
+          session: hitPlayerSession,
+          notification: {
+            type: 'Notification',
+            id: 'Hit',
+            data: {
+              damage: 1
             }
           }
         })
       })
     })
 
-    it('generates a Hit notification for the controllers and the affected player', () => {
-      const shot = { id: 'shot-1' }
-      const update: ComponentUpdate = {
-        type: UpdateType.Hit,
-        component: {
-          type: ComponentType.Player,
-          data: {
-            shotId: shot.id,
-            id: 'player-1',
-            life: 99,
-            damage: 1
-          }
-        }
-      }
-
-      const hitPlayerSession = createSession({ id: 'channel-1' })
-      hitPlayerSession.playerId = 'player-1'
-      const otherPlayerSession = createSession({ id: 'channel-2' })
-      otherPlayerSession.playerId = 'player-2'
-
-      const controlSession = createControlSession({ id: 'channel-3' })
-      const anotherControlSession = createControlSession({ id: 'channel-4' })
-      const sessions = [hitPlayerSession, otherPlayerSession, controlSession, anotherControlSession]
-
-      const result = updateToNotifications(update, sessions)
-
-      expect(result).to.have.lengthOf(3)
-      expect(result[0]).to.eql({
-        session: controlSession,
-        notification: {
-          type: 'Notification',
-          id: 'Hit',
+    describe('mine hits', () => {
+      it('generates a Hit notification for the controllers and the affected player', () => {
+        const playerId = 'player-1'
+        const mine = { id: 'mine-1' }
+        const update: ComponentUpdate = {
+          type: UpdateType.Hit,
           component: {
-            type: 'Player',
+            type: ComponentType.Mine,
             data: {
-              shotId: shot.id,
-              id: 'player-1',
-              damage: 1
+              id: 'mine-1',
+              playerId,
+              damage: 20
             }
           }
         }
-      })
-      expect(result[1]).to.eql({
-        session: anotherControlSession,
-        notification: {
-          type: 'Notification',
-          id: 'Hit',
-          component: {
-            type: 'Player',
-            data: {
-              shotId: shot.id,
-              id: 'player-1',
-              damage: 1
+
+        const hitPlayerSession = createSession({ id: 'channel-1' })
+        hitPlayerSession.playerId = playerId
+        const otherPlayerSession = createSession({ id: 'channel-2' })
+        otherPlayerSession.playerId = 'player-2'
+
+        const controlSession = createControlSession({ id: 'channel-3' })
+        const anotherControlSession = createControlSession({ id: 'channel-4' })
+        const sessions = [hitPlayerSession, otherPlayerSession, controlSession, anotherControlSession]
+
+        const result = updateToNotifications(update, sessions)
+
+        expect(result).to.have.lengthOf(3)
+        expect(result[0]).to.eql({
+          session: controlSession,
+          notification: {
+            type: 'Notification',
+            id: 'Hit',
+            component: {
+              type: 'Mine',
+              data: {
+                id: mine.id,
+                playerId: 'player-1',
+                damage: 20
+              }
             }
           }
-        }
-      })
-      expect(result[2]).to.eql({
-        session: hitPlayerSession,
-        notification: {
-          type: 'Notification',
-          id: 'Hit',
-          data: {
-            damage: 1
+        })
+        expect(result[1]).to.eql({
+          session: anotherControlSession,
+          notification: {
+            type: 'Notification',
+            id: 'Hit',
+            component: {
+              type: 'Mine',
+              data: {
+                id: mine.id,
+                playerId: 'player-1',
+                damage: 20
+              }
+            }
           }
-        }
+        })
+        expect(result[2]).to.eql({
+          session: hitPlayerSession,
+          notification: {
+            type: 'Notification',
+            id: 'Hit',
+            data: {
+              damage: 20
+            }
+          }
+        })
       })
+
     })
   })
 

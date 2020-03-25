@@ -50,8 +50,7 @@ export enum UpdateType {
   Hit = 'hit',
   Scan = 'scan',
   PlayerDestroyed = 'playerDestroyed',
-  RemovePlayer = 'RemovePlayer',
-  MineHit = 'MineHit'
+  RemovePlayer = 'RemovePlayer'
 }
 
 export type ArenaRadarScanResult = ScanResult & {
