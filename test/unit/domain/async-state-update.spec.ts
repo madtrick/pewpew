@@ -81,7 +81,7 @@ describe('Async update', () => {
         // potentially break even though nothing on it changed or is wrong
         expect(updates).to.have.lengthOf(2)
         expect(updates[0]).to.deep.include({
-          type: UpdateType.MineHit,
+          type: UpdateType.Hit,
           component: {
             type: ComponentType.Mine,
             data: {
