@@ -18,13 +18,45 @@ describe('Requests - Register player', () => {
     session = createSession({ id: 'channel-1' })
   })
 
+  describe('game version', () => {
+    it('returns an error if the version in the request is incompatible', () => {
+      const state: GameState = new GameState(gameStateOptions)
+      const message: RegisterPlayerMessage = {
+        data: {
+          id: 'player-1',
+          game: {
+            version: '0.0.0'
+          }
+        },
+        type: 'Request',
+        id: 'RegisterPlayer'
+      }
+
+      // @ts-ignore
+      state.version = '99.0.0'
+
+      const { result, state: newState } = handler(session, message, state, config)
+
+      expect(newState.players()).to.have.lengthOf(0)
+      expect(result).to.eql({
+        session,
+        success: false,
+        reason: `The specified version (${message.data.game.version}) does not satisfy the current game version (${state.version})`,
+        request: RequestType.RegisterPlayer
+      })
+    })
+  })
+
   // TODO throw if the game has already started
   describe('when the game has not started', () => {
     it('registers player in game', () => {
       const state: GameState = new GameState(gameStateOptions)
       const message: RegisterPlayerMessage = {
         data: {
-          id: 'player-1'
+          id: 'player-1',
+          game: {
+            version: state.version
+          }
         },
         type: 'Request',
         id: 'RegisterPlayer'
@@ -61,6 +93,7 @@ describe('Requests - Register player', () => {
         // NOTE can't use .finite from chai as it's not part of the typing definitions
         expect((result.details as RegisterPlayerResultDetails).position.x).to.be.a('number')
         expect((result.details as RegisterPlayerResultDetails).position.y).to.be.a('number')
+        expect((result.details as RegisterPlayerResultDetails).gameVersion).to.eql(state.version)
       }
       expect(session.playerId).to.eql(player.id)
     })
@@ -71,6 +104,9 @@ describe('Requests - Register player', () => {
       state.registerPlayer(player)
       const message: RegisterPlayerMessage = {
         data: {
+          game: {
+            version: state.version
+          },
           id: 'player-1'
         },
         type: 'Request',
@@ -95,6 +131,9 @@ describe('Requests - Register player', () => {
       state.registerPlayer(player)
       const message: RegisterPlayerMessage = {
         data: {
+          game: {
+            version: state.version
+          },
           id: 'player-2'
         },
         type: 'Request',

@@ -63,6 +63,9 @@ describe('Game loop', () => {
       const state: GameState = new GameState({ arena })
       const message: RegisterPlayerMessage = {
         data: {
+          game: {
+            version: state.version
+          },
           id: 'player-1'
         },
         type: 'Request',
@@ -79,7 +82,8 @@ describe('Game loop', () => {
               y: 1
             },
             rotation: 0,
-            isGameStarted: false
+            isGameStarted: false,
+            gameVersion: state.version
           }
         },
         state

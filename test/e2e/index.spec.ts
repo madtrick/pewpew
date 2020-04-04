@@ -3,6 +3,7 @@ import createServer, { Server } from '../../src/http-server'
 import WebSocket from 'ws'
 import { init, start, stop, Server as GameServer } from '../../src/server'
 import { config } from '../config'
+import VERSION from '../../src/version'
 
 describe('End to end', () => {
   let httpServer: Server
@@ -29,6 +30,9 @@ describe('End to end', () => {
         type: 'Request',
         id: 'RegisterPlayer',
         data: {
+          game: {
+            version: VERSION
+          },
           id: 'player-1'
         }
       })

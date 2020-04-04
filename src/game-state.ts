@@ -2,6 +2,7 @@ import { Player } from './player'
 import { Arena, Result, ArenaPlayer, ArenaShot } from './components/arena'
 import { Shot } from './shot'
 import { Mine } from './mine'
+import VERSION from './version'
 
 export enum GameStateUpdateResult {
   Success,
@@ -17,12 +18,14 @@ export interface GameStateUpdate {
 // TODO do we need the game state. Besides the `started` flag there's not much else
 // going on here
 export class GameState {
+  readonly version: string
   readonly arena: Arena
   started: boolean
 
   constructor (options: { arena: Arena, started?: boolean }) {
     this.arena = options.arena
     this.started = options.started || false
+    this.version = VERSION
   }
 
   registerPlayer (player: Player): Result<{ player: ArenaPlayer }, { details: { msg: string } }> {

@@ -2,6 +2,9 @@ import Joi from '@hapi/joi'
 
 export type RegisterPlayerMessage = IncommingMessage<'Request'> & {
   data: {
+    game: {
+      version: string
+    }
     id: string
   }
 }
@@ -56,6 +59,9 @@ const REGISTER_PLAYER_SCHEMA = Joi.object().keys({
   type: Joi.string().valid('Request').required(),
   id: Joi.string().valid('RegisterPlayer').required(),
   data: Joi.object().keys({
+    game: Joi.object().keys({
+      version: Joi.string().required()
+    }).required(),
     id: Joi.string().required()
   }).required() // TODO restrict the id more
 })

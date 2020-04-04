@@ -8,6 +8,7 @@ import {
   DeployMineMessage,
   validateMessage
 } from '../../src/messages'
+import VERSION from '../../src/version'
 
 describe('Messages', () => {
   describe('validatMessage', () => {
@@ -27,6 +28,9 @@ describe('Messages', () => {
         type: 'Request',
         id: 'RegisterPlayer',
         data: {
+          game: {
+            version: VERSION
+          },
           id: 'player-1'
         }
       }
