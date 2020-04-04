@@ -74,7 +74,8 @@ describe('Result to response', () => {
                 y: 100
               },
               rotation: 33,
-              isGameStarted: true
+              isGameStarted: true,
+              gameVersion: '1.0.0'
             }
           }
 
@@ -129,6 +130,9 @@ describe('Result to response', () => {
               id: 'RegisterPlayer',
               success: true,
               details: {
+                game: {
+                  version: '1.0.0'
+                },
                 position: {
                   x: 100,
                   y: 100
@@ -146,6 +150,7 @@ describe('Result to response', () => {
           })
         })
       })
+
       describe('when the game is not started', () => {
         it('generates a RegisterPlayer response for the player and a notification for the controller', () => {
           const result: SuccessRequestResult = {
@@ -158,7 +163,8 @@ describe('Result to response', () => {
                 y: 100
               },
               rotation: 33,
-              isGameStarted: false
+              isGameStarted: false,
+              gameVersion: '1.0.0'
             }
           }
 
@@ -213,6 +219,9 @@ describe('Result to response', () => {
               id: 'RegisterPlayer',
               success: true,
               details: {
+                game: {
+                  version: '1.0.0'
+                },
                 position: {
                   x: 100,
                   y: 100

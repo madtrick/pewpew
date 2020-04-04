@@ -13,6 +13,7 @@ import { createProcessor as createMineHitPipelineProcessor } from '../../src/dom
 import { createProcessor as createShotHitPipelineProcessor } from '../../src/domain/state-processors/shot-hits'
 import { createProcessor as createRadarScanPipelineProcessor } from '../../src/domain/state-processors/radar-scan'
 import { process } from '../../src/domain/state-update-pipeline'
+import VERSION from '../../src/version'
 
 describe('Engine - Integration', () => {
   let arena: Arena
@@ -49,6 +50,9 @@ describe('Engine - Integration', () => {
             type: 'Request',
             id: 'RegisterPlayer',
             data: {
+              game: {
+                version: VERSION
+              },
               id: 'jake'
             }
           }

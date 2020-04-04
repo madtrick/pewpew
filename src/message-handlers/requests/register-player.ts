@@ -5,17 +5,32 @@ import { createPlayer } from '../../player'
 import { Session } from '../../session'
 import { Position } from '../../types'
 import Config from '../../config'
+import semver from 'semver'
 
 export interface RegisterPlayerResultDetails {
   id: string
   position: Position
   rotation: number
   isGameStarted: boolean
+  gameVersion: string
 }
 
 // TODO split this module into controller and domain
 
 export default function registerPlayer (session: Session, message: RegisterPlayerMessage, state: GameState, config: Config): HandlerResult {
+
+  const givenVersion = message.data.game.version
+  if (!semver.satisfies(givenVersion, state.version)) {
+    return {
+      result: {
+        session,
+        success: false,
+        request: RequestType.RegisterPlayer,
+        reason: `The specified version (${givenVersion}) does not satisfy the current game version (${state.version})`
+      },
+      state
+    }
+  }
 
   if (state.players().length >= config.maxPlayersPerGame) {
     return {
@@ -35,7 +50,6 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
   const result = state.registerPlayer(player)
 
   // TODO reject players registering in the game if the game already started?
-  // TODO another reason for KO could be too many players in the arena
   if (result.status === 'ko') {
     return {
       result: {
@@ -61,7 +75,8 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
         id: result.player.id,
         position: result.player.position,
         rotation: result.player.rotation,
-        isGameStarted: state.started
+        isGameStarted: state.started,
+        gameVersion: state.version
       }
     },
     state
