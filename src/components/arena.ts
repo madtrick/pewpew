@@ -1,11 +1,8 @@
 import { Player, PLAYER_RADIUS } from '../player'
 import { Shot } from '../shot'
 import { Mine } from '../mine'
-import { RadarScan, ScanResult, ScannedPlayer, ScannedShot, ScannedMine, ScannedUnknown } from './radar'
 import { Position } from '../types'
 import { round } from '../helpers'
-import Config from '../config'
-import asyncStateUpdate from '../domain/async-state-update'
 
 export type Success<T = {}> = { status: 'ok' } & T
 export type Failure<T> = { status: 'ko' } & T
@@ -17,8 +14,10 @@ export function asSuccess<T, F> (result: Result<T, F>): Success<T> | never {
     return result
   }
 
-  // TODO include the failure details in the thrown error
-  throw new Error('Expected a Success got a Failure')
+  // TODO the failure could have a toString method to render itself
+  // giving some details about the failure without having to call
+  // JSON.stringify
+  throw new Error(`Expected a Success got a Failure ((${JSON.stringify(result)}))`)
 }
 
 // TODO maybe rename this type and ArenaShot to
@@ -30,74 +29,28 @@ export type ArenaPlayer = Player & { position: Position }
 //   position: Position
 // }
 
+// TODO remove this type and instead have just a Shot type
+// with a discriminant property, for example "shot.status" and
+// based on that add additional properties like the position
 export type ArenaShot = Shot & { position: Position }
 // type ArenaShot = {
 //   shot: Shot
 //   position: Position
 // }
 
-export enum ComponentType {
-  Player = 'player',
-  DestroyedPlayer = 'destroyedPlayer',
-  Shot = 'shot',
-  Wall = 'wall',
-  Radar = 'Radar',
-  Mine = 'Mine'
-}
-
-export enum UpdateType {
-  Movement = 'movement',
-  Hit = 'hit',
-  Scan = 'scan',
-  PlayerDestroyed = 'playerDestroyed',
-  RemovePlayer = 'RemovePlayer'
-}
-
-export type ArenaRadarScanResult = ScanResult & {
-  component: {
-    data: {
-      playerId: string
-    }
-  }
-}
-
-export type Foo = (
-  { type: ComponentType.Player, data: { id: string } } |
-  { type: ComponentType.Player, data: { shotId: string, id: string, damage: number, life: number } } |
-  { type: ComponentType.Wall, data: { shotId: string, position: Position } } |
-  { type: ComponentType.Shot, data: { id: string, position: Position } } |
-  { type: ComponentType.Mine, data: { id: string, damage: number, playerId: string } } |
-  {
-    type: ComponentType.Radar,
-    data: {
-      // TODO change the types of "players", "unknown" and "shots" to
-      // ScannedPlayer, ScannedUnknown and ScannedShot.
-      // TODO add mines to this type
-      playerId: string,
-      players: ScannedPlayer[],
-      unknown: ScannedUnknown[],
-      shots: ScannedShot[],
-      mines: ScannedMine[]
-    }
-  } |
-  { type: ComponentType.DestroyedPlayer, data: { id: string } }
-)
-
 export class Arena {
   readonly width: number
   readonly height: number
   private arenaPlayers: ArenaPlayer[]
   private arenaShots: ArenaShot[]
-  public mines: Mine[]
-  private radar: RadarScan
+  private arenaMines: Mine[]
 
-  constructor (options: { width: number, height: number }, modules: { radar: RadarScan }) {
+  constructor (options: { width: number, height: number }) {
     this.width = options.width
     this.height = options.height
     this.arenaPlayers = []
     this.arenaShots = []
-    this.mines = []
-    this.radar = modules.radar
+    this.arenaMines = []
   }
 
   // TODO wondering if I could remove the `players` and `shots` methods
@@ -114,6 +67,53 @@ export class Arena {
 
   shots (): ArenaShot[] {
     return this.arenaShots
+  }
+
+  removeMine (mine: Mine): Result<{}, { details: { msg: string } }> {
+    const existingMine = this.arenaMines.find((arenaMine) => arenaMine.id === mine.id)
+
+    if (!existingMine) {
+      return {
+        status: 'ko',
+        details: {
+          msg: `A mine with id ${mine.id} can not be found in the arena`
+        }
+      }
+    }
+
+    this.arenaMines = this.arenaMines.filter((arenaMine) => arenaMine.id !== mine.id)
+
+    return {
+      status: 'ok'
+    }
+  }
+
+  registerMine (mine: Mine): Result<{}, { details: { msg: string } }> {
+    this.arenaMines.push(mine)
+    return { status: 'ok' }
+  }
+
+  mines (): Mine[] {
+    return this.arenaMines
+  }
+
+  removeShot (shot: Shot): Result<{}, { details: { msg: string } }> {
+    const existingShot = this.arenaShots.find((arenaShot) => arenaShot.id === shot.id)
+
+    if (!existingShot) {
+      return {
+        status: 'ko',
+        details: {
+          msg: `A shot with id ${shot.id} can not be found in the arena`
+        }
+      }
+    }
+
+    this.arenaShots = this.arenaShots.filter((arenaShot) => arenaShot.id !== shot.id)
+
+    return {
+      status: 'ok'
+    }
   }
 
   removePlayer (player: Player): Result<{}, { details: { msg: string } }> {
@@ -220,28 +220,6 @@ export class Arena {
     this.arenaShots.push(arenaShot)
 
     return { status: 'ok', shot: arenaShot }
-  }
-
-  update (
-    config: Config
-  ): {
-    type: UpdateType,
-    component: Foo
-  }[] {
-    const dimensions = { width: this.width, height: this.height }
-    const update = asyncStateUpdate(
-      this.arenaShots,
-      this.mines,
-      this.arenaPlayers,
-      dimensions,
-      this.radar,
-      config
-    )
-
-    this.arenaPlayers = update.players
-    this.arenaShots = update.shots
-
-    return update.updates
   }
 
   rotatePlayer (rotation: number, player: Player): void {

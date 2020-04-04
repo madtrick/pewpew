@@ -1,12 +1,13 @@
 import { expect } from 'chai'
 import { createControlSession, createSession } from '../../src/session'
-import { UpdateType, ComponentType, ArenaRadarScanResult } from '../../src/components/arena'
-import updateToNotifications, { ComponentUpdate } from '../../src/update-to-notifications'
+import { UpdateType, ComponentType } from '../../src/types'
+import updateToNotifications from '../../src/update-to-notifications'
+import { Update } from '../../src/domain/state-update-pipeline'
 
 describe('Update to notification', () => {
   describe('UpdateType.RemovePlayer', () => {
     it('generates a Movement notification for the controllers', () => {
-      const update: ComponentUpdate = {
+      const update: Update = {
         type: UpdateType.RemovePlayer,
         component: {
           type: ComponentType.Player,
@@ -56,7 +57,7 @@ describe('Update to notification', () => {
 
   describe('UpdateType.Movement', () => {
     it('generates a Movement notification for the controllers', () => {
-      const update: ComponentUpdate = {
+      const update: Update = {
         type: UpdateType.Movement,
         component: {
           type: ComponentType.Shot,
@@ -119,7 +120,7 @@ describe('Update to notification', () => {
       describe('when the shot hits a wall', () => {
         it('generates a Hit notification for the controllers', () => {
           const shot = { id: 'shot-1' }
-          const update: ComponentUpdate = {
+          const update: Update = {
             type: UpdateType.Hit,
             component: {
               type: ComponentType.Wall,
@@ -169,7 +170,7 @@ describe('Update to notification', () => {
 
       it('generates a Hit notification for the controllers and the affected player', () => {
         const shot = { id: 'shot-1' }
-        const update: ComponentUpdate = {
+        const update: Update = {
           type: UpdateType.Hit,
           component: {
             type: ComponentType.Player,
@@ -241,7 +242,7 @@ describe('Update to notification', () => {
       it('generates a Hit notification for the controllers and the affected player', () => {
         const playerId = 'player-1'
         const mine = { id: 'mine-1' }
-        const update: ComponentUpdate = {
+        const update: Update = {
           type: UpdateType.Hit,
           component: {
             type: ComponentType.Mine,
@@ -317,7 +318,7 @@ describe('Update to notification', () => {
       const scannedUnknown = { position: { x: 2, y: 3 } }
       const scannedShot = { position: { x: 3, y: 4 }, rotation: 30 }
       const scannedMine = { position: { x: 4, y: 5 } }
-      const update: ArenaRadarScanResult = {
+      const update: Update = {
         type: UpdateType.Scan,
         component: {
           type: ComponentType.Radar,
@@ -357,7 +358,7 @@ describe('Update to notification', () => {
 
   describe('UpdateType.PlayerDestroyed', () => {
     it('generates player destroyed notifications', () => {
-      const update: ComponentUpdate = {
+      const update: Update = {
         type: UpdateType.PlayerDestroyed,
         component: {
           type: ComponentType.DestroyedPlayer,

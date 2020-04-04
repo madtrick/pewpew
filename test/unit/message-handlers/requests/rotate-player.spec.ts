@@ -6,7 +6,6 @@ import { createSession, Session } from '../../../../src/session'
 import { createPlayer } from '../../../../src/player'
 import { Arena, asSuccess } from '../../../../src/components/arena'
 import { RequestType } from '../../../../src/message-handlers'
-import { scan } from '../../../../src/components/radar'
 import handler, { ROTATION_COST_IN_TOKENS } from '../../../../src/message-handlers/requests/rotate-player'
 import { config } from '../../../config'
 
@@ -21,7 +20,7 @@ describe('Requests - Rotate player', () => {
   let session: Session
 
   beforeEach(() => {
-    arena = new Arena({ width: 100, height: 100 }, { radar: scan })
+    arena = new Arena({ width: 100, height: 100 })
     session = createSession({ id: 'channel-1' })
   })
 

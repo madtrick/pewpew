@@ -1,5 +1,6 @@
 import uuid from 'uuid/v4'
-import { ArenaPlayer, ComponentType } from './components/arena'
+import { ArenaPlayer } from './components/arena'
+import { ComponentType } from './types'
 
 export const SHOT_RADIUS = 1
 export const SHOT_DAMAGE = 1

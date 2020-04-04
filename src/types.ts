@@ -23,3 +23,21 @@ export interface ILogger {
 export type Rotation = number
 export type Speed = number
 export type Position = { x: number, y: number }
+
+export enum ComponentType {
+  Player = 'Player',
+  DestroyedPlayer = 'DestroyedPlayer',
+  Shot = 'Shot',
+  Wall = 'Wall',
+  Radar = 'Radar',
+  Mine = 'Mine'
+}
+
+export enum UpdateType {
+  Movement = 'Movement',
+  Hit = 'Hit',
+  Scan = 'Scan',
+  PlayerDestroyed = 'PlayerDestroyed',
+  RemovePlayer = 'RemovePlayer'
+}
+

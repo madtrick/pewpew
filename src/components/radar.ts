@@ -1,26 +1,17 @@
 import { Position, Rotation } from '../types'
-import { ComponentType, UpdateType, ArenaPlayer, ArenaShot } from './arena'
+import { ArenaPlayer, ArenaShot } from './arena'
 import { Mine } from '../mine'
 import { PLAYER_RADIUS } from '../player'
 
-// TODO since this is an update, this type should be named
-// something like ScanUpdate. Or maybe keep the result and rename the
-// updatetype prop :shrug:
 export type ScannedUnknown = { position: Position }
 export type ScannedPlayer = { id: string, rotation: Rotation, position: Position }
 export type ScannedShot = { rotation: Rotation, position: Position }
 export type ScannedMine = { position: Position }
 export interface ScanResult {
-  type: UpdateType.Scan,
-  component: {
-    type: ComponentType.Radar,
-    data: {
-      unknown: ScannedUnknown[]
-      players: ScannedPlayer[]
-      shots: ScannedShot[]
-      mines: ScannedMine[]
-    }
-  }
+  unknown: ScannedUnknown[]
+  players: ScannedPlayer[]
+  shots: ScannedShot[]
+  mines: ScannedMine[]
 }
 
 type ScannablePlayer = Pick<ArenaPlayer, 'id' | 'position' | 'rotation'>
@@ -48,7 +39,7 @@ export function scan (
   const scanRadius = 80
   const shotIdentifyRadius = scanRadius - 5
   const mineIdentifyRadius = scanRadius - 5
-  const detectedComponents: ScanResult['component']['data'] = { players: [], shots: [], mines: [], unknown: [] }
+  const detectedComponents: ScanResult = { players: [], shots: [], mines: [], unknown: [] }
 
   components.shots.forEach((shot) => {
     const distance = calculateDistanceBetweenPositions(position, shot.position)
@@ -96,12 +87,6 @@ export function scan (
     }
   })
 
-  return {
-    type: UpdateType.Scan,
-    component: {
-      type: ComponentType.Radar,
-      data: detectedComponents
-    }
-  }
+  return detectedComponents
 }
 

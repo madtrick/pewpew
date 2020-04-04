@@ -5,7 +5,6 @@ import { GameState } from '../../../../src/game-state'
 import { createSession } from '../../../../src/session'
 import { createPlayer, PLAYER_RADIUS, Player } from '../../../../src/player'
 import { Arena, asSuccess } from '../../../../src/components/arena'
-import { scan } from '../../../../src/components/radar'
 import { RequestType } from '../../../../src/message-handlers'
 import handler from '../../../../src/message-handlers/requests/move-player'
 import { config } from '../../../config'
@@ -32,7 +31,7 @@ describe('Requests - Move player', () => {
   }
 
   beforeEach(() => {
-    arena = new Arena({ width: ARENA_WIDTH, height: 500 }, { radar: scan })
+    arena = new Arena({ width: ARENA_WIDTH, height: 500 })
     player = createPlayer({ id: PLAYER_ID, initialTokens: config.initialTokensPerPlayer })
     otherPlayer = createPlayer({ id: 'another-player', initialTokens: config.initialTokensPerPlayer })
     domainStub = sinon.stub()

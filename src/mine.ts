@@ -1,6 +1,5 @@
 import uuid from 'uuid/v4'
-import { Position } from './types'
-import { ComponentType } from './components/arena'
+import { Position, ComponentType } from './types'
 import { PLAYER_RADIUS } from './player'
 
 export const MINE_RADIUS = PLAYER_RADIUS / 2

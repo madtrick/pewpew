@@ -1,8 +1,7 @@
 import { expect } from 'chai'
-import { ComponentType, UpdateType } from '../../../src/components/arena'
 import { scan, ScannableComponents } from '../../../src/components/radar'
 
-describe(' Radar', () => {
+describe('Radar', () => {
   let components: ScannableComponents
 
   beforeEach(() => {
@@ -15,16 +14,10 @@ describe(' Radar', () => {
         const result = scan({ x: 100, y: 100 }, components)
 
         expect(result).to.eql({
-          type: UpdateType.Scan,
-          component: {
-            type: ComponentType.Radar,
-            data: {
-              players: [],
-              unknown: [],
-              shots: [],
-              mines: []
-            }
-          }
+          players: [],
+          unknown: [],
+          shots: [],
+          mines: []
         })
       })
     })
@@ -38,18 +31,12 @@ describe(' Radar', () => {
           const result = scan({ x: 30, y: 40 }, components)
 
           expect(result).to.eql({
-            type: UpdateType.Scan,
-            component: {
-              type: ComponentType.Radar,
-              data: {
-                unknown: [],
-                players: [],
-                shots: [],
-                mines: [
-                  { position: { x: 55, y: 40 } }
-                ]
-              }
-            }
+            unknown: [],
+            players: [],
+            shots: [],
+            mines: [
+              { position: { x: 55, y: 40 } }
+            ]
           })
         })
       })
@@ -62,18 +49,12 @@ describe(' Radar', () => {
           const result = scan({ x: 30, y: 40 }, components)
 
           expect(result).to.eql({
-            type: UpdateType.Scan,
-            component: {
-              type: ComponentType.Radar,
-              data: {
-                unknown: [
-                  { position: { x: 106, y: 40 } }
-                ],
-                players: [],
-                shots: [],
-                mines: []
-              }
-            }
+            unknown: [
+              { position: { x: 106, y: 40 } }
+            ],
+            players: [],
+            shots: [],
+            mines: []
           })
         })
       })
@@ -89,19 +70,13 @@ describe(' Radar', () => {
           const result = scan({ x: 30, y: 40 }, components)
 
           expect(result).to.eql({
-            type: UpdateType.Scan,
-            component: {
-              type: ComponentType.Radar,
-              data: {
-                unknown: [],
-                players: [],
-                shots: [
-                  shot1,
-                  shot2
-                ],
-                mines: []
-              }
-            }
+            unknown: [],
+            players: [],
+            shots: [
+              shot1,
+              shot2
+            ],
+            mines: []
           })
         })
       })
@@ -114,18 +89,12 @@ describe(' Radar', () => {
           const result = scan({ x: 30, y: 40 }, components)
 
           expect(result).to.eql({
-            type: UpdateType.Scan,
-            component: {
-              type: ComponentType.Radar,
-              data: {
-                unknown: [
-                  { position: { x: 106, y: 40 } }
-                ],
-                players: [],
-                shots: [],
-                mines: []
-              }
-            }
+            unknown: [
+              { position: { x: 106, y: 40 } }
+            ],
+            players: [],
+            shots: [],
+            mines: []
           })
         })
       })
@@ -142,16 +111,10 @@ describe(' Radar', () => {
           const result = scan(player1.position, components)
 
           expect(result).to.eql({
-            type: UpdateType.Scan,
-            component: {
-              type: ComponentType.Radar,
-              data: {
-                unknown: [],
-                players: [player2],
-                shots: [],
-                mines: []
-              }
-            }
+            unknown: [],
+            players: [player2],
+            shots: [],
+            mines: []
           })
         })
       })
@@ -166,21 +129,15 @@ describe(' Radar', () => {
           const result = scan(player1.position, components)
 
           expect(result).to.eql({
-            type: UpdateType.Scan,
-            component: {
-              type: ComponentType.Radar,
-              data: {
-                players: [],
-                unknown: [{
-                  position: {
-                    x: 140,
-                    y: 40
-                  }
-                }],
-                shots: [],
-                mines: []
+            players: [],
+            unknown: [{
+              position: {
+                x: 140,
+                y: 40
               }
-            }
+            }],
+            shots: [],
+            mines: []
           })
         })
       })

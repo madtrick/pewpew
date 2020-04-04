@@ -108,7 +108,7 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
 
   const mine = createMine({ position: { x, y } })
   player.tokens = player.tokens - playerDeployMineCostInTokens
-  state.arena.mines.push(mine)
+  state.registerMine(mine)
 
   return {
     result: {

@@ -1,13 +1,14 @@
 import { GameLoop } from './game-loop'
-import { Arena, UpdateType, ComponentType } from './components/arena'
+import { Arena } from './components/arena'
 import { GameState } from './game-state'
 import { Session, isPlayerSession, isControlSession } from './session'
 import { IncommingMessages, validateMessage } from './messages'
 import { isFailure, asSuccess, failure, success, Result } from './success-failure'
-import updateToNotifications, { ComponentUpdate } from './update-to-notifications'
+import updateToNotifications from './update-to-notifications'
 import resultToResponseAndNotifications from './result-to-response-notifications'
-import { ILogger, Event, EventType, Position, Rotation } from './types'
+import { ILogger, Event, EventType, Position, Rotation, UpdateType, ComponentType } from './types'
 import Config from './config'
+import { Update } from './domain/state-update-pipeline'
 
 function asIncomingMessage (message: object): Result<IncommingMessages, any> {
   // let object: object
@@ -122,7 +123,7 @@ export default async function engine (
               rotation: shot.rotation
             }
           })
-          const mines = state.gameState.arena.mines.map((mine) => {
+          const mines = state.gameState.mines().map((mine) => {
             return {
               id: mine.id,
               position: mine.position
@@ -153,7 +154,7 @@ export default async function engine (
         const sessions = Array.from(state.channelSession.values())
         const existControlSessions = sessions.find(isControlSession)
         if (result.status === 'ok' && existControlSessions) {
-          const update: ComponentUpdate = {
+          const update: Update = {
             type: UpdateType.RemovePlayer,
             component: {
               type: ComponentType.Player,

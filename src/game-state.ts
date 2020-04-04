@@ -1,6 +1,7 @@
 import { Player } from './player'
-import { Arena, Result, ArenaPlayer } from './components/arena'
-import Config from './config'
+import { Arena, Result, ArenaPlayer, ArenaShot } from './components/arena'
+import { Shot } from './shot'
+import { Mine } from './mine'
 
 export enum GameStateUpdateResult {
   Success,
@@ -32,16 +33,31 @@ export class GameState {
     return this.arena.removePlayer(player)
   }
 
-  players (): Player[] {
+  findPlayer (id: string): ArenaPlayer | undefined {
+    return this.arena.findPlayer(id)
+  }
+
+  removeShot (shot: Shot): Result<{}, { details: { msg: string } }> {
+    return this.arena.removeShot(shot)
+  }
+
+  players (): ArenaPlayer[] {
     return this.arena.players()
   }
 
-  // TODO fix this type and use the type from the arena
-  update (config: Config): any {
-    if (!this.started) {
-      return []
-    }
+  shots (): ArenaShot[] {
+    return this.arena.shots()
+  }
 
-    return this.arena.update(config)
+  registerMine (mine: Mine): Result<{}, { details: { msg: string } }> {
+    return this.arena.registerMine(mine)
+  }
+
+  removeMine (mine: Mine): Result<{}, { details: { msg: string } }> {
+    return this.arena.removeMine(mine)
+  }
+
+  mines (): Mine[] {
+    return this.arena.mines()
   }
 }
