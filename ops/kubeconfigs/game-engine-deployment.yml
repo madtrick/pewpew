@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: game-engine
-          image: 'gcr.io/nth-segment-264718/game-engine:b9cd06b'
+          image: 'gcr.io/nth-segment-264718/game-engine:333b4fc'
           readinessProbe:
             httpGet:
               path: /health
