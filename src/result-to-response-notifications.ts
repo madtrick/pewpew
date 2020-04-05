@@ -11,6 +11,10 @@ import {
   FailureCommandResult,
   FailureDeployMineRequest
 } from './message-handlers'
+import Config from './config'
+import { ARENA_WIDTH, ARENA_HEIGHT } from './server'
+import { PLAYER_RADIUS } from './player'
+import { RADAR_RADIUS } from './components/radar'
 
 function isCommandResult (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult): result is SuccessCommandResult | FailureCommandResult {
   return 'command' in result
@@ -21,7 +25,7 @@ function isRequestResult (result: SuccessRequestResult | SuccessCommandResult | 
 }
 
 // @ts-ignore TODO remove this ignore
-export default function resultToResponseAndNotifications (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult, sessions: Session[]): any[] {
+export default function resultToResponseAndNotifications (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult, sessions: Session[], config: Config): any[] {
   const controlSessions = sessions.filter(isControlSession)
   const playerSessions = sessions.filter(isPlayerSession)
 
@@ -188,7 +192,20 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
           response: {
             type: 'Notification',
             // TODO create enum for notification types
-            id: 'JoinGame'
+            id: 'JoinGame',
+            details: {
+              game: {
+                settings: {
+                  playerSpeed: config.movementSpeeds.player,
+                  shotSpeed: config.movementSpeeds.shot,
+                  turboMultiplier: config.turboMultiplierFactor,
+                  arenaWidth: ARENA_WIDTH,
+                  arenaHeight: ARENA_HEIGHT,
+                  playerRadius: PLAYER_RADIUS,
+                  radarScanRadius: RADAR_RADIUS
+                }
+              }
+            }
           }
         })
       }

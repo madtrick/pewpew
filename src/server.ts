@@ -48,8 +48,11 @@ function parse (message: Message): { channel: ChannelRef, route: RouteRef, data:
   }
 }
 
+export const ARENA_WIDTH = 500
+export const ARENA_HEIGHT = 500
+
 export function init ({ WS }: { WS: WebSocketConnectionHandler }, config: Config): ServerContext {
-  const arena = new Arena({ width: 500, height: 500 })
+  const arena = new Arena({ width: ARENA_WIDTH, height: ARENA_HEIGHT })
   const gameState = new GameState({ arena, started: config.autoStartGame })
   const engineState = createEngineState(arena, gameState)
   const ticker = createTicker()

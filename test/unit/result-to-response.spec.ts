@@ -20,6 +20,10 @@ import {
   SuccessfulDeployMineRequest,
   FailureDeployMineRequest
 } from '../../src/message-handlers'
+import { config } from '../config'
+import { ARENA_WIDTH, ARENA_HEIGHT } from '../../src/server'
+import { PLAYER_RADIUS } from '../../src/player'
+import { RADAR_RADIUS } from '../../src/components/radar'
 
 describe('Result to response', () => {
   const playerOneId = 'player-1'
@@ -45,7 +49,7 @@ describe('Result to response', () => {
         }
         const sessions = [playerSession, controlSession]
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.eql([{
           session: playerSession,
@@ -82,7 +86,7 @@ describe('Result to response', () => {
           playerSession.playerId = playerOneId
           const sessions = [playerSession, controlSession, anotherControlSession]
 
-          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
           expect(responsesAndNotifications).to.have.lengthOf(4)
           expect(responsesAndNotifications[0]).to.eql({
@@ -145,7 +149,20 @@ describe('Result to response', () => {
             session: playerSession,
             response: {
               type: 'Notification',
-              id: 'JoinGame'
+              id: 'JoinGame',
+              details: {
+                game: {
+                  settings: {
+                    playerSpeed: config.movementSpeeds.player,
+                    shotSpeed: config.movementSpeeds.shot,
+                    turboMultiplier: config.turboMultiplierFactor,
+                    arenaWidth: ARENA_WIDTH,
+                    arenaHeight: ARENA_HEIGHT,
+                    playerRadius: PLAYER_RADIUS,
+                    radarScanRadius: RADAR_RADIUS
+                  }
+                }
+              }
             }
           })
         })
@@ -171,7 +188,7 @@ describe('Result to response', () => {
           playerSession.playerId = playerOneId
           const sessions = [playerSession, controlSession, anotherControlSession]
 
-          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
           expect(responsesAndNotifications).to.have.lengthOf(3)
           expect(responsesAndNotifications[0]).to.eql({
@@ -246,7 +263,7 @@ describe('Result to response', () => {
           reason: 'Some error'
         }
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.eql([{
           session: playerSession,
@@ -282,7 +299,7 @@ describe('Result to response', () => {
         playerSession.playerId = playerOneId
         const sessions = [playerSession, controlSession, anotherControlSession]
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.have.lengthOf(3)
         expect(responsesAndNotifications[0]).to.eql({
@@ -358,7 +375,7 @@ describe('Result to response', () => {
         }
 
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.have.lengthOf(1)
         expect(responsesAndNotifications[0]).to.eql({
@@ -390,7 +407,7 @@ describe('Result to response', () => {
         playerSession.playerId = playerOneId
         const sessions = [playerSession]
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.have.lengthOf(1)
         expect(responsesAndNotifications[0]).to.eql({
@@ -427,7 +444,7 @@ describe('Result to response', () => {
         }
 
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.have.lengthOf(1)
         expect(responsesAndNotifications[0]).to.eql({
@@ -461,7 +478,7 @@ describe('Result to response', () => {
         playerSession.playerId = playerOneId
         const sessions = [playerSession, controlSession, anotherControlSession]
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.have.lengthOf(3)
         expect(responsesAndNotifications[0]).to.eql({
@@ -527,7 +544,7 @@ describe('Result to response', () => {
         }
 
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.have.lengthOf(1)
         expect(responsesAndNotifications[0]).to.eql({
@@ -563,7 +580,7 @@ describe('Result to response', () => {
         playerSession.playerId = playerOneId
         const sessions = [playerSession, controlSession, anotherControlSession]
 
-        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+        const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
         expect(responsesAndNotifications).to.have.lengthOf(3)
         expect(responsesAndNotifications[0]).to.eql({
@@ -630,7 +647,7 @@ describe('Result to response', () => {
 
           const sessions = [playerSession, controlSession]
 
-          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
           expect(responsesAndNotifications).to.eql([{
             session: controlSession,
@@ -656,7 +673,7 @@ describe('Result to response', () => {
           const otherPlayerSession = createSession({ id: 'channel-3' })
           const sessions = [playerSession, otherPlayerSession, controlSession]
 
-          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions)
+          const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
           expect(responsesAndNotifications).to.have.lengthOf(3)
           expect(responsesAndNotifications[0]).to.eql({
