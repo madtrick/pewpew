@@ -192,16 +192,19 @@ export class Arena {
     return { status: 'ok', player: arenaPlayer }
   }
 
-  registerShot (shot: Shot): Result<{ shot: ArenaShot }, void> {
+  registerShot (shot: Shot): Result<{ shot: ArenaShot }, {}> {
     const arenaPlayer = this.arenaPlayers.find((arenaPlayer) => arenaPlayer.id === shot.player.id)
 
-    // TODO should I check if the player exists?
-    const { x: playerX, y: playerY } = arenaPlayer!.position
+    if (!arenaPlayer) {
+      return { status: 'ko' }
+    }
+
+    const { x: playerX, y: playerY } = arenaPlayer.position
     /*
      * Rotate from players origin to
      * get the origin of the shot
      */
-    const radians = Math.PI / 180 * arenaPlayer!.rotation
+    const radians = Math.PI / 180 * arenaPlayer.rotation
     /*
      * We add 1 to the player radius considering that the shot
      * starts already on the inmediate pixel after the player
@@ -216,16 +219,22 @@ export class Arena {
     const shotX = round(offsetX + playerX)
     const shotY = round(offsetY + playerY)
 
-    const arenaShot = { ...shot, rotation: arenaPlayer!.rotation, position: { x: shotX, y: shotY } }
+    const arenaShot = { ...shot, rotation: arenaPlayer.rotation, position: { x: shotX, y: shotY } }
     this.arenaShots.push(arenaShot)
 
     return { status: 'ok', shot: arenaShot }
   }
 
-  rotatePlayer (rotation: number, player: Player): void {
+  rotatePlayer (rotation: number, player: Player): Result<{}, {}> {
     const arenaPlayer = this.arenaPlayers.find((arenaPlayer) => arenaPlayer.id === player.id)
-    // TODO throw if the player is not found
-    arenaPlayer!.rotation = rotation
+
+    if (!arenaPlayer) {
+      return { status: 'ko' }
+    }
+
+    arenaPlayer.rotation = rotation
+
+    return { status: 'ok' }
   }
 
   private isPlayerPositionWithinBoundaries ({ x, y }: Position): boolean {
@@ -256,8 +265,8 @@ export class Arena {
        */
       const { x: ox, y: oy } = arenaPlayer.position
       const value = Math.pow((x - ox), 2) + Math.pow((y - oy), 2)
-        // TODO the Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) part is useless
-        // but will it keep it here in case we have players with different radius
+      // TODO the Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) part is useless
+      // but will it keep it here in case we have players with different radius
 
       return Math.pow(PLAYER_RADIUS - PLAYER_RADIUS, 2) <= value && value <= Math.pow(PLAYER_RADIUS + PLAYER_RADIUS, 2)
     })

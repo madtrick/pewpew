@@ -70,6 +70,7 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
 
   const shot = createShot({ player })
   player.tokens = player.tokens - playerShotCostInToken
+  // TODO handle result. Return an error if the result is not 'ok'
   state.arena.registerShot(shot)
 
   return {

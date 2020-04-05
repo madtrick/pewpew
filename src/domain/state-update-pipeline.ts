@@ -2,43 +2,43 @@ import { GameState } from '../game-state'
 import { Position, UpdateType, ComponentType } from '../types'
 import { ScannedMine, ScannedPlayer, ScannedShot, ScannedUnknown } from '../components/radar'
 
-type WallHitUpdate = {
-  type: UpdateType.Hit,
+export type WallHitUpdate = {
+  type: UpdateType.Hit
   component: { type: ComponentType.Wall, data: { shotId: string, position: Position } }
 }
 
-type PlayerHitUpdate = {
-  type: UpdateType.Hit,
+export type PlayerHitUpdate = {
+  type: UpdateType.Hit
   component: { type: ComponentType.Player, data: { shotId: string, id: string, damage: number, life: number } }
 }
 
 type ShotMovementUpdate = { type: UpdateType.Movement } &
-  { component: { type: ComponentType.Shot, data: { id: string, position: Position } } }
+{ component: { type: ComponentType.Shot, data: { id: string, position: Position } } }
 
 type PlayerDestroyUpdate = { type: UpdateType.PlayerDestroyed } &
-  { component: { type: ComponentType.DestroyedPlayer, data: { id: string } } }
+{ component: { type: ComponentType.DestroyedPlayer, data: { id: string } } }
 
 type ComponentHitUpdate = {
-  type: UpdateType.Hit,
+  type: UpdateType.Hit
   component: {
-    type: ComponentType,
+    type: ComponentType
     data: {
-      id: string,
-      damage: number,
+      id: string
+      damage: number
       playerId: string
     }
   }
 }
 
 type ComponentScanUpdate = {
-  type: UpdateType.Scan,
+  type: UpdateType.Scan
   component: {
-    type: ComponentType.Radar,
+    type: ComponentType.Radar
     data: {
-      playerId: string,
-      players: ScannedPlayer[],
-      unknown: ScannedUnknown[],
-      shots: ScannedShot[],
+      playerId: string
+      players: ScannedPlayer[]
+      unknown: ScannedUnknown[]
+      shots: ScannedShot[]
       mines: ScannedMine[]
     }
   }
@@ -48,9 +48,9 @@ type ComponentScanUpdate = {
 // in the update-to-notification module where we transform a RemovePlayer update
 // injected by the engine
 type RemovePlayer = {
-  type: UpdateType.RemovePlayer,
+  type: UpdateType.RemovePlayer
   component: {
-    type: ComponentType.Player,
+    type: ComponentType.Player
     data: {
       id: string
     }

@@ -15,7 +15,7 @@ export interface SessionCloseEvent extends Event {
   data: Session
 }
 
-export interface ILogger {
+export interface Logger {
   info: (data: object) => void
   debug: (data: object) => void
 }

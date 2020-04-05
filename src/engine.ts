@@ -6,7 +6,7 @@ import { IncommingMessages, validateMessage } from './messages'
 import { isFailure, asSuccess, failure, success, Result } from './success-failure'
 import updateToNotifications from './update-to-notifications'
 import resultToResponseAndNotifications from './result-to-response-notifications'
-import { ILogger, Event, EventType, Position, Rotation, UpdateType, ComponentType } from './types'
+import { Logger, Event, EventType, Position, Rotation, UpdateType, ComponentType } from './types'
 import Config from './config'
 import { Update } from './domain/state-update-pipeline'
 
@@ -96,7 +96,7 @@ export default async function engine (
   controlMessages: InMessage[],
   messages: InMessage[],
   events: Event[],
-  context: { logger: ILogger, config: Config }
+  context: { logger: Logger, config: Config }
 ): Promise<EngineResult> {
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
   const controlResultMessages: OutMessage[] = []

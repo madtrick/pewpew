@@ -9,7 +9,7 @@ import Config from '../../config'
 // instead of having the same structure used in different places
 // with different names
 export type PlayerPosition = {
-  x: number,
+  x: number
   y: number
 }
 
@@ -62,29 +62,41 @@ export default function movePlayer (
   const turboMultiplierFactor = config.turboMultiplierFactor
   const domainResult = domain(movement, playerSpeed, turboCostInTokens, turboMultiplierFactor, player, arena.players(), { width: arena.width, height: arena.height })
 
-  const result: {
-    success: true,
-    request: RequestType.MovePlayer,
-    details: MovePlayerResultDetails
-  } = {
-    success: true,
-    request: RequestType.MovePlayer,
-    details: {
-      id: player.id,
-      turboApplied: domainResult.turboApplied,
-      requestCostInTokens: domainResult.actionCostInTokens,
-      remainingTokens: domainResult.player.tokens,
-      position: domainResult.player.position
+  if (domainResult.status === 'ok') {
+    const result: {
+      success: true
+      request: RequestType.MovePlayer
+      details: MovePlayerResultDetails
+    } = {
+      success: true,
+      request: RequestType.MovePlayer,
+      details: {
+        id: player.id,
+        turboApplied: domainResult.turboApplied,
+        requestCostInTokens: domainResult.actionCostInTokens,
+        remainingTokens: domainResult.player.tokens,
+        position: domainResult.player.position
+      }
     }
-  }
 
-  if (domainResult.errors) {
-    result.details.errors = domainResult.errors
-  }
+    if (domainResult.errors) {
+      result.details.errors = domainResult.errors
+    }
 
-  return {
-    result,
-    state
+    return {
+      result,
+      state
+    }
+  } else {
+    // TODO give a meaningful reason
+    return {
+      state,
+      result: {
+        request: RequestType.MovePlayer,
+        success: false,
+        reason: 'Unknown error'
+      }
+    }
   }
 }
 

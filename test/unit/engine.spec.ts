@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { UpdateType, ComponentType, ILogger, EventType } from '../../src/types'
+import { UpdateType, ComponentType, Logger, EventType } from '../../src/types'
 import { createSession, createControlSession, Session } from '../../src/session'
 import { CommandType } from '../../src/message-handlers'
 import { createPlayer, Player } from '../../src/player'
@@ -16,7 +16,7 @@ describe('Engine', () => {
     let sandbox: sinon.SinonSandbox
     let engineState: EngineState
     let loopStub: sinon.SinonStub
-    let logger: ILogger
+    let logger: Logger
     let arena: Arena
     let player: Player
 

@@ -1,9 +1,9 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 import { EventEmitter } from 'events'
-import { MessagingHub, ChannelRef, RouteRef } from '../../src/messaging-hub'
+import { WebSocketMessagingHub, ChannelRef, RouteRef } from '../../src/messaging-hub'
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
 describe('Messaging Hub', () => {
   let socket1: EventEmitter & { send: sinon.SinonStub, terminate: sinon.SinonStub }
@@ -24,7 +24,7 @@ describe('Messaging Hub', () => {
   describe('when the request path exists in the hub', () => {
     it('assigns correct route to incoming messages', () => {
       const routes = { '/player': { id: 'player' }, '/control': { id: 'control' } }
-      const hub = new MessagingHub(wss, uuidFn, { routes })
+      const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
       const playerRequest = { url: '/player', headers: { host: 'localhost:8888' } }
       const controlRequest = { url: '/control', headers: { host: 'localhost:8888' } }
 
@@ -46,7 +46,7 @@ describe('Messaging Hub', () => {
   describe('when the requested path does not exist in the hub', () => {
     it('does not create a channel for the request', () => {
       const routes = { '/player': { id: 'player' } }
-      const hub = new MessagingHub(wss, uuidFn, { routes })
+      const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
       const request = { url: '/foo', headers: { host: 'localhost:8888' } }
 
       socket1.send = sinon.stub().resolves()
@@ -61,7 +61,7 @@ describe('Messaging Hub', () => {
     it('sends an error message', () => {
       const routes = { '/player': { id: 'player' } }
       // tslint:disable-next-line
-      new MessagingHub(wss, uuidFn, { routes })
+      new WebSocketMessagingHub(wss, uuidFn, { routes })
       const request = { url: '/foo', headers: { host: 'localhost:8888' } }
 
       socket1.send = sinon.stub().yields()
@@ -74,7 +74,7 @@ describe('Messaging Hub', () => {
     it('terminates the socket', async () => {
       const routes = { '/player': { id: 'player' } }
       // tslint:disable-next-line
-      new MessagingHub(wss, uuidFn, { routes })
+      new WebSocketMessagingHub(wss, uuidFn, { routes })
       const request = { url: '/foo', headers: { host: 'localhost:8888' } }
 
       socket1.send = sinon.stub().yields()
@@ -91,7 +91,7 @@ describe('Messaging Hub', () => {
 
   it('creates a channel when a new WebSocket connection is openened', () => {
     const routes = { '/player': { id: 'player' } }
-    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
     const request = { url: '/player', headers: { host: 'localhost:8888' } }
 
     wss.emit('connection', socket1, request)
@@ -103,7 +103,7 @@ describe('Messaging Hub', () => {
 
   it('removes the channel when the WebSocket connection is closed', () => {
     const routes = { '/player': { id: 'player' }, '/control': { id: 'control' } }
-    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
     const request = { url: '/player', headers: { host: 'localhost:8888' } }
 
     wss.emit('connection', socket1, request)
@@ -116,7 +116,7 @@ describe('Messaging Hub', () => {
 
   it('calls the listener when a channel is closed', () => {
     const routes = { '/player': { id: 'player' } }
-    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
     const request = { url: '/player', headers: { host: 'localhost:8888' } }
     let openedChannel: ChannelRef | undefined
     let closedChannel: ChannelRef | undefined
@@ -131,7 +131,7 @@ describe('Messaging Hub', () => {
 
   it('clears the in memory messages after each pull', () => {
     const routes = { '/player': { id: 'player' } }
-    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
     const request = { url: '/player', headers: { host: 'localhost:8888' } }
 
     wss.emit('connection', socket1, request)
@@ -143,7 +143,7 @@ describe('Messaging Hub', () => {
 
   it('keeps only on message per channel', () => {
     const routes = { '/player': { id: 'player' } }
-    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
     const request = { url: '/player', headers: { host: 'localhost:8888' } }
 
     wss.emit('connection', socket1, request)
@@ -162,7 +162,7 @@ describe('Messaging Hub', () => {
 
   it('sends messages throught the right channel', async () => {
     const routes = { '/player': { id: 'player' } }
-    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
     const request = { url: '/player', headers: { host: 'localhost:8888' } }
     const data = 'my-message'
 
@@ -177,7 +177,7 @@ describe('Messaging Hub', () => {
 
   it('calls the listener when a new channel is created', () => {
     const routes = { '/player': { id: 'player' } }
-    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
     const request = { url: '/player', headers: { host: 'localhost:8888' } }
     let channel: ChannelRef | undefined
 
@@ -190,14 +190,15 @@ describe('Messaging Hub', () => {
 
   it('calls the listener when a new channel is created including the respective route', () => {
     const routes = { '/player': { id: 'player' } }
-    const hub = new MessagingHub(wss, uuidFn, { routes })
+    const hub = new WebSocketMessagingHub(wss, uuidFn, { routes })
     const request = { url: '/player', headers: { host: 'localhost:8888' } }
-    let route: RouteRef | undefined
+    let route: RouteRef
 
     hub.on('channelOpen', (_ch: ChannelRef, context: { route: RouteRef }) => route = context.route)
 
     wss.emit('connection', socket1, request)
-    expect(route!.id).to.eql('player')
+    // @ts-ignore
+    expect(route.id).to.eql('player')
   })
 
   // TODO don't send messages to a socket that just closed

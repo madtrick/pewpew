@@ -61,15 +61,15 @@ describe('State processor - Shot hits', () => {
       const { newState, updates } = await processor(state)
       const shots = newState.shots()
       expect(shots).to.be.empty
-      const targetPlayer = arena.findPlayer('player-2')
-      expect(targetPlayer!.life).to.eql(initialOtherPlayerLife - shot.damage)
+      const targetPlayer = arena.findPlayer('player-2') as ArenaPlayer
+      expect(targetPlayer.life).to.eql(initialOtherPlayerLife - shot.damage)
       expect(updates).to.eql([{
         type: UpdateType.Hit,
         component: {
           type: ComponentType.Player,
           data: {
-            id: targetPlayer!.id,
-            life: targetPlayer!.life,
+            id: targetPlayer.id,
+            life: targetPlayer.life,
             damage: shot.damage,
             shotId: shot.id
           }

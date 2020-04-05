@@ -15,7 +15,7 @@ describe('Command - Start game', () => {
       id: 'StartGame'
     }
 
-      // TODO, update this to also take a session object
+    // TODO, update this to also take a session object
     const { result, state: newState } = handler(message, state)
 
     expect(result).to.eql({

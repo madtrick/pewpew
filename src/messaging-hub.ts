@@ -43,7 +43,7 @@ interface Channel {
   route: Route
 }
 
-export interface IMessagingHub {
+export interface MessagingHub {
   pull (): Message[]
   send (options: { channel: { id: ChannelId }, data: string }): Promise<void>
   on (event: 'channelOpen' | 'channelClose', listener: (ch: ChannelRef, context: { route: RouteRef }) => void): void
@@ -51,7 +51,7 @@ export interface IMessagingHub {
 
 type UUIDFn = () => string
 
-export class MessagingHub extends EventEmitter implements IMessagingHub {
+export class WebSocketMessagingHub extends EventEmitter implements MessagingHub {
   private connection: WebSocketConnectionHandler
   private channels: Map<string, Channel>
   private messages: [Channel, any][] // TODO replace that any

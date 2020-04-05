@@ -32,7 +32,7 @@ interface GameLoopResult {
  * - Messages are validated in another layer, before being passed to the loop
  */
 
- // TODO validate that only one message is processed per player, per loop tick
+// TODO validate that only one message is processed per player, per loop tick
 export type GameLoop = (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[], config: Config) => Promise<GameLoopResult>
 
 // TODO rename this module to something like message dispatcher
@@ -42,7 +42,7 @@ export default function createGameLopp (
   stateUpdatePipeline: (state: GameState) => Promise<{ state: GameState, updates: Update[] }>
 ): GameLoop {
   return async function gameLoop (state: GameState, inputs: { session: Session, message: IncommingMessage<'Request' | 'Command'> }[], config: Config): Promise<GameLoopResult> {
-    let loopCycleRunResult: GameLoopResult = { state: state, results: [], updates: [] }
+    const loopCycleRunResult: GameLoopResult = { state: state, results: [], updates: [] }
 
     let newState: GameState = state
     let updates: Update[] = []

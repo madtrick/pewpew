@@ -8,8 +8,12 @@ export interface WebSocketHandler extends EventEmitter {
   handleUpgrade: WebSocket.Server['handleUpgrade']
 }
 
-export type Server = ReturnType<typeof create>
-const create = (wss: WebSocketHandler) => {
+export interface Server {
+  start: () => Promise<void>
+  stop: () => Promise<void>
+}
+
+const create = (wss: WebSocketHandler): Server => {
   const server = createServer()
   return {
     start: async () => {
@@ -56,12 +60,17 @@ const create = (wss: WebSocketHandler) => {
       })
     },
     stop: async () => {
-      return new Promise((resolve) => {
-        server.close(resolve)
+      return new Promise((resolve, reject) => {
+        server.close((err) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
       })
     }
   }
 }
 
 export default create
-
