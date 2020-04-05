@@ -27,6 +27,8 @@ function calculateDistanceBetweenPositions (positionA: Position, positionB: Posi
   return distance
 }
 
+export const RADAR_RADIUS = 80
+
 export type RadarScan = typeof scan
 export function scan (
   position: Position,
@@ -36,15 +38,14 @@ export function scan (
   const players = components.players.filter(({ position: playerPosition }) => {
     return playerPosition.x !== position.x || playerPosition.y !== position.y
   })
-  const scanRadius = 80
-  const shotIdentifyRadius = scanRadius - 5
-  const mineIdentifyRadius = scanRadius - 5
+  const shotIdentifyRadius = RADAR_RADIUS - 5
+  const mineIdentifyRadius = RADAR_RADIUS - 5
   const detectedComponents: ScanResult = { players: [], shots: [], mines: [], unknown: [] }
 
   components.shots.forEach((shot) => {
     const distance = calculateDistanceBetweenPositions(position, shot.position)
 
-    if (distance <= scanRadius) {
+    if (distance <= RADAR_RADIUS) {
       if (distance <= shotIdentifyRadius) {
         detectedComponents.shots.push({
           rotation: shot.rotation,
@@ -61,7 +62,7 @@ export function scan (
   components.mines.forEach((mine) => {
     const distance = calculateDistanceBetweenPositions(position, mine.position)
 
-    if (distance <= scanRadius) {
+    if (distance <= RADAR_RADIUS) {
       if (distance <= mineIdentifyRadius) {
         detectedComponents.mines.push({ position: mine.position })
       } else {
@@ -73,8 +74,8 @@ export function scan (
   players.forEach((player) => {
     const distance = calculateDistanceBetweenPositions(position, player.position)
 
-    if (distance <= (scanRadius + PLAYER_RADIUS)) {
-      if (distance <= scanRadius) {
+    if (distance <= (RADAR_RADIUS + PLAYER_RADIUS)) {
+      if (distance <= RADAR_RADIUS) {
         // the center of the component is within the range of the radar
         detectedComponents.players.push({
           id: player.id,

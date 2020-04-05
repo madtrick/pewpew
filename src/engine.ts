@@ -243,7 +243,7 @@ export default async function engine (
   // TODO combine the notifications and responses
   if (results) {
     for (const result of results) {
-      const responsesAndNotifications = resultToResponseAndNotifications(result, Array.from(state.channelSession.values()))
+      const responsesAndNotifications = resultToResponseAndNotifications(result, Array.from(state.channelSession.values()), context.config)
       for (const notification of responsesAndNotifications) {
         const session = notification.session
 
