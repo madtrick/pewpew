@@ -40,7 +40,7 @@ export type SuccessCommandResult = CommandResult & {
 }
 
 export type FailureCommandResult = CommandResult & {
-  success: false,
+  success: false
   reason: string
 }
 
@@ -72,13 +72,13 @@ export type SuccessfulRotateRequest = RequestResult & SuccessfulRequest & {
 }
 
 export type SuccessfulDeployMineRequest = RequestResult & SuccessfulRequest & {
-  request: RequestType.DeployMine,
+  request: RequestType.DeployMine
   details: DeployMineResultDetails
 }
 
 export type SuccessRequestResult = SuccessfulRegiserPlayerRequest | SuccessfulMovePlayerRequest | SuccessfulShootRequest | SuccessfulRotateRequest | SuccessfulDeployMineRequest
 export type FailureRequestResult = RequestResult & {
-  success: false,
+  success: false
   reason: string
 }
 
@@ -121,7 +121,7 @@ export interface IncommingMessageHandlers {
     RotatePlayer: (session: Session, message: RotatePlayerMessage, state: GameState, config: Config) => HandlerResult
     Shoot: (session: Session, message: ShootMessage, state: GameState, config: Config) => HandlerResult
     DeployMine: (session: Session, message: DeployMineMessage, state: GameState, config: Config) => HandlerResult
-  },
+  }
   Command: {
     StartGame: (message: StartGameMessage, state: GameState) => CommandHandlerResult
   }

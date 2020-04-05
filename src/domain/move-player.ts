@@ -42,19 +42,22 @@ export default function movePlayer (
   player: Player,
   players: ArenaPlayer[],
   arenaDimensions: { width: number, height: number }
-): Result<ActionResult, null> {
+): Result<ActionResult, {}> {
   const arenaPlayer = players.find((arenaPlayer) => arenaPlayer.id === player.id)
-  // TODO return a failure in the result if the player hasn't been found
+
+  if (!arenaPlayer) {
+    return { status: 'ko' }
+  }
 
   let speedWithTurbo
-  let errors: { msg: string }[] = []
-  let turboApplied: boolean = false
+  const errors: { msg: string }[] = []
+  let turboApplied = false
 
   if (movement.withTurbo) {
-    if (arenaPlayer!.tokens >= turboCostInTokens) {
+    if (arenaPlayer.tokens >= turboCostInTokens) {
       turboApplied = true
       speedWithTurbo = speed * turboMultiplierFactor
-      arenaPlayer!.tokens = arenaPlayer!.tokens - turboCostInTokens
+      arenaPlayer.tokens = arenaPlayer.tokens - turboCostInTokens
     } else {
       errors.push({ msg: 'The player does not have enough tokens to use the turbo' })
       speedWithTurbo = speed
@@ -63,7 +66,7 @@ export default function movePlayer (
     speedWithTurbo = speed
   }
 
-  const newPosition = calculateNewPlayerPosition(movement, speedWithTurbo, player, arenaPlayer!.position)
+  const newPosition = calculateNewPlayerPosition(movement, speedWithTurbo, player, arenaPlayer.position)
 
   const { x, y } = newPosition
   const collides = players.find((arenaPlayer) => {
@@ -85,11 +88,11 @@ export default function movePlayer (
   })
 
   if (isPlayerPositionWithinBoundaries(newPosition, arenaDimensions) && collides === undefined) {
-    arenaPlayer!.position = newPosition
+    arenaPlayer.position = newPosition
 
     return {
       status: 'ok',
-      player: arenaPlayer!,
+      player: arenaPlayer,
       turboApplied,
       actionCostInTokens: turboApplied ? turboCostInTokens : 0,
       errors: errors
@@ -97,7 +100,7 @@ export default function movePlayer (
   } else {
     return {
       status: 'ok',
-      player: arenaPlayer!,
+      player: arenaPlayer,
       turboApplied,
       actionCostInTokens: turboApplied ? turboCostInTokens : 0,
       errors: errors

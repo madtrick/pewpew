@@ -17,7 +17,7 @@ export interface Session extends Base {
   playerId?: string
 }
 
-export interface ControlSession extends Base {}
+export type ControlSession = Base
 
 export function isControlSession (session: ControlSession | Session): session is ControlSession {
   return session.type === SessionType.Control

@@ -9,7 +9,7 @@ export const ROTATION_COST_IN_TOKENS = 0
 // instead of having the same structure used in different places
 // with different names
 export type PlayerPosition = {
-  x: number,
+  x: number
   y: number
 }
 
@@ -63,6 +63,7 @@ export default function rotatePlayer (session: Session, message: RotatePlayerMes
   }
 
   const { data: { rotation } } = message
+  // TODO handle the returned result. Return an error if the status is 'ko'
   state.arena.rotatePlayer(rotation, player)
 
   return {

@@ -21,11 +21,11 @@ export type RotatePlayerMessage = IncommingMessage<'Request'> & {
   }
 }
 
-export interface DeployMineMessage extends IncommingMessage<'Request'> {}
+export type DeployMineMessage = IncommingMessage<'Request'>
 
-export interface ShootMessage extends IncommingMessage<'Request'> {}
+export type ShootMessage = IncommingMessage<'Request'>
 
-export interface StartGameMessage extends IncommingMessage<'Command'> {}
+export type StartGameMessage = IncommingMessage<'Command'>
 
 
 export interface IncommingMessage<Type> {
@@ -41,9 +41,9 @@ export type IncommingMessages = RegisterPlayerMessage | MovePlayerMessage | Shoo
 export interface OutgoingMessage<T> {
   data: {
     result: 'Success' | 'Failure'
-    msg?: string, // TODO: move this into details?
+    msg?: string // TODO: move this into details?
     details?: T
-  },
+  }
   type: 'Response'
   id: string
 }

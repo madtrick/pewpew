@@ -12,7 +12,7 @@ import { createProcessor as createMoveShotPipelineProcessor } from '../../src/do
 import { createProcessor as createMineHitPipelineProcessor } from '../../src/domain/state-processors/mine-hit'
 import { createProcessor as createShotHitPipelineProcessor } from '../../src/domain/state-processors/shot-hits'
 import { createProcessor as createRadarScanPipelineProcessor } from '../../src/domain/state-processors/radar-scan'
-import { process } from '../../src/domain/state-update-pipeline'
+import { process, Update } from '../../src/domain/state-update-pipeline'
 import VERSION from '../../src/version'
 
 describe('Engine - Integration', () => {
@@ -27,7 +27,7 @@ describe('Engine - Integration', () => {
     createMineHitPipelineProcessor(),
     createRadarScanPipelineProcessor(scan)
   ]
-  const statePipelineProcessor = (state: GameState) => process(statePipeline, state)
+  const statePipelineProcessor = (state: GameState): Promise<{ state: GameState, updates: Update[] }> => process(statePipeline, state)
   const gameLoop = createGameLoop(handlers, statePipelineProcessor)
 
   beforeEach(() => {

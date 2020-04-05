@@ -1,6 +1,6 @@
 // TODO make MessagingHub, Arena and GameState default exports
 import uuid from 'uuid/v4'
-import { IMessagingHub, MessagingHub, Message, ChannelRef, RouteRef, WebSocketConnectionHandler } from './messaging-hub'
+import { MessagingHub, WebSocketMessagingHub, Message, ChannelRef, RouteRef, WebSocketConnectionHandler } from './messaging-hub'
 import { Arena } from './components/arena'
 import { scan } from './components/radar'
 import { GameState } from './game-state'
@@ -16,7 +16,7 @@ import { createTicker, Ticker } from './ticker'
 import { EventType, Event } from './types'
 import Config from './config'
 import * as Logger from 'bunyan'
-import { process } from './domain/state-update-pipeline'
+import { process, Update } from './domain/state-update-pipeline'
 
 interface ServerContext {
   config: Config
@@ -24,8 +24,8 @@ interface ServerContext {
   ticker: Ticker
   engine: Engine
   loop: GameLoop
-  engineState: EngineState,
-  messagingHub: IMessagingHub
+  engineState: EngineState
+  messagingHub: MessagingHub
   createSession: CreateSessionFn
   createControlSession: CreateControlSessionFn
 }
@@ -62,14 +62,14 @@ export function init ({ WS }: { WS: WebSocketConnectionHandler }, config: Config
     createMineHitPipelineProcessor(),
     createRadarScanPipelineProcessor(scan)
   ]
-  const statePipelineProcessor = (state: GameState) => process(statePipeline, state)
+  const statePipelineProcessor = (state: GameState): Promise<{ state: GameState, updates: Update[] }> => process(statePipeline, state)
   const loop = createGameLoop(handlers, statePipelineProcessor)
   const logger = Logger.createLogger({ name: 'pewpew', level: 'info' })
   const messagingRoutes = {
     '/ws/player': { id: 'player' },
     '/ws/control': { id: 'control' }
   }
-  const messagingHub = new MessagingHub(WS, uuid, { routes: messagingRoutes })
+  const messagingHub = new WebSocketMessagingHub(WS, uuid, { routes: messagingRoutes })
 
   return {
     config,

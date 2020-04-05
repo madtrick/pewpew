@@ -1,13 +1,13 @@
 import { expect } from 'chai'
 import uuid from 'uuid/v4'
 import WS from 'ws'
-import { MessagingHub } from '../../src/messaging-hub'
+import { MessagingHub, WebSocketMessagingHub } from '../../src/messaging-hub'
 
 function P (fn: (resolver: (value?: any | PromiseLike<void>) => void) => void): Promise<void> {
   return new Promise((resolve) => fn(resolve))
 }
 
-function sleep (ms: number = 100): Promise<void> {
+function sleep (ms = 100): Promise<void> {
   return P((resolve) => setTimeout(resolve, ms))
 }
 
@@ -19,7 +19,7 @@ describe('Messaging Hub - Integration', () => {
   beforeEach(async () => {
     await P((r) => server = new WS.Server({ port: 8888 }, r))
 
-    hub = new MessagingHub(server, uuid, { routes: { '/player': { id: 'player' } } })
+    hub = new WebSocketMessagingHub(server, uuid, { routes: { '/player': { id: 'player' } } })
 
     // NOTE the client has to be created after the hub is initalized
     // or otherwise the 'connection' event from the server

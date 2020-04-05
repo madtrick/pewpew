@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import * as sinon from 'sinon'
+import sinon from 'sinon'
 import { Arena, asSuccess } from '../../../src/components/arena'
 import { createPlayer, Player } from '../../../src/player'
 import movePlayer from '../../../src/domain/move-player'
@@ -15,10 +15,10 @@ enum DisplacementDirection {
 }
 
 type MovementTestOptions = {
-  arena: () => Arena,
-  initialRotation: Rotation,
-  initialPosition: Position,
-  movements: { direction: DisplacementDirection, withTurbo?: boolean }[],
+  arena: () => Arena
+  initialRotation: Rotation
+  initialPosition: Position
+  movements: { direction: DisplacementDirection, withTurbo?: boolean }[]
   expectedResponses: { position: Position }[]
 }
 function movementTest (options: MovementTestOptions): () => Promise<void> {
