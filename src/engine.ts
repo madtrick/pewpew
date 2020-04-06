@@ -271,7 +271,6 @@ export default async function engine (
           } else {
             playerMessages.set(channel, [{ channel, data: notification.notification || notification.response }])
           }
-          /* playerResultMessages.push({ channel, data: notification.notification || notification.response }) */
         } else {
           // controlResultMessages.push({ channel, data: notification.notification || notification.response })
           if (dataForChannel.has(channel)) {
@@ -306,7 +305,6 @@ export default async function engine (
         const channel = session.channel
 
         if (isPlayerSession(notification.session)) {
-          /* playerResultMessages.push({ channel, data: notification.notification }) */
           if (playerMessages.has(channel)) {
             (playerMessages.get(channel) as any[]).push({ channel, data: notification.notification || notification.response })
           } else {
