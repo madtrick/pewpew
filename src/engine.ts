@@ -354,7 +354,7 @@ export default async function engine (
   })
 
   playerMessages.forEach((messages, channel) => {
-    messages.push({ channel, data: { id: 'Sync', type: 'Notification' } })
+    messages.push({ channel, data: { id: 'Tick', type: 'Notification' } })
   })
 
   const m = Array.from(playerMessages.values()).flat()

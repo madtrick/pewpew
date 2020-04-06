@@ -323,7 +323,7 @@ describe('Engine', () => {
       }])
     })
 
-    describe.only('Sync notifications', () => {
+    describe.only('Tick notifications', () => {
       describe('when the game is started', () => {
         it('is sent to each registered player after any other message', async () => {
           const playerSession = createSession({ id: 'channel-2' })
@@ -372,7 +372,7 @@ describe('Engine', () => {
               channel: { id: 'channel-2' },
               data: {
                 type: 'Notification',
-                id: 'Sync'
+                id: 'Tick'
               }
             }
           ])
@@ -391,7 +391,7 @@ describe('Engine', () => {
               channel: { id: 'channel-2' },
               data: {
                 type: 'Notification',
-                id: 'Sync'
+                id: 'Tick'
               }
             }
           ])
