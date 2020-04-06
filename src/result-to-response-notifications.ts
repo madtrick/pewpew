@@ -276,7 +276,6 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     if (result.success === true && result.request === RequestType.Shoot) {
       const { details: { id: playerId, remainingTokens, requestCostInTokens } } = result
       const playerSession = playerSessions.find((s) => s.playerId === playerId)
-      console.log(playerSession)
 
       return [{
         session: playerSession,

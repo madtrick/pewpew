@@ -325,7 +325,7 @@ describe('Engine', () => {
 
     describe('Sync notifications', () => {
       describe('when the game is started', () => {
-        it.only('includes a "Sync" message after all the messages sent to each player', async () => {
+        it.only('is sent to each registered player after any other message', async () => {
           const controlSession = createControlSession({ id: 'channel-1' })
           const playerSession = createSession({ id: 'channel-2' })
           playerSession.playerId = player.id
@@ -349,11 +349,6 @@ describe('Engine', () => {
             ['channel-1', controlSession],
             ['channel-2', playerSession],
             ['channel-3', otherPlayerSession]
-          ])
-          engineState.sessionChannel = new Map([
-            [controlSession, 'channel-1'],
-            [playerSession, 'channel-2'],
-            [otherPlayerSession, 'channel-3']
           ])
 
           const { playerResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
