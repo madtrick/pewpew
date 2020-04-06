@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import { UpdateType, ComponentType, Logger, EventType } from '../../src/types'
 import { createSession, createControlSession, Session } from '../../src/session'
-import { CommandType } from '../../src/message-handlers'
+import { CommandType, RequestType } from '../../src/message-handlers'
 import { createPlayer, Player } from '../../src/player'
 import engine, { EngineState } from '../../src/engine'
 import { Arena, asSuccess } from '../../src/components/arena'
@@ -321,6 +321,87 @@ describe('Engine', () => {
           }]
         }
       }])
+    })
+
+    describe('Sync notifications', () => {
+      describe('when the game is started', () => {
+        it.only('includes a "Sync" message after all the messages sent to each player', async () => {
+          const controlSession = createControlSession({ id: 'channel-1' })
+          const playerSession = createSession({ id: 'channel-2' })
+          playerSession.playerId = player.id
+          const otherPlayerSession = createSession({ id: 'channel-3' })
+          // Response to a shoot request
+          loopStub.resolves({
+            results: [
+              {
+                success: true,
+                request: RequestType.Shoot,
+                details: {
+                  requestCostInTokens: config.costs.playerShot,
+                  remainingTokens: player.tokens - config.costs.playerShot,
+                  id: player.id
+                }
+              }
+            ]
+          })
+
+          engineState.channelSession = new Map([
+            ['channel-1', controlSession],
+            ['channel-2', playerSession],
+            ['channel-3', otherPlayerSession]
+          ])
+          engineState.sessionChannel = new Map([
+            [controlSession, 'channel-1'],
+            [playerSession, 'channel-2'],
+            [otherPlayerSession, 'channel-3']
+          ])
+
+          const { playerResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
+
+          expect(playerResultMessages).to.eql([
+            {
+              channel: { id: 'channel-2' },
+              data: {
+                type: 'Response',
+                id: RequestType.Shoot,
+                success: true,
+                data: {
+                  component: {
+                    details: {
+                      tokens: player.tokens - config.costs.playerShot
+                    }
+                  },
+                  request: {
+                    cost: config.costs.playerShot
+                  }
+                }
+              }
+            },
+            {
+              channel: { id: 'channel-2' },
+              data: {
+                type: 'Notification',
+                id: 'Sync'
+              }
+            },
+            {
+              channel: { id: 'channel-3' },
+              data: {
+                type: 'Notification',
+                id: 'Sync'
+              }
+            }
+          ])
+          /* expect(controlResultMessages).to.eql([{ */
+          /*   channel: { id: 'channel-1' }, */
+          /*   data: { */
+          /*     type: 'Notification', */
+          /*     id: 'GameStateUpdate', */
+          /*     data: [{}] */
+          /*   } */
+          /* }]) */
+        })
+      })
     })
   })
 })
