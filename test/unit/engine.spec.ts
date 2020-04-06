@@ -323,13 +323,11 @@ describe('Engine', () => {
       }])
     })
 
-    describe('Sync notifications', () => {
+    describe.only('Sync notifications', () => {
       describe('when the game is started', () => {
-        it.only('is sent to each registered player after any other message', async () => {
-          const controlSession = createControlSession({ id: 'channel-1' })
+        it('is sent to each registered player after any other message', async () => {
           const playerSession = createSession({ id: 'channel-2' })
           playerSession.playerId = player.id
-          const otherPlayerSession = createSession({ id: 'channel-3' })
           // Response to a shoot request
           loopStub.resolves({
             results: [
@@ -346,9 +344,7 @@ describe('Engine', () => {
           })
 
           engineState.channelSession = new Map([
-            ['channel-1', controlSession],
-            ['channel-2', playerSession],
-            ['channel-3', otherPlayerSession]
+            ['channel-2', playerSession]
           ])
 
           const { playerResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
@@ -378,23 +374,38 @@ describe('Engine', () => {
                 type: 'Notification',
                 id: 'Sync'
               }
-            },
+            }
+          ])
+        })
+
+        it('is sent to inactive players', async () => {
+          const playerSession = createSession({ id: 'channel-2' })
+          engineState.channelSession = new Map([
+            ['channel-2', playerSession]
+          ])
+
+          const { playerResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
+
+          expect(playerResultMessages).to.eql([
             {
-              channel: { id: 'channel-3' },
+              channel: { id: 'channel-2' },
               data: {
                 type: 'Notification',
                 id: 'Sync'
               }
             }
           ])
-          /* expect(controlResultMessages).to.eql([{ */
-          /*   channel: { id: 'channel-1' }, */
-          /*   data: { */
-          /*     type: 'Notification', */
-          /*     id: 'GameStateUpdate', */
-          /*     data: [{}] */
-          /*   } */
-          /* }]) */
+        })
+
+        it('is not sent to control channels', async () => {
+          const controlSession = createControlSession({ id: 'channel-1' })
+          engineState.channelSession = new Map([
+            ['channel-1', controlSession]
+          ])
+
+          const { controlResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
+
+          expect(controlResultMessages).to.eql([])
         })
       })
     })
