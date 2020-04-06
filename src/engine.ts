@@ -9,6 +9,7 @@ import resultToResponseAndNotifications from './result-to-response-notifications
 import { Logger, Event, EventType, Position, Rotation, UpdateType, ComponentType } from './types'
 import Config from './config'
 import { Update } from './domain/state-update-pipeline'
+import { ChannelRef } from './messaging-hub'
 
 function asIncomingMessage (message: object): Result<IncommingMessages, any> {
   // let object: object
@@ -100,7 +101,7 @@ export default async function engine (
 ): Promise<EngineResult> {
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
   const controlResultMessages: OutMessage[] = []
-  const playerResultMessages: OutMessage[] = []
+  const playerMessages: Map<ChannelRef, any[]> = new Map()
 
   // TODO move all the event handling logic to a separa module so it's easier to test
   for (const event of events) {
@@ -186,7 +187,7 @@ export default async function engine (
     const result = asIncomingMessage(data)
 
     if (isFailure(result)) {
-      playerResultMessages.push({
+      const message = {
         channel,
         data: {
           type: 'Error',
@@ -195,7 +196,15 @@ export default async function engine (
             msg: 'Invalid message'
           }
         }
-      })
+      }
+
+      const messages = playerMessages.get(channel)
+
+      if (messages) {
+        messages.push(message)
+      } else {
+        playerMessages.set(channel, [message])
+      }
     } else {
       context.logger.debug({ message: result })
       const session = state.channelSession.get(channel.id)
@@ -264,7 +273,11 @@ export default async function engine (
         if (isPlayerSession(notification.session)) {
           // TODO we shoult pass the session here and not the channel. The channel is an implementation
           // detail of how we communicate with players
-          playerResultMessages.push({ channel, data: notification.notification || notification.response })
+          if (playerMessages.has(channel)) {
+            (playerMessages.get(channel) as any[]).push({ channel, data: notification.notification || notification.response })
+          } else {
+            playerMessages.set(channel, [{ channel, data: notification.notification || notification.response }])
+          }
         } else {
           // controlResultMessages.push({ channel, data: notification.notification || notification.response })
           if (dataForChannel.has(channel)) {
@@ -299,7 +312,11 @@ export default async function engine (
         const channel = session.channel
 
         if (isPlayerSession(notification.session)) {
-          playerResultMessages.push({ channel, data: notification.notification })
+          if (playerMessages.has(channel)) {
+            (playerMessages.get(channel) as any[]).push({ channel, data: notification.notification || notification.response })
+          } else {
+            playerMessages.set(channel, [{ channel, data: notification.notification || notification.response }])
+          }
         } else {
           // controlResultMessages.push({ channel, data: notification.notification })
           if (dataForChannel.has(channel)) {
@@ -335,6 +352,18 @@ export default async function engine (
     })
   })
 
+  state.channelSession.forEach((session) => {
+    if (isPlayerSession(session) && !playerMessages.has(session.channel)) {
+      playerMessages.set(session.channel, [])
+    }
+  })
+
+  playerMessages.forEach((messages, channel) => {
+    messages.push({ channel, data: { id: 'Tick', type: 'Notification' } })
+  })
+
+  const m = Array.from(playerMessages.values()).flat()
+
   // TODO rename this properties
-  return { playerResultMessages, controlResultMessages }
+  return { playerResultMessages: m, controlResultMessages }
 }
