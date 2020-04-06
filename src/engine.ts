@@ -101,7 +101,7 @@ export default async function engine (
 ): Promise<EngineResult> {
   const parsedMessages: { session: Session, message: IncommingMessages }[] = []
   const controlResultMessages: OutMessage[] = []
-  const playerResultMessages: OutMessage[] = []
+  const playerMessages: Map<ChannelRef, any[]> = new Map()
 
   // TODO move all the event handling logic to a separa module so it's easier to test
   for (const event of events) {
@@ -187,7 +187,7 @@ export default async function engine (
     const result = asIncomingMessage(data)
 
     if (isFailure(result)) {
-      playerResultMessages.push({
+      const message = {
         channel,
         data: {
           type: 'Error',
@@ -196,7 +196,15 @@ export default async function engine (
             msg: 'Invalid message'
           }
         }
-      })
+      }
+
+      const messages = playerMessages.get(channel)
+
+      if (messages) {
+        messages.push(message)
+      } else {
+        playerMessages.set(channel, [message])
+      }
     } else {
       context.logger.debug({ message: result })
       const session = state.channelSession.get(channel.id)
@@ -240,7 +248,6 @@ export default async function engine (
 
   const { updates, results } = await loop(state.gameState, parsedMessages, context.config)
   const dataForChannel = new Map()
-  const playerMessages: Map<ChannelRef, any[]> = new Map()
 
   // TODO combine the notifications and responses
   if (results) {

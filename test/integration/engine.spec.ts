@@ -64,7 +64,7 @@ describe('Engine - Integration', () => {
 
       const { playerResultMessages } = await engine(engineState, gameLoop, [], playerMessages, [], { logger, config })
 
-      expect(playerResultMessages).to.have.lengthOf(1)
+      expect(playerResultMessages).to.have.lengthOf(2)
       expect(playerResultMessages[0].data).to.include({
         type: 'Response',
         id: 'RegisterPlayer',
@@ -72,6 +72,7 @@ describe('Engine - Integration', () => {
       })
       expect((playerResultMessages[0] as any).data.details.position.x).to.be.a('number')
       expect((playerResultMessages[0].data as any).details.position.y).to.be.a('number')
+      expect((playerResultMessages[1].data)).to.eql({ type: 'Notification', id: 'Tick' })
     })
   })
 
@@ -167,15 +168,11 @@ describe('Engine - Integration', () => {
           success: true
         }]
       })
-      expect(playerResultMessages).to.have.lengthOf(2)
-      expect(playerResultMessages[0].data).to.eql({
-        type: 'Notification',
-        id: 'StartGame'
-      })
-      expect(playerResultMessages[0].data).to.eql({
-        type: 'Notification',
-        id: 'StartGame'
-      })
+      expect(playerResultMessages).to.have.lengthOf(4)
+      expect(playerResultMessages[0].data).to.eql({ type: 'Notification', id: 'StartGame' })
+      expect((playerResultMessages[1].data)).to.eql({ type: 'Notification', id: 'Tick' })
+      expect(playerResultMessages[2].data).to.eql({ type: 'Notification', id: 'StartGame' })
+      expect((playerResultMessages[3].data)).to.eql({ type: 'Notification', id: 'Tick' })
     })
   })
 })

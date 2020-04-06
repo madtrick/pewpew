@@ -41,6 +41,11 @@ describe('End to end', () => {
         websocket.on('message', (reply) => {
           const parsed = JSON.parse(reply.toString())
 
+          if (parsed.type === 'Notification' && parsed.id === 'Tick') {
+            // ignore tick notifications
+            return
+          }
+
           expect(parsed).to.include({
             type: 'Response',
             id: 'RegisterPlayer'

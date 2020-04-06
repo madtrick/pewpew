@@ -68,7 +68,13 @@ describe('Engine', () => {
           }
           const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], [event], { logger, config })
 
-          expect(playerResultMessages).to.eql([])
+          expect(playerResultMessages).to.eql([{
+            channel: { id: 'channel-2' },
+            data: {
+              type: 'Notification',
+              id: 'Tick'
+            }
+          }])
           expect(controlResultMessages).to.eql([{
             channel: { id: 'channel-1' },
             data: {
@@ -129,6 +135,7 @@ describe('Engine', () => {
 
       it('sends a message to notify that the corresponding player was removed', async () => {
         engineState.gameState.registerPlayer(player)
+        engineState.channelSession.delete(playerSession.channel.id)
 
         const event = {
           type: EventType.SessionClose,
@@ -218,15 +225,28 @@ describe('Engine', () => {
       const { playerResultMessages, controlResultMessages } = await engine(engineState, loopStub, [], messages, [], { logger, config })
 
       expect(controlResultMessages).to.be.empty
-      expect(playerResultMessages).to.eql([{
-        channel: { id: 'channel-1' },
-        data: {
-          type: 'Error',
-          details: {
-            msg: 'Invalid message'
+      expect(playerResultMessages).to.eql([
+        {
+          channel: { id: 'channel-1' },
+          data: {
+            type: 'Error',
+            details: {
+              msg: 'Invalid message'
+            }
+          }
+        },
+        // TODO having to include this Notification feels a bit like a leaky abstraction. On this test
+        // I'm only interested that the player will receive a response for his invalid request but I
+        // have to test nonetheless for the tick notification. Maybe this is a sign that there should be
+        // player driven responses and game driven notifications
+        {
+          channel: { id: 'channel-1' },
+          data: {
+            type: 'Notification',
+            id: 'Tick'
           }
         }
-      }])
+      ])
     })
 
     it('transform the requests and commands results into notifications and responses and sends those', async () => {
@@ -252,13 +272,22 @@ describe('Engine', () => {
 
       const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
 
-      expect(playerResultMessages).to.eql([{
-        channel: { id: 'channel-2' },
-        data: {
-          type: 'Notification',
-          id: 'StartGame'
+      expect(playerResultMessages).to.eql([
+        {
+          channel: { id: 'channel-2' },
+          data: {
+            type: 'Notification',
+            id: 'StartGame'
+          }
+        },
+        {
+          channel: { id: 'channel-2' },
+          data: {
+            type: 'Notification',
+            id: 'Tick'
+          }
         }
-      }])
+      ])
       expect(controlResultMessages).to.eql([{
         channel: { id: 'channel-1' },
         data: {
@@ -302,7 +331,15 @@ describe('Engine', () => {
 
       const { controlResultMessages, playerResultMessages } = await engine(engineState, loopStub, [], [], [], { logger, config })
 
-      expect(playerResultMessages).to.be.empty
+      expect(playerResultMessages).to.eql([
+        {
+          channel: { id: 'channel-2' },
+          data: {
+            type: 'Notification',
+            id: 'Tick'
+          }
+        }
+      ])
       expect(controlResultMessages).to.eql([{
         channel: { id: 'channel-1' },
         data: {
@@ -323,7 +360,7 @@ describe('Engine', () => {
       }])
     })
 
-    describe.only('Tick notifications', () => {
+    describe('Tick notifications', () => {
       it('is sent to each registered player after any other message', async () => {
         const playerSession = createSession({ id: 'channel-2' })
         playerSession.playerId = player.id
