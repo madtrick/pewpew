@@ -93,6 +93,8 @@ describe('Requests - Register player', () => {
         // NOTE can't use .finite from chai as it's not part of the typing definitions
         expect((result.details as RegisterPlayerResultDetails).position.x).to.be.a('number')
         expect((result.details as RegisterPlayerResultDetails).position.y).to.be.a('number')
+        expect((result.details as RegisterPlayerResultDetails).life).to.eql(player.life)
+        expect((result.details as RegisterPlayerResultDetails).tokens).to.eql(player.tokens)
         expect((result.details as RegisterPlayerResultDetails).gameVersion).to.eql(state.version)
       }
       expect(session.playerId).to.eql(player.id)

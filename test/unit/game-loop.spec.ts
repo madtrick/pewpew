@@ -82,6 +82,8 @@ describe('Game loop', () => {
               y: 1
             },
             rotation: 0,
+            life: 100,
+            tokens: 150,
             isGameStarted: false,
             gameVersion: state.version
           }
