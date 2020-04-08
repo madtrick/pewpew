@@ -11,6 +11,8 @@ export interface RegisterPlayerResultDetails {
   id: string
   position: Position
   rotation: number
+  life: number
+  tokens: number
   isGameStarted: boolean
   gameVersion: string
 }
@@ -75,6 +77,8 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
         id: result.player.id,
         position: result.player.position,
         rotation: result.player.rotation,
+        life: result.player.life,
+        tokens: result.player.tokens,
         isGameStarted: state.started,
         gameVersion: state.version
       }

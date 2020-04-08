@@ -78,6 +78,8 @@ describe('Result to response', () => {
                 y: 100
               },
               rotation: 33,
+              life: 100,
+              tokens: 150,
               isGameStarted: true,
               gameVersion: '1.0.0'
             }
@@ -103,7 +105,9 @@ describe('Result to response', () => {
                     x: 100,
                     y: 100
                   },
-                  rotation: 33
+                  rotation: 33,
+                  life: 100,
+                  tokens: 150
                 }
               }
             }
@@ -122,7 +126,9 @@ describe('Result to response', () => {
                     x: 100,
                     y: 100
                   },
-                  rotation: 33
+                  rotation: 33,
+                  life: 100,
+                  tokens: 150
                 }
               }
             }
@@ -141,7 +147,9 @@ describe('Result to response', () => {
                   x: 100,
                   y: 100
                 },
-                rotation: 33
+                rotation: 33,
+                life: 100,
+                tokens: 150
               }
             }
           })
@@ -180,6 +188,8 @@ describe('Result to response', () => {
                 y: 100
               },
               rotation: 33,
+              life: 100,
+              tokens: 150,
               isGameStarted: false,
               gameVersion: '1.0.0'
             }
@@ -205,7 +215,9 @@ describe('Result to response', () => {
                     x: 100,
                     y: 100
                   },
-                  rotation: 33
+                  rotation: 33,
+                  life: 100,
+                  tokens: 150
                 }
               }
             }
@@ -224,7 +236,9 @@ describe('Result to response', () => {
                     x: 100,
                     y: 100
                   },
-                  rotation: 33
+                  rotation: 33,
+                  life: 100,
+                  tokens: 150
                 }
               }
             }
@@ -243,7 +257,9 @@ describe('Result to response', () => {
                   x: 100,
                   y: 100
                 },
-                rotation: 33
+                rotation: 33,
+                life: 100,
+                tokens: 150
               }
             }
           })
