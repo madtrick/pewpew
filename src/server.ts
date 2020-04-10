@@ -12,6 +12,7 @@ import { createProcessor as createMoveShotPipelineProcessor } from './domain/sta
 import { createProcessor as createMineHitPipelineProcessor } from './domain/state-processors/mine-hit'
 import { createProcessor as createShotHitPipelineProcessor } from './domain/state-processors/shot-hits'
 import { createProcessor as createRadarScanPipelineProcessor } from './domain/state-processors/radar-scan'
+import { createProcessor as createIncreaseTokensProcessor } from './domain/state-processors/increase-tokens'
 import { createTicker, Ticker } from './ticker'
 import { EventType, Event } from './types'
 import Config from './config'
@@ -60,7 +61,8 @@ export function init ({ WS }: { WS: WebSocketConnectionHandler }, config: Config
     createMoveShotPipelineProcessor(config.movementSpeeds.shot),
     createShotHitPipelineProcessor({ width: arena.width, height: arena.height }),
     createMineHitPipelineProcessor(),
-    createRadarScanPipelineProcessor(scan)
+    createRadarScanPipelineProcessor(scan),
+    createIncreaseTokensProcessor({ maxTokensPerPlayer: config.maxTokensPerPlayer, tokensIncreaseFactor: config.tokensIncreaseFactor })
   ]
   const statePipelineProcessor = (state: GameState): Promise<{ state: GameState, updates: Update[] }> => process(statePipeline, state)
   const loop = createGameLoop(handlers, statePipelineProcessor)
