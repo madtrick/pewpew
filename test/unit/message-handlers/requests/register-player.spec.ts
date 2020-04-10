@@ -8,13 +8,14 @@ import { RequestType } from '../../../../src/message-handlers'
 import handler, { RegisterPlayerResultDetails } from '../../../../src/message-handlers/requests/register-player'
 import { config } from '../../../config'
 
-describe('Requests - Register player', () => {
-  const arena = new Arena({ width: 100, height: 100 })
-  const gameStateOptions = { arena }
-
+describe.only('Requests - Register player', () => {
+  let gameStateOptions: { arena: Arena }
   let session: Session
+  let arena: Arena
 
   beforeEach(() => {
+    arena = new Arena({ width: 100, height: 100 })
+    gameStateOptions = { arena }
     session = createSession({ id: 'channel-1' })
   })
 
@@ -43,6 +44,52 @@ describe('Requests - Register player', () => {
         success: false,
         reason: `The specified version (${message.data.game.version}) does not satisfy the current game version (${state.version})`,
         request: RequestType.RegisterPlayer
+      })
+    })
+
+    it('accepts valid minor version', () => {
+      const state: GameState = new GameState(gameStateOptions)
+      const message: RegisterPlayerMessage = {
+        data: {
+          id: 'player-1',
+          game: {
+            version: '2.1.0'
+          }
+        },
+        type: 'Request',
+        id: 'RegisterPlayer'
+      }
+
+      // @ts-ignore
+      state.version = '2.3.0'
+
+      const { result } = handler(session, message, state, config)
+
+      expect(result).to.deep.include({
+        success: true
+      })
+    })
+
+    it('accepts valid patch version', () => {
+      const state: GameState = new GameState(gameStateOptions)
+      const message: RegisterPlayerMessage = {
+        data: {
+          id: 'player-1',
+          game: {
+            version: '2.1.0'
+          }
+        },
+        type: 'Request',
+        id: 'RegisterPlayer'
+      }
+
+      // @ts-ignore
+      state.version = '2.1.3'
+
+      const { result } = handler(session, message, state, config)
+
+      expect(result).to.deep.include({
+        success: true
       })
     })
   })
