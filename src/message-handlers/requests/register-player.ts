@@ -22,7 +22,7 @@ export interface RegisterPlayerResultDetails {
 export default function registerPlayer (session: Session, message: RegisterPlayerMessage, state: GameState, config: Config): HandlerResult {
 
   const givenVersion = message.data.game.version
-  if (!semver.satisfies(givenVersion, state.version)) {
+  if (!semver.satisfies(state.version, `^${givenVersion}`)) {
     return {
       result: {
         session,
