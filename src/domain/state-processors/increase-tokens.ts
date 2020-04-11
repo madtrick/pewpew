@@ -6,7 +6,6 @@ export function createProcessor(options: { maxTokensPerPlayer: number, tokensInc
     state.players().forEach((player) => {
       const updatedTokensValue = player.tokens + options.tokensIncreaseFactor
 
-      console.log(updatedTokensValue)
       if (updatedTokensValue < options.maxTokensPerPlayer) {
         player.tokens = updatedTokensValue
       }

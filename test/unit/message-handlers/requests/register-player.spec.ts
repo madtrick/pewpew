@@ -8,7 +8,7 @@ import { RequestType } from '../../../../src/message-handlers'
 import handler, { RegisterPlayerResultDetails } from '../../../../src/message-handlers/requests/register-player'
 import { config } from '../../../config'
 
-describe.only('Requests - Register player', () => {
+describe('Requests - Register player', () => {
   let gameStateOptions: { arena: Arena }
   let session: Session
   let arena: Arena
