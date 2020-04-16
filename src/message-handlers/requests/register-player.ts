@@ -71,6 +71,7 @@ export default function registerPlayer (session: Session, message: RegisterPlaye
   // TODO regex for valid ids?
   return {
     result: {
+      session,
       success: true,
       request: RequestType.RegisterPlayer,
       details: {

@@ -75,6 +75,7 @@ export default function shoot (session: Session, _message: ShootMessage, state: 
 
   return {
     result: {
+      session,
       success: true,
       request: RequestType.Shoot,
       details: {

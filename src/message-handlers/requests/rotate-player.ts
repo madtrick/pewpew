@@ -68,6 +68,7 @@ export default function rotatePlayer (session: Session, message: RotatePlayerMes
 
   return {
     result: {
+      session,
       success: true,
       request: RequestType.RotatePlayer,
       details: {

@@ -112,6 +112,7 @@ export default function shoot (session: Session, _message: DeployMineMessage, st
 
   return {
     result: {
+      session,
       success: true,
       request: RequestType.DeployMine,
       details: {

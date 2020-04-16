@@ -135,6 +135,7 @@ describe('Requests - Deploy mine', () => {
         position: { x: 74, y: 74 }
       })
       expect(result).to.eql({
+        session,
         success: true,
         request: RequestType.DeployMine,
         details: {
@@ -168,6 +169,7 @@ describe('Requests - Deploy mine', () => {
         position: { x: 126, y: 74 }
       })
       expect(result).to.eql({
+        session,
         success: true,
         request: RequestType.DeployMine,
         details: {

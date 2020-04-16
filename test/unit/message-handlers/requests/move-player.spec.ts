@@ -81,6 +81,7 @@ describe('Requests - Move player', () => {
 
       expect(domainStub).to.have.been.calledWith()
       expect(result).to.eql({
+        session,
         request: RequestType.MovePlayer,
         success: true,
         details: {

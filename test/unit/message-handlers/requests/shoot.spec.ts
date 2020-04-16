@@ -137,6 +137,7 @@ describe('Requests - Shoot', () => {
       const { result } = handler(session, message, state, config)
 
       expect(result).to.eql({
+        session,
         success: true,
         request: RequestType.Shoot,
         details: {

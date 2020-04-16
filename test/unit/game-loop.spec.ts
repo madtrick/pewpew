@@ -73,6 +73,7 @@ describe('Game loop', () => {
       }
       const result = {
         result: {
+          session,
           success: true,
           request: RequestType.RegisterPlayer,
           details: {
@@ -109,6 +110,7 @@ describe('Game loop', () => {
       }
       const result = {
         result: {
+          session,
           success: true,
           request: RequestType.DeployMine,
           details: {
@@ -144,6 +146,7 @@ describe('Game loop', () => {
       }
       const result = {
         result: {
+          session,
           success: true,
           request: RequestType.MovePlayer,
           details: {
@@ -176,6 +179,7 @@ describe('Game loop', () => {
       }
       const result = {
         result: {
+          session,
           success: true,
           request: RequestType.Shoot,
           details: {
@@ -206,6 +210,7 @@ describe('Game loop', () => {
       }
       const result = {
         result: {
+          session,
           success: true,
           request: RequestType.RotatePlayer,
           details: {
@@ -262,6 +267,7 @@ describe('Game loop', () => {
       }
       const result = {
         result: {
+          session,
           success: true,
           request: RequestType.RotatePlayer,
           details: {
