@@ -64,10 +64,14 @@ export default function movePlayer (
 
   if (domainResult.status === 'ok') {
     const result: {
+      session: Session
       success: true
+      // TODO this should be a type `RequestResult` from
+      // message-handlers/index
       request: RequestType.MovePlayer
       details: MovePlayerResultDetails
     } = {
+      session,
       success: true,
       request: RequestType.MovePlayer,
       details: {
@@ -92,6 +96,7 @@ export default function movePlayer (
     return {
       state,
       result: {
+        session,
         request: RequestType.MovePlayer,
         success: false,
         reason: 'Unknown error'

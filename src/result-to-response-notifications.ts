@@ -86,9 +86,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.DeployMine) {
-      const { details: { playerId, id, position, remainingTokens, requestCostInTokens } } = result
-      // TODO isn't the session alredy part of the result? why I'm finding it again here?
-      const playerSession = playerSessions.find((s) => s.playerId === playerId)
+      const { session: playerSession, details: { playerId, id, position, remainingTokens, requestCostInTokens } } = result
 
       return [
         {
@@ -144,9 +142,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.RegisterPlayer) {
-      const { details: { id: playerId, position, rotation, gameVersion, tokens, life } } = result
-      // TODO isn't the session alredy part of the result? why I'm finding it again here?
-      const playerSession = playerSessions.find((s) => s.playerId === playerId)
+      const { session: playerSession, details: { id: playerId, position, rotation, gameVersion, tokens, life } } = result
 
       // TODO I've to type the messages array as any
       // as otherwise I can't add the `JoinGame` notification below
@@ -220,8 +216,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     if (result.success === true && result.request === RequestType.MovePlayer) {
       // TODO maybe always include the session in the result so it's easier
       // to find to which user send the response
-      const { details: { id: playerId, position, remainingTokens, requestCostInTokens, turboApplied } } = result
-      const playerSession = playerSessions.find((s) => s.playerId === playerId)
+      const { session: playerSession, details: { id: playerId, position, remainingTokens, requestCostInTokens, turboApplied } } = result
 
       return [
         {
@@ -278,8 +273,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.Shoot) {
-      const { details: { id: playerId, remainingTokens, requestCostInTokens } } = result
-      const playerSession = playerSessions.find((s) => s.playerId === playerId)
+      const { session: playerSession, details: { remainingTokens: remainingTokens, requestCostInTokens } } = result
 
       return [{
         session: playerSession,
@@ -318,8 +312,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
     }
 
     if (result.success === true && result.request === RequestType.RotatePlayer) {
-      const { details: { id: playerId, rotation, remainingTokens, requestCostInTokens } } = result
-      const playerSession = playerSessions.find((s) => s.playerId === playerId)
+      const { session: playerSession, details: { id: playerId, rotation, remainingTokens, requestCostInTokens } } = result
 
       return [
         {

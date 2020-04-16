@@ -68,7 +68,9 @@ describe('Result to response', () => {
     describe('when the player was successfully registered', () => {
       describe('when the game is already started', () => {
         it('generates a RegisterPlayer response and a JoinGame notification for the player and a notification for the controller', () => {
+          const sessions = [playerSession, controlSession, anotherControlSession]
           const result: SuccessRequestResult = {
+            session: playerSession,
             success: true,
             request: RequestType.RegisterPlayer,
             details: {
@@ -86,7 +88,6 @@ describe('Result to response', () => {
           }
 
           playerSession.playerId = playerOneId
-          const sessions = [playerSession, controlSession, anotherControlSession]
 
           const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
@@ -178,7 +179,9 @@ describe('Result to response', () => {
 
       describe('when the game is not started', () => {
         it('generates a RegisterPlayer response for the player and a notification for the controller', () => {
+          const sessions = [playerSession, controlSession, anotherControlSession]
           const result: SuccessRequestResult = {
+            session: playerSession,
             success: true,
             request: RequestType.RegisterPlayer,
             details: {
@@ -196,7 +199,6 @@ describe('Result to response', () => {
           }
 
           playerSession.playerId = playerOneId
-          const sessions = [playerSession, controlSession, anotherControlSession]
 
           const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
@@ -297,7 +299,9 @@ describe('Result to response', () => {
 
     describe('when the player was successfully moved', () => {
       it('generates a MovePlayer response', () => {
+        const sessions = [playerSession, controlSession, anotherControlSession]
         const result: SuccessRequestResult = {
+          session: playerSession,
           success: true,
           request: RequestType.MovePlayer,
           details: {
@@ -313,7 +317,6 @@ describe('Result to response', () => {
         }
 
         playerSession.playerId = playerOneId
-        const sessions = [playerSession, controlSession, anotherControlSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
@@ -410,7 +413,9 @@ describe('Result to response', () => {
 
     describe('when the request was successful', () => {
       it('generates a Shoot response', () => {
+        const sessions = [playerSession]
         const result: SuccessRequestResult = {
+          session: playerSession,
           success: true,
           request: RequestType.Shoot,
           details: {
@@ -421,7 +426,6 @@ describe('Result to response', () => {
         }
 
         playerSession.playerId = playerOneId
-        const sessions = [playerSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
@@ -480,7 +484,9 @@ describe('Result to response', () => {
     describe('when the request was successful', () => {
       it('generates a Rotate response', () => {
         const rotation = 300
+        const sessions = [playerSession, controlSession, anotherControlSession]
         const result: SuccessfulRotateRequest = {
+          session: playerSession,
           success: true,
           request: RequestType.RotatePlayer,
           details: {
@@ -492,7 +498,6 @@ describe('Result to response', () => {
         }
 
         playerSession.playerId = playerOneId
-        const sessions = [playerSession, controlSession, anotherControlSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 
@@ -581,7 +586,9 @@ describe('Result to response', () => {
       it('generates a DeployMine response', () => {
         const mineId = 'mine-id'
         const minePosition = { x: 100, y: 100 }
+        const sessions = [playerSession, controlSession, anotherControlSession]
         const result: SuccessfulDeployMineRequest = {
+          session: playerSession,
           success: true,
           request: RequestType.DeployMine,
           details: {
@@ -594,7 +601,6 @@ describe('Result to response', () => {
         }
 
         playerSession.playerId = playerOneId
-        const sessions = [playerSession, controlSession, anotherControlSession]
 
         const responsesAndNotifications = resultToResponseAndNotifications(result, sessions, config)
 

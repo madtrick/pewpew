@@ -45,6 +45,7 @@ export type FailureCommandResult = CommandResult & {
 }
 
 interface RequestResult {
+  session: Session
   success: boolean
   request: RequestType
 }

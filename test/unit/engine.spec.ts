@@ -368,6 +368,7 @@ describe('Engine', () => {
         loopStub.resolves({
           results: [
             {
+              session: playerSession,
               success: true,
               request: RequestType.Shoot,
               details: {
