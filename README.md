@@ -16,6 +16,20 @@ gcloud container images list-tags --project $PROJECT_ID gcr.io/nth-segment-26471
 
 The game is deployed to [GKE](https://console.cloud.google.com/kubernetes/list?project=nth-segment-264718)
 
+#### Init cluster config
+
+```shell
+KUBECONFIG=.kube gcloud container clusters get-credentials game-engine --project $PROJECT_ID
+```
+
+This command will create a `.kube` file in the current directory with the required configuration to manage the cluster. To use this config, remember to set the `KUBECONFIG` variable to that path.
+
+```shell
+export KUBECONFIG=./.kube
+```
+
+
+
 #### Get public IP address
 
 ```bash
