@@ -1,4 +1,4 @@
-import { Session, isControlSession, isPlayerSession } from './session'
+import { Session, isControlSession, isPlayerSession, ControlSession } from './session'
 import {
   RequestType,
   CommandType,
@@ -24,8 +24,11 @@ function isRequestResult (result: SuccessRequestResult | SuccessCommandResult | 
   return 'request' in result
 }
 
-// @ts-ignore TODO remove this ignore
-export default function resultToResponseAndNotifications (result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult, sessions: Session[], config: Config): any[] {
+export default function resultToResponseAndNotifications (
+  result: SuccessRequestResult | SuccessCommandResult | FailureRequestResult | FailureCommandResult,
+  sessions: Session[],
+  config: Config
+): ({ session: Session, payload: any } | { session: ControlSession, payload: any })[] {
   const controlSessions = sessions.filter(isControlSession)
   const playerSessions = sessions.filter(isPlayerSession)
 
@@ -37,7 +40,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
       return controlSessions.map((controlSession) => ({
         session: controlSession,
-        response: {
+        payload: {
           type: 'Response',
           id: CommandType.StartGame,
           success: false,
@@ -51,7 +54,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       return [
         ...controlSessions.map((controlSession) => ({
           session: controlSession,
-          response: {
+          payload: {
             type: 'Response',
             id: CommandType.StartGame,
             success: true
@@ -59,7 +62,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
         })),
         ...playerSessions.map((playerSession) => ({
           session: playerSession,
-          notification: {
+          payload: {
             type: 'Notification',
             id: CommandType.StartGame
           }
@@ -74,7 +77,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
       return [{
         session,
-        response: {
+        payload: {
           type: 'Response',
           id: RequestType.DeployMine,
           success: false,
@@ -91,7 +94,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       return [
         {
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.DeployMine,
             success: true,
@@ -109,7 +112,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
         },
         ...controlSessions.map((controlSession) => ({
           session: controlSession,
-          response: {
+          payload: {
             type: 'Notification',
             id: RequestType.DeployMine,
             component: {
@@ -130,7 +133,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
       return [{
         session,
-        response: {
+        payload: {
           type: 'Response',
           id: RequestType.RegisterPlayer,
           success: false,
@@ -151,7 +154,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       const messages: any = [
         ...controlSessions.map((controlSession) => ({
           session: controlSession,
-          notification: {
+          payload: {
             type: 'Notification',
             id: RequestType.RegisterPlayer,
             success: true,
@@ -169,7 +172,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
         })),
         {
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.RegisterPlayer,
             success: true,
@@ -189,7 +192,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       if (result.details.isGameStarted) {
         messages.push({
           session: playerSession,
-          response: {
+          payload: {
             type: 'Notification',
             // TODO create enum for notification types
             id: 'JoinGame',
@@ -221,7 +224,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       return [
         {
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.MovePlayer,
             success: true,
@@ -241,7 +244,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
         },
         ...controlSessions.map((controlSession) => ({
           session: controlSession,
-          response: {
+          payload: {
             type: 'Notification',
             id: 'Movement',
             component: {
@@ -261,7 +264,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
       return [{
         session,
-        response: {
+        payload: {
           type: 'Response',
           id: RequestType.MovePlayer,
           success: false,
@@ -277,7 +280,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
       return [{
         session: playerSession,
-        response: {
+        payload: {
           type: 'Response',
           id: RequestType.Shoot,
           success: true,
@@ -300,7 +303,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
       return [{
         session: session,
-        response: {
+        payload: {
           type: 'Response',
           id: RequestType.Shoot,
           success: false,
@@ -317,7 +320,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       return [
         {
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.RotatePlayer,
             success: true,
@@ -336,7 +339,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
         },
         ...controlSessions.map((controlSession) => ({
           session: controlSession,
-          response: {
+          payload: {
             type: 'Notification',
             // TODO: what is this `ComponentUpdate` id? We are using `MovePlayer` when a player was moved
             id: 'ComponentUpdate',
@@ -358,7 +361,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
 
       return [{
         session: session,
-        response: {
+        payload: {
           type: 'Response',
           id: RequestType.RotatePlayer,
           success: false,
@@ -369,5 +372,7 @@ export default function resultToResponseAndNotifications (result: SuccessRequest
       }]
     }
   }
+
+  return []
 }
 

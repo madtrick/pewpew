@@ -53,7 +53,7 @@ describe('Result to response', () => {
 
         expect(responsesAndNotifications).to.eql([{
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: 'RegisterPlayer',
             success: false,
@@ -94,7 +94,7 @@ describe('Result to response', () => {
           expect(responsesAndNotifications).to.have.lengthOf(4)
           expect(responsesAndNotifications[0]).to.eql({
             session: controlSession,
-            notification: {
+            payload: {
               type: 'Notification',
               id: 'RegisterPlayer',
               success: true,
@@ -115,7 +115,7 @@ describe('Result to response', () => {
           })
           expect(responsesAndNotifications[1]).to.eql({
             session: anotherControlSession,
-            notification: {
+            payload: {
               type: 'Notification',
               id: 'RegisterPlayer',
               success: true,
@@ -136,7 +136,7 @@ describe('Result to response', () => {
           })
           expect(responsesAndNotifications[2]).to.eql({
             session: playerSession,
-            response: {
+            payload: {
               type: 'Response',
               id: 'RegisterPlayer',
               success: true,
@@ -156,7 +156,7 @@ describe('Result to response', () => {
           })
           expect(responsesAndNotifications[3]).to.eql({
             session: playerSession,
-            response: {
+            payload: {
               type: 'Notification',
               id: 'JoinGame',
               details: {
@@ -205,7 +205,7 @@ describe('Result to response', () => {
           expect(responsesAndNotifications).to.have.lengthOf(3)
           expect(responsesAndNotifications[0]).to.eql({
             session: controlSession,
-            notification: {
+            payload: {
               type: 'Notification',
               id: 'RegisterPlayer',
               success: true,
@@ -226,7 +226,7 @@ describe('Result to response', () => {
           })
           expect(responsesAndNotifications[1]).to.eql({
             session: anotherControlSession,
-            notification: {
+            payload: {
               type: 'Notification',
               id: 'RegisterPlayer',
               success: true,
@@ -247,7 +247,7 @@ describe('Result to response', () => {
           })
           expect(responsesAndNotifications[2]).to.eql({
             session: playerSession,
-            response: {
+            payload: {
               type: 'Response',
               id: 'RegisterPlayer',
               success: true,
@@ -285,7 +285,7 @@ describe('Result to response', () => {
 
         expect(responsesAndNotifications).to.eql([{
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: 'MovePlayer',
             success: false,
@@ -323,7 +323,7 @@ describe('Result to response', () => {
         expect(responsesAndNotifications).to.have.lengthOf(3)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: 'MovePlayer',
             success: true,
@@ -346,7 +346,7 @@ describe('Result to response', () => {
         })
         expect(responsesAndNotifications[1]).to.eql({
           session: controlSession,
-          response: {
+          payload: {
             type: 'Notification',
             id: 'Movement',
             component: {
@@ -363,7 +363,7 @@ describe('Result to response', () => {
         })
         expect(responsesAndNotifications[2]).to.eql({
           session: anotherControlSession,
-          response: {
+          payload: {
             type: 'Notification',
             id: 'Movement',
             component: {
@@ -399,7 +399,7 @@ describe('Result to response', () => {
         expect(responsesAndNotifications).to.have.lengthOf(1)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.Shoot,
             success: false,
@@ -432,7 +432,7 @@ describe('Result to response', () => {
         expect(responsesAndNotifications).to.have.lengthOf(1)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: 'Shoot',
             success: true,
@@ -469,7 +469,7 @@ describe('Result to response', () => {
         expect(responsesAndNotifications).to.have.lengthOf(1)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.RotatePlayer,
             success: false,
@@ -504,7 +504,7 @@ describe('Result to response', () => {
         expect(responsesAndNotifications).to.have.lengthOf(3)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.RotatePlayer,
             success: true,
@@ -523,7 +523,7 @@ describe('Result to response', () => {
         })
         expect(responsesAndNotifications[1]).to.eql({
           session: controlSession,
-          response: {
+          payload: {
             type: 'Notification',
             id: 'ComponentUpdate',
             component: {
@@ -537,7 +537,7 @@ describe('Result to response', () => {
         })
         expect(responsesAndNotifications[2]).to.eql({
           session: anotherControlSession,
-          response: {
+          payload: {
             type: 'Notification',
             id: 'ComponentUpdate',
             component: {
@@ -570,7 +570,7 @@ describe('Result to response', () => {
         expect(responsesAndNotifications).to.have.lengthOf(1)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.DeployMine,
             success: false,
@@ -607,7 +607,7 @@ describe('Result to response', () => {
         expect(responsesAndNotifications).to.have.lengthOf(3)
         expect(responsesAndNotifications[0]).to.eql({
           session: playerSession,
-          response: {
+          payload: {
             type: 'Response',
             id: RequestType.DeployMine,
             success: true,
@@ -625,7 +625,7 @@ describe('Result to response', () => {
         })
         expect(responsesAndNotifications[1]).to.eql({
           session: controlSession,
-          response: {
+          payload: {
             type: 'Notification',
             id: 'DeployMine',
             component: {
@@ -640,7 +640,7 @@ describe('Result to response', () => {
         })
         expect(responsesAndNotifications[2]).to.eql({
           session: anotherControlSession,
-          response: {
+          payload: {
             type: 'Notification',
             id: 'DeployMine',
             component: {
@@ -673,7 +673,7 @@ describe('Result to response', () => {
 
           expect(responsesAndNotifications).to.eql([{
             session: controlSession,
-            response: {
+            payload: {
               type: 'Response',
               id: 'StartGame',
               success: false,
@@ -700,7 +700,7 @@ describe('Result to response', () => {
           expect(responsesAndNotifications).to.have.lengthOf(3)
           expect(responsesAndNotifications[0]).to.eql({
             session: controlSession,
-            response: {
+            payload: {
               type: 'Response',
               id: 'StartGame',
               success: true
@@ -708,14 +708,14 @@ describe('Result to response', () => {
           })
           expect(responsesAndNotifications[1]).to.eql({
             session: playerSession,
-            notification: {
+            payload: {
               type: 'Notification',
               id: 'StartGame'
             }
           })
           expect(responsesAndNotifications[2]).to.eql({
             session: otherPlayerSession,
-            notification: {
+            payload: {
               type: 'Notification',
               id: 'StartGame'
             }

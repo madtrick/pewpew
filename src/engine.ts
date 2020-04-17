@@ -253,8 +253,8 @@ export default async function engine (
   if (results) {
     for (const result of results) {
       const responsesAndNotifications = resultToResponseAndNotifications(result, Array.from(state.channelSession.values()), context.config)
-      for (const notification of responsesAndNotifications) {
-        const session = notification.session
+      for (const message of responsesAndNotifications) {
+        const session = message.session
 
         if (!session) {
           // TODO one of the case I'm aware when there won't be a session
@@ -270,20 +270,20 @@ export default async function engine (
 
         const channel = session.channel
 
-        if (isPlayerSession(notification.session)) {
+        if (isPlayerSession(message.session)) {
           // TODO we shoult pass the session here and not the channel. The channel is an implementation
           // detail of how we communicate with players
           if (playerMessages.has(channel)) {
-            (playerMessages.get(channel) as any[]).push({ channel, data: notification.notification || notification.response })
+            (playerMessages.get(channel) as any[]).push({ channel, data: message.payload })
           } else {
-            playerMessages.set(channel, [{ channel, data: notification.notification || notification.response }])
+            playerMessages.set(channel, [{ channel, data: message.payload }])
           }
         } else {
           // controlResultMessages.push({ channel, data: notification.notification || notification.response })
           if (dataForChannel.has(channel)) {
-            dataForChannel.get(channel).push(notification.notification || notification.response)
+            dataForChannel.get(channel).push(message.payload)
           } else {
-            dataForChannel.set(channel, [notification.notification || notification.response])
+            dataForChannel.set(channel, [message.payload])
           }
         }
       }
